@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>ALLF Studio — Clean</title>
 
-<!-- =========================
-     STYLES
-     ========================= -->
 <style>
 :root{
   --accent:#72a4f2;
@@ -21,8 +18,6 @@
 }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif;}
-
-/* Header */
 header{
   height:64px;padding:12px 18px;background:linear-gradient(180deg,var(--bg),#071022);
   display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.04);
@@ -30,10 +25,9 @@ header{
 }
 .title-group{display:flex;align-items:center;gap:14px}
 .title-group h1{margin:0;font-size:18px;color:var(--accent);text-shadow:0 0 10px rgba(114,164,242,0.6)}
-.toolbar{display:flex;align-items:center;gap:10px}
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
 .input-file{background:var(--panel-2);border:1px solid rgba(255,255,255,0.06);color:var(--text);padding:8px;border-radius:8px;width:220px}
 
-/* Buttons */
 .btn{padding:8px 12px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-weight:700;cursor:pointer;box-shadow:0 10px 30px rgba(114,164,242,0.12);transition:all .12s}
 .btn.secondary{background:#26303a}
 .btn.danger{background:var(--danger)}
@@ -41,64 +35,86 @@ header{
 .btn:active{transform:translateY(1px)}
 .btn:hover{transform:translateY(-2px);box-shadow:0 18px 50px rgba(114,164,242,0.18)}
 
-/* Layout: left small, center big editor, right tiny preview */
 .container{
   display:grid;
-  grid-template-columns:260px 1fr 300px;
+  grid-template-columns:260px 1fr 320px;
   gap:12px;
   height:calc(100vh - 64px - 56px);
   padding:12px;
 }
 
-/* Left panel (compact list) */
 .panel{
   background:var(--panel);border-radius:12px;overflow:auto;box-shadow:0 10px 40px rgba(114,164,242,0.06);display:flex;flex-direction:column;
   padding:12px;
 }
 .left-list{display:flex;flex-direction:column;gap:8px}
 .section-item{display:flex;align-items:center;justify-content:space-between;padding:8px;border-radius:8px;background:rgba(255,255,255,0.02)}
-.section-item .left{display:flex;flex-direction:column;gap:6px}
+.section-item .left{display:flex;flex-direction:column;gap:6px;min-width:0}
 .section-item strong{color:var(--accent)}
 .section-actions{display:flex;gap:6px;align-items:center}
 
-/* Center editor */
 .editor-area{display:flex;flex-direction:column;border-radius:12px;overflow:hidden}
 .editor-top{display:flex;align-items:center;justify-content:space-between;padding:10px;border-bottom:1px solid rgba(255,255,255,0.03)}
 #centralEditor{width:100%;height:calc(100% - 48px);min-height:420px}
 
-/* Right preview */
 .preview-area{display:flex;flex-direction:column;overflow:hidden;border-radius:12px}
 .preview-top{display:flex;align-items:center;justify-content:space-between;padding:10px;border-bottom:1px solid rgba(255,255,255,0.03)}
 .preview-frame{border:none;width:100%;height:100%;background:#fff}
 
-/* Footer */
 footer{height:56px;background:#0d1220;border-top:1px solid rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:space-between;padding:0 18px;font-size:13px;color:var(--muted)}
 .brand-small{font-size:13px;color:var(--muted)}
 
-/* Modal styles */
 .modal-bg{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);z-index:220}
-.modal{width:720px;max-width:96%;background:linear-gradient(180deg,#0d1320,#0b1624);padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 40px 120px rgba(4,8,20,0.9)}
+.modal{width:760px;max-width:96%;background:linear-gradient(180deg,#0d1320,#0b1624);padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 40px 120px rgba(4,8,20,0.9)}
 .modal h3{margin:0;color:var(--accent)}
 .modal .row{display:flex;gap:8px;margin-top:12px;align-items:center}
-.modal input[type="text"], .modal textarea, .glow-select{width:100%;padding:10px;border-radius:8px;background:var(--panel-2);border:1px solid rgba(255,255,255,0.04);color:var(--text)}
+.modal input[type="text"], .modal textarea, .glow-select{
+  width:100%;padding:10px;border-radius:8px;background:var(--panel-2);border:1px solid rgba(255,255,255,0.04);color:var(--text)
+}
 .modal textarea{height:140px;resize:vertical}
 
-/* Themes modal */
 .theme-modal{width:860px;max-width:96%}
 .glow-select{appearance:none;-moz-appearance:none;-webkit-appearance:none;padding:10px;border-radius:8px}
 
-/* small screens */
 @media(max-width:1080px){
-  .container{grid-template-columns:1fr;grid-auto-rows:360px 1fr 240px;height:auto}
-  #centralEditor{height:360px}
+  .container{grid-template-columns:1fr;grid-auto-rows:380px 1fr 280px;height:auto}
+  #centralEditor{height:380px}
 }
 
 .toast{position:fixed;right:24px;bottom:24px;display:none;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:white;padding:12px 16px;border-radius:10px;box-shadow:0 20px 60px rgba(114,164,242,0.18);z-index:99999}
+
+.attach-wrap{border-top:1px solid rgba(255,255,255,0.03)}
+.attach-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px}
+.pill{font-size:12px;padding:4px 8px;border-radius:999px;background:rgba(114,164,242,0.12);border:1px solid rgba(114,164,242,0.18);color:var(--accent)}
+.small-muted{font-size:12px;color:var(--muted)}
+.attach-list{display:flex;flex-direction:column;gap:10px;padding:10px}
+.attach-card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);border-radius:10px;padding:10px}
+.attach-card .row1{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.attach-card .name{font-weight:800;color:var(--text);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:210px}
+.attach-card .meta{font-size:12px;color:var(--muted)}
+.attach-card .actions{display:flex;gap:8px;align-items:center;margin-top:8px}
+.codebox{
+  width:100%;min-height:170px;
+  font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size:12.5px;line-height:1.45;
+}
+
+.drop{
+  margin-top:10px;
+  border:1px dashed rgba(114,164,242,0.35);
+  background:rgba(114,164,242,0.06);
+  border-radius:12px;
+  padding:12px;
+  color:var(--muted);
+}
+.drop strong{color:var(--accent)}
+.drop.drag{background:rgba(114,164,242,0.10);border-color:rgba(114,164,242,0.55)}
+
+kbd{background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:6px;border:1px solid rgba(255,255,255,0.08);font-size:12px}
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <header>
   <div class="title-group">
     <h1>ALLF Studio</h1>
@@ -114,35 +130,48 @@ footer{height:56px;background:#0d1220;border-top:1px solid rgba(255,255,255,0.03
   </div>
 </header>
 
-<!-- MAIN LAYOUT -->
 <div class="container">
 
-  <!-- LEFT: small section list -->
+  <!-- LEFT -->
   <div class="panel" id="leftPanel">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <div><strong style="color:var(--accent)">Sections</strong><div style="font-size:12px;color:var(--muted)">Click to load into central editor</div></div>
-      <div style="display:flex;gap:6px">
+      <div>
+        <strong style="color:var(--accent)">Sections</strong>
+        <div style="font-size:12px;color:var(--muted)">Click Load to edit in central editor</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
         <button id="addCode" class="btn small">+ Code</button>
         <button id="addNote" class="btn small secondary">+ Note</button>
+        <!-- NEW: requested buttons placed here (not in nav) -->
+        <button id="addMeta" class="btn small secondary">+ Metadata</button>
+        <button id="addMedia" class="btn small secondary">+ Images/Videos</button>
+
+        <input id="mediaInput" type="file" accept="image/*,video/*" multiple style="display:none" />
       </div>
     </div>
 
-    <div class="left-list" id="sectionList">
-      <!-- dynamically populated -->
+    <div class="left-list" id="sectionList"></div>
+
+    <div class="drop" id="dropZone" tabindex="0" aria-label="Drop images and videos">
+      <strong>Drop images/videos here</strong>
+      <div style="margin-top:6px">or click <kbd>+ Images/Videos</kbd>. Stored in your browser during editing, and embedded into exported .allf.</div>
     </div>
 
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
-      <div style="font-size:12px;color:var(--muted)">No persistence — resets on reload</div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <div style="font-size:12px;color:var(--muted)">Autosave: on (browser)</div>
+        <div id="saveStatus" style="font-size:12px;color:var(--muted)">Saved</div>
+      </div>
       <div class="brand-small">© ALLF STUDIO - TSFALEX</div>
     </div>
   </div>
 
-  <!-- CENTER: big Ace editor -->
+  <!-- CENTER -->
   <div class="panel editor-area">
     <div class="editor-top">
       <div>
         <strong style="color:var(--accent)">Central Editor</strong>
-        <div style="font-size:12px;color:var(--muted)">This is the single advanced editor. Load a section from the left to edit.</div>
+        <div style="font-size:12px;color:var(--muted)">Single advanced editor. <span style="opacity:.85">Ctrl+S</span> saves section.</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
         <button id="btnSaveSection" class="btn small">Save Section</button>
@@ -152,28 +181,42 @@ footer{height:56px;background:#0d1220;border-top:1px solid rgba(255,255,255,0.03
     <div id="centralEditor"></div>
   </div>
 
-  <!-- RIGHT: smaller preview -->
+  <!-- RIGHT -->
   <div class="panel preview-area">
     <div class="preview-top">
-      <div><strong style="color:var(--accent)">Live Preview</strong><div style="font-size:12px;color:var(--muted)">First HTML-like code section</div></div>
+      <div>
+        <strong style="color:var(--accent)">Live Preview</strong>
+        <div style="font-size:12px;color:var(--muted)">First HTML-like code section</div>
+      </div>
       <div style="display:flex;gap:8px;align-items:center">
         <label style="color:var(--muted)">Live</label>
         <div id="liveToggle" class="btn small" style="background:#26303a">Toggle</div>
         <button id="btnReloadPreview" class="btn small secondary">Reload</button>
       </div>
     </div>
+
     <iframe id="previewFrame" class="preview-frame" title="Preview"></iframe>
+
+    <div class="attach-wrap">
+      <div class="attach-head">
+        <div>
+          <strong style="color:var(--accent)">Embedded Media</strong>
+          <div class="small-muted">Stored in browser while editing; embedded in .allf as Base64</div>
+        </div>
+        <div class="pill" id="attachCounts">0 images • 0 videos</div>
+      </div>
+      <div class="attach-list" id="attachList"></div>
+    </div>
   </div>
 
 </div>
 
-<!-- FOOTER -->
 <footer>
   <div class="brand-small">ALLF Studio – Clean Interface</div>
   <div class="brand-small">© ALLF STUDIO - TSFALEX</div>
 </footer>
 
-<!-- EXPORT POPUP MODAL -->
+<!-- EXPORT MODAL -->
 <div id="exportModal" class="modal-bg" aria-hidden="true">
   <div class="modal" role="dialog" aria-modal="true">
     <h3>Export .allf — Finalize</h3>
@@ -183,7 +226,15 @@ footer{height:56px;background:#0d1220;border-top:1px solid rgba(255,255,255,0.03
     </div>
     <div class="row">
       <label style="min-width:110px;color:var(--muted);align-self:flex-start">Notes (optional)</label>
-      <textarea id="exportNotes" placeholder="Add notes that will be merged into each N// block or appended to RM//"></textarea>
+      <textarea id="exportNotes" placeholder="Optional export notes (appended into N// when exporting)"></textarea>
+    </div>
+    <div class="row">
+      <label style="min-width:110px;color:var(--muted);align-self:flex-start">Metadata</label>
+      <textarea id="exportMetaPreview" class="codebox" readonly></textarea>
+    </div>
+    <div class="row">
+      <label style="min-width:110px;color:var(--muted);align-self:flex-start">Media Summary</label>
+      <textarea id="exportMediaPreview" class="codebox" readonly></textarea>
     </div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
       <button id="exportCancel" class="btn secondary">Cancel</button>
@@ -225,42 +276,57 @@ footer{height:56px;background:#0d1220;border-top:1px solid rgba(255,255,255,0.03
   </div>
 </div>
 
-<!-- TOAST -->
-<div id="toast" class="toast" style="display:none"><strong id="toastTitle">Done</strong><div id="toastMsg" style="font-size:13px;opacity:0.95">Message</div></div>
+<!-- METADATA MODAL -->
+<div id="metaModal" class="modal-bg" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true">
+    <h3>Project Metadata</h3>
+    <div style="margin-top:10px;color:var(--muted);font-size:13px">
+      Stored in your browser while editing and embedded into exported .allf as JSON.
+    </div>
+    <div class="row">
+      <label style="min-width:110px;color:var(--muted);align-self:flex-start">Metadata JSON</label>
+      <textarea id="metaJson" class="codebox" placeholder='{"author":"Alex","tags":["beat saber","web"],"version":"1.0.0"}'></textarea>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button id="metaClose" class="btn secondary">Close</button>
+      <button id="metaSave" class="btn">Save Metadata</button>
+    </div>
+  </div>
+</div>
 
-<!-- LIBRARIES -->
+<!-- TOAST -->
+<div id="toast" class="toast"><strong id="toastTitle">Done</strong><div id="toastMsg" style="font-size:13px;opacity:0.95">Message</div></div>
+
+<!-- ACE -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.14/ace.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.14/ext-language_tools.min.js"></script>
 
-<!-- =========================
-     APPLICATION SCRIPT
-     ========================= -->
 <script>
-/*
-  ALLF Studio — Clean Single-File App
-  - Single central Ace editor
-  - Left list small (sections)
-  - No persistence (everything resets on reload)
-  - Strict import branding enforcement
-  - Export popup for last-minute edits
-  - Themes modal with live changes
-  - Reusable numbering for code sections
-*/
+/* =========================
+   ALLF Studio — local browser save + embedded media export
+   - Everything stored in browser (localStorage) while editing
+   - Export embeds images/videos INSIDE .allf as base64 data URLs
+   - Import restores everything
+   ========================= */
 
-/* -------------------------
-   Constants & DOM refs
-   ------------------------- */
-const BRANDING_TEXT = '© ALLF STUDIO - TSFALEX'; // exact required branding for import
+const BRANDING_TEXT = '© ALLF STUDIO - TSFALEX';
+
+// DOM
 const sectionListEl = document.getElementById('sectionList');
 const addCodeBtn = document.getElementById('addCode');
 const addNoteBtn = document.getElementById('addNote');
+const addMetaBtn = document.getElementById('addMeta');
+const addMediaBtn = document.getElementById('addMedia');
+const mediaInput = document.getElementById('mediaInput');
+const dropZone = document.getElementById('dropZone');
+
 const btnExport = document.getElementById('btnExport');
 const btnImport = document.getElementById('btnImport');
 const importInput = document.getElementById('importInput');
 const projectNameEl = document.getElementById('projectName');
+
 const btnSaveSection = document.getElementById('btnSaveSection');
 const btnClearEditor = document.getElementById('btnClearEditor');
-const centralEditorEl = document.getElementById('centralEditor');
 const previewFrame = document.getElementById('previewFrame');
 const liveToggle = document.getElementById('liveToggle');
 const btnReloadPreview = document.getElementById('btnReloadPreview');
@@ -268,6 +334,8 @@ const btnReloadPreview = document.getElementById('btnReloadPreview');
 const exportModal = document.getElementById('exportModal');
 const exportFilename = document.getElementById('exportFilename');
 const exportNotes = document.getElementById('exportNotes');
+const exportMetaPreview = document.getElementById('exportMetaPreview');
+const exportMediaPreview = document.getElementById('exportMediaPreview');
 const exportCancel = document.getElementById('exportCancel');
 const exportConfirm = document.getElementById('exportConfirm');
 
@@ -277,53 +345,72 @@ const editorThemeSelect = document.getElementById('editorThemeSelect');
 const websiteThemeSelect = document.getElementById('websiteThemeSelect');
 const themesClose = document.getElementById('themesClose');
 
+const metaModal = document.getElementById('metaModal');
+const metaJsonEl = document.getElementById('metaJson');
+const metaSave = document.getElementById('metaSave');
+const metaClose = document.getElementById('metaClose');
+
 const toastEl = document.getElementById('toast');
 const toastTitle = document.getElementById('toastTitle');
 const toastMsg = document.getElementById('toastMsg');
 
-/* App state (in-memory only) */
-let sections = []; // array: {type:'code'|'note', id:'C1'|'N1', title:'', content:''}
+const saveStatus = document.getElementById('saveStatus');
+
+const attachCounts = document.getElementById('attachCounts');
+const attachList = document.getElementById('attachList');
+
+// State (persisted in localStorage)
+let sections = []; // {type:'code'|'note', id:'C1'|'N1', title:'', content:''}
 let selectedSectionId = null;
+let projectMeta = {}; // JSON object
+let media = []; // {id,name,kind:'image'|'video',mime,bytes,createdAt,dataUrl}
 
-/* Manage reusable numbering:
-   - When creating a code section, choose lowest unused positive integer for C#
-   - When deleting, that number becomes available again
-*/
-function nextCodeId(){
-  // collect used numeric indices
-  const used = new Set();
-  sections.forEach(s=>{
-    if(s.type === 'code'){
-      const m = s.id.match(/^C(\d+)$/i);
-      if(m) used.add(parseInt(m[1],10));
-    }
-  });
-  let i = 1;
-  while(true){
-    if(!used.has(i)) return 'C' + i;
-    i++;
+/* ---------- localStorage keys ---------- */
+function storageKey(){
+  const raw = (projectNameEl.value || 'untitled').trim() || 'untitled';
+  const safe = raw.replace(/[^\w\-]+/g,'_').slice(0,80) || 'untitled';
+  return 'ALLF_STUDIO__' + safe;
+}
+function saveToBrowser(){
+  try{
+    const payload = {
+      v: 1,
+      projectName: projectNameEl.value || 'untitled',
+      updatedAt: new Date().toISOString(),
+      sections,
+      selectedSectionId,
+      meta: projectMeta || {},
+      media: media || []
+    };
+    localStorage.setItem(storageKey(), JSON.stringify(payload));
+    setStatus('Saved');
+  }catch(e){
+    console.error(e);
+    setStatus('Save failed');
   }
 }
-function nextNoteId(){
-  // notes numbering N1, N2...
-  const used = new Set();
-  sections.forEach(s=>{
-    if(s.type === 'note'){
-      const m = s.id.match(/^N(\d+)$/i);
-      if(m) used.add(parseInt(m[1],10));
-    }
-  });
-  let i = 1;
-  while(true){
-    if(!used.has(i)) return 'N' + i;
-    i++;
+function loadFromBrowser(){
+  try{
+    const raw = localStorage.getItem(storageKey());
+    if(!raw) return false;
+    const payload = JSON.parse(raw);
+    if(!payload || typeof payload !== 'object') return false;
+    sections = Array.isArray(payload.sections) ? payload.sections : [];
+    selectedSectionId = payload.selectedSectionId || null;
+    projectMeta = (payload.meta && typeof payload.meta === 'object') ? payload.meta : {};
+    media = Array.isArray(payload.media) ? payload.media : [];
+    return true;
+  }catch(e){
+    console.error(e);
+    return false;
   }
 }
+function setStatus(t){
+  saveStatus.textContent = t;
+}
 
-/* -------------------------
-   Single central Ace editor
-   ------------------------- */
-const centralEditor = ace.edit(centralEditorEl, {
+/* ---------- Ace ---------- */
+const centralEditor = ace.edit("centralEditor", {
   mode: 'ace/mode/text',
   theme: 'ace/theme/monokai',
   fontSize: 14,
@@ -333,8 +420,8 @@ const centralEditor = ace.edit(centralEditorEl, {
 });
 centralEditor.renderer.setPadding(8);
 
-/* Helper: show toast */
-let _toastTimer = null;
+/* ---------- toast ---------- */
+let _toastTimer=null;
 function showToast(title, msg, ms=2400){
   toastTitle.textContent = title;
   toastMsg.textContent = msg;
@@ -344,449 +431,197 @@ function showToast(title, msg, ms=2400){
   _toastTimer = setTimeout(()=>{ toastEl.style.opacity='0'; setTimeout(()=>toastEl.style.display='none',300); }, ms);
 }
 
-/* -------------------------
-   UI: sections list rendering
-   ------------------------- */
+/* ---------- ids ---------- */
+function nextCodeId(){
+  const used = new Set();
+  sections.forEach(s=>{
+    if(s.type==='code'){
+      const m = (s.id||'').match(/^C(\d+)$/i);
+      if(m) used.add(parseInt(m[1],10));
+    }
+  });
+  let i=1; while(used.has(i)) i++;
+  return 'C'+i;
+}
+function nextNoteId(){
+  const used = new Set();
+  sections.forEach(s=>{
+    if(s.type==='note'){
+      const m = (s.id||'').match(/^N(\d+)$/i);
+      if(m) used.add(parseInt(m[1],10));
+    }
+  });
+  let i=1; while(used.has(i)) i++;
+  return 'N'+i;
+}
+
+/* ---------- render sections ---------- */
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function renderSectionList(){
   sectionListEl.innerHTML = '';
-  if(sections.length === 0){
-    const empty = document.createElement('div');
-    empty.style.color = 'var(--muted)';
-    empty.style.padding = '8px';
-    empty.textContent = 'No sections — add a code or note';
-    sectionListEl.appendChild(empty);
+  if(sections.length===0){
+    const d=document.createElement('div');
+    d.style.color='var(--muted)'; d.style.padding='8px';
+    d.textContent='No sections — add a code or note';
+    sectionListEl.appendChild(d);
     return;
   }
-
-  // render in order of array (we keep creation order)
   sections.forEach(s=>{
-    const item = document.createElement('div');
-    item.className = 'section-item';
-    const left = document.createElement('div');
-    left.className = 'left';
-    const titleText = s.title ? s.title : (s.type === 'code' ? '(no title)' : '(note)');
-    left.innerHTML = `<div><strong>${s.id}</strong> <span style="color:var(--muted);font-size:12px">${s.type.toUpperCase()}</span></div><div style="font-size:13px;color:var(--muted)">${escapeHtml(titleText)}</div>`;
-
-    const actions = document.createElement('div');
-    actions.className = 'section-actions';
-    const loadBtn = document.createElement('button');
-    loadBtn.className = 'btn small';
-    loadBtn.textContent = 'Load';
-    loadBtn.title = 'Load into central editor';
-    loadBtn.addEventListener('click', ()=> {
-      loadSectionIntoEditor(s.id);
-    });
-
-    const delBtn = document.createElement('button');
-    delBtn.className = 'btn small danger';
-    delBtn.textContent = 'Delete';
-    delBtn.title = 'Delete this section';
-    delBtn.addEventListener('click', ()=> {
-      if(!confirm('Delete ' + s.id + '?')) return;
+    const item=document.createElement('div');
+    item.className='section-item';
+    const left=document.createElement('div');
+    left.className='left';
+    const titleText = s.title ? s.title : (s.type==='code' ? '(no title)' : '(note)');
+    left.innerHTML = `<div><strong>${s.id}</strong> <span style="color:var(--muted);font-size:12px">${s.type.toUpperCase()}</span></div>
+                      <div style="font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(titleText)}</div>`;
+    const actions=document.createElement('div');
+    actions.className='section-actions';
+    const loadBtn=document.createElement('button');
+    loadBtn.className='btn small'; loadBtn.textContent='Load';
+    loadBtn.addEventListener('click',()=>loadSectionIntoEditor(s.id));
+    const delBtn=document.createElement('button');
+    delBtn.className='btn small danger'; delBtn.textContent='Delete';
+    delBtn.addEventListener('click',()=>{
+      if(!confirm('Delete '+s.id+'?')) return;
       deleteSectionById(s.id);
     });
-
-    actions.appendChild(loadBtn);
-    actions.appendChild(delBtn);
-
-    item.appendChild(left);
-    item.appendChild(actions);
+    actions.appendChild(loadBtn); actions.appendChild(delBtn);
+    item.appendChild(left); item.appendChild(actions);
     sectionListEl.appendChild(item);
   });
 }
 
-/* -------------------------
-   Section operations (in-memory only)
-   ------------------------- */
-function createCodeSection(title = '', content = ''){
-  const id = nextCodeId();
-  sections.push({ type: 'code', id, title: title || '', content: content || '' });
+/* ---------- section ops ---------- */
+function createCodeSection(title='', content=''){
+  const id=nextCodeId();
+  sections.push({type:'code', id, title:title||'', content:content||''});
   renderSectionList();
-  showToast('Created', id + ' added.');
+  saveToBrowser();
+  showToast('Created', id+' added.');
   return id;
 }
-function createNoteSection(title = '', content = ''){
-  const id = nextNoteId();
-  sections.push({ type: 'note', id, title: title || '', content: content || '' });
+function createNoteSection(title='', content=''){
+  const id=nextNoteId();
+  sections.push({type:'note', id, title:title||'', content:content||''});
   renderSectionList();
-  showToast('Created', id + ' (note) added.');
+  saveToBrowser();
+  showToast('Created', id+' (note) added.');
   return id;
 }
-function findSectionIndexById(id){
-  return sections.findIndex(s => s.id === id);
-}
+function findSectionIndexById(id){ return sections.findIndex(s=>s.id===id); }
 function deleteSectionById(id){
-  const idx = findSectionIndexById(id);
-  if(idx === -1) return;
+  const idx=findSectionIndexById(id);
+  if(idx===-1) return;
   sections.splice(idx,1);
-  // if the deleted one was selected, clear editor
-  if(selectedSectionId === id){
-    selectedSectionId = null;
+  if(selectedSectionId===id){
+    selectedSectionId=null;
     centralEditor.setValue('', -1);
     centralEditor.session.setMode('ace/mode/text');
   }
   renderSectionList();
-  showToast('Deleted', id + ' removed.');
+  saveToBrowser();
+  showToast('Deleted', id+' removed.');
 }
-
-/* Load section content into central editor */
-function loadSectionIntoEditor(id){
-  const idx = findSectionIndexById(id);
-  if(idx === -1) return;
-  const s = sections[idx];
-  selectedSectionId = s.id;
-  centralEditor.setValue(s.content || '', -1);
-  // set editor mode based on title heuristics (if code)
-  if(s.type === 'code'){
-    centralEditor.session.setMode(modeFromTitle(s.title));
-  } else {
-    centralEditor.session.setMode('ace/mode/text');
-  }
-  showToast('Loaded', s.id + ' loaded into editor.');
-}
-
-/* Save central editor back to selected section (or create new if none selected) */
-function saveCentralToSection(){
-  const text = centralEditor.getValue();
-  const titlePrompt = selectedSectionId ? null : prompt('No section selected. Enter title for new section (optional):');
-  if(selectedSectionId){
-    const idx = findSectionIndexById(selectedSectionId);
-    if(idx === -1){
-      showToast('Error','Selected section not found.');
-      return;
-    }
-    sections[idx].content = text;
-    // optionally allow renaming the title inline: we will ask user if they want to change title
-    if(confirm('Change title for ' + selectedSectionId + '? (Cancel to keep)')){
-      const newTitle = prompt('Enter new title (leave blank for none):', sections[idx].title || '');
-      if(newTitle !== null) sections[idx].title = newTitle;
-    }
-    renderSectionList();
-    showToast('Saved','Section ' + selectedSectionId + ' updated.');
-  } else {
-    // create new code section by default
-    const newId = createCodeSection(titlePrompt || '', text);
-    selectedSectionId = newId;
-    showToast('Saved','New section ' + newId + ' created and saved.');
-  }
-}
-
-/* Clear central editor */
-function clearCentralEditor(){
-  if(!confirm('Clear central editor content?')) return;
-  centralEditor.setValue('', -1);
-  centralEditor.session.setMode('ace/mode/text');
-  selectedSectionId = null;
-  showToast('Cleared','Editor cleared.');
-}
-
-/* Heuristic for mode (based on title or content) */
 function modeFromTitle(title){
   if(!title) return detectModeFromContent(centralEditor.getValue());
-  const t = title.toLowerCase();
+  const t=title.toLowerCase();
   if(t.includes('html')) return 'ace/mode/html';
   if(t.includes('css')) return 'ace/mode/css';
-  if(t.includes('js') || t.includes('javascript')) return 'ace/mode/javascript';
+  if(t.includes('js')||t.includes('javascript')) return 'ace/mode/javascript';
   if(t.includes('json')) return 'ace/mode/json';
   if(t.includes('py')) return 'ace/mode/python';
-  if(t.includes('xml') || t.includes('svg')) return 'ace/mode/xml';
+  if(t.includes('xml')||t.includes('svg')) return 'ace/mode/xml';
   if(t.includes('md')) return 'ace/mode/markdown';
   return detectModeFromContent(centralEditor.getValue());
 }
 function detectModeFromContent(text){
-  const v = (text || '').trim().slice(0,200).toLowerCase();
-  if(v.startsWith('<!doctype') || v.startsWith('<html') || v.includes('<html') ) return 'ace/mode/html';
-  if(v.includes('function') && v.includes('{') ) return 'ace/mode/javascript';
-  if(v.startsWith('{') && v.includes('"')) return 'ace/mode/json';
-  if(v.startsWith('#') || v.includes('def ') ) return 'ace/mode/python';
+  const v=(text||'').trim().slice(0,200).toLowerCase();
+  if(v.startsWith('<!doctype')||v.startsWith('<html')||v.includes('<html')) return 'ace/mode/html';
+  if(v.includes('function')&&v.includes('{')) return 'ace/mode/javascript';
+  if(v.startsWith('{')&&v.includes('"')) return 'ace/mode/json';
+  if(v.startsWith('#')||v.includes('def ')) return 'ace/mode/python';
   return 'ace/mode/text';
 }
-
-/* -------------------------
-   Generate ALLF text (strict structure)
-   - Code sections in order of sections array, but only code-type
-   - After each code block: Cx\\  then SPACE//
-   - Notes each as N// ... N\\
-   - Append RM// block
-   - Append B// branding line and B\\
-   - Append END//
-*/
-function generateRMBlock(){
-  return `RM// Read Me
-This ALLF file format is designed to hold multiple pieces of code, notes, and minimal metadata in an easy-to-parse, human-readable structure.
-It is intended for sharing small-to-medium projects and for importing back into ALLF Studio.
-Please respect the mandatory branding block (B// ... B\\\\) — files missing the exact branding will be rejected by ALLF Studio.
-Files may grow large; consider splitting into multiple ALLF files if necessary.
-RM\\\\`;
+function loadSectionIntoEditor(id){
+  const idx=findSectionIndexById(id);
+  if(idx===-1) return;
+  const s=sections[idx];
+  selectedSectionId=s.id;
+  centralEditor.setValue(s.content||'', -1);
+  centralEditor.session.setMode(s.type==='code' ? modeFromTitle(s.title) : 'ace/mode/text');
+  saveToBrowser();
+  showToast('Loaded', s.id+' loaded.');
 }
-
-function generateALLFText(exportNotesText){
-  const out = [];
-  // code blocks — output in array order but filter only code type
-  const codes = sections.filter(s => s.type === 'code');
-  if(codes.length === 0){
-    // default empty C1
-    out.push('C1//');
-    out.push('');
-    out.push('C1\\\\');
-    out.push('SPACE//');
-  } else {
-    codes.forEach(c => {
-      const title = (c.title || '').trim();
-      out.push(`${c.id}// ${title}`.trim());
-      out.push(c.content || '');
-      out.push(`${c.id}\\\\`);
-      out.push('SPACE//');
-    });
-  }
-
-  // notes - each note as its own block
-  const notes = sections.filter(s => s.type === 'note');
-  if(notes.length === 0){
-    out.push('N//');
-    out.push(exportNotesText || '');
-    out.push('N\\\\');
-  } else {
-    notes.forEach(n => {
-      const ntitle = (n.title || '').trim();
-      out.push(`N// ${ntitle}`.trim());
-      out.push(n.content || '');
-      out.push('N\\\\');
-    });
-  }
-
-  // add README block (expanded)
-  out.push(generateRMBlock());
-
-  // Branding block (strict)
-  out.push('B//');
-  out.push(BRANDING_TEXT);
-  out.push('B\\\\');
-
-  // End marker
-  out.push('END//');
-
-  return out.join('\n');
-}
-
-/* -------------------------
-   EXPORT flow: show popup for last edits, confirm download
-   ------------------------- */
-function openExportPopup(){
-  // default filename based on project name
-  const base = (projectNameEl.value || 'project').split('.').slice(0,-1).join('') || 'project';
-  exportFilename.value = base + '.allf';
-  exportNotes.value = ''; // let user fill notes to be appended to note block
-  exportModal.style.display = 'flex';
-  exportFilename.focus();
-}
-function closeExportPopup(){
-  exportModal.style.display = 'none';
-}
-function confirmExport(){
-  const filename = (exportFilename.value || 'project.allf').trim();
-  const notesText = exportNotes.value || '';
-  const content = generateALLFText(notesText);
-  // trigger download
-  triggerDownload(filename, content, 'text/plain;charset=utf-8');
-  closeExportPopup();
-  showToast('Exported', filename + ' downloaded.');
-}
-
-/* download helper */
-function triggerDownload(filename, content, mime='text/plain;charset=utf-8'){
-  const blob = new Blob([content], { type: mime });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(()=>{ try{ URL.revokeObjectURL(a.href); }catch(e){} a.remove(); }, 800);
-}
-
-/* -------------------------
-   IMPORT flow: parse .allf strictly, require branding
-   ------------------------- */
-function openImportPicker(){
-  importInput.value = '';
-  importInput.click();
-}
-importInput.addEventListener('change', async (ev) => {
-  const f = ev.target.files && ev.target.files[0];
-  if(!f) return;
-  try{
-    const text = await f.text();
-    const parsed = parseALLF(text);
-    if(!parsed){
-      alert('Invalid .allf file format.');
-      importInput.value = '';
-      return;
+function saveCentralToSection(){
+  const text=centralEditor.getValue();
+  if(selectedSectionId){
+    const idx=findSectionIndexById(selectedSectionId);
+    if(idx===-1){ showToast('Error','Selected section not found.'); return; }
+    sections[idx].content=text;
+    if(confirm('Change title for '+selectedSectionId+'? (Cancel keeps)')){
+      const newTitle=prompt('Enter new title (leave blank for none):', sections[idx].title||'');
+      if(newTitle!==null) sections[idx].title=newTitle;
     }
-    if(!parsed.branding || parsed.branding.trim() !== BRANDING_TEXT){
-      alert('Import failed: required branding block B// with exact content "' + BRANDING_TEXT + '" not found.');
-      importInput.value = '';
-      return;
-    }
-    // Clear everything (since no persistence)
-    sections = [];
-    selectedSectionId = null;
-
-    // Add parsed code blocks and notes (preserve order)
-    parsed.codes.forEach(c => sections.push({ type: 'code', id: c.id, title: (c.title || ''), content: (c.content || '') }));
-    parsed.notes.forEach(n => sections.push({ type: 'note', id: n.id || nextNoteId(), title: (n.title || ''), content: (n.content || '') }));
-
-    // After import, ensure numbering reuses gaps on subsequent adds (we trust nextCodeId function)
     renderSectionList();
-    showToast('Imported', f.name + ' loaded.');
-    importInput.value = '';
-  }catch(err){
-    console.error(err);
-    alert('Failed to read file.');
-    importInput.value = '';
+    saveToBrowser();
+    showToast('Saved','Section '+selectedSectionId+' updated.');
+  }else{
+    const titlePrompt=prompt('No section selected. Enter title for new code section (optional):')||'';
+    const newId=createCodeSection(titlePrompt, text);
+    selectedSectionId=newId;
+    saveToBrowser();
+    showToast('Saved','New section '+newId+' created.');
   }
-});
-
-/* Parser: returns { codes: [{id,title,content}], notes: [{id?,title,content}], branding, rm } or null */
-function parseALLF(text){
-  if(!text) return null;
-  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
-  const codes = [];
-  const notes = [];
-  let branding = null;
-  let rm = null;
-
-  let i = 0;
-  while(i < lines.length){
-    const line = lines[i];
-
-    // CODE START: C<number>// optional title
-    const codeStartMatch = line.match(/^C(\d+)\/\/\s*(.*)$/);
-    if(codeStartMatch){
-      const idx = codeStartMatch[1];
-      const title = codeStartMatch[2] || '';
-      i++;
-      const contentLines = [];
-      while(i < lines.length){
-        const l = lines[i];
-        const closeMatch = l.match(new RegExp('^C' + idx + '\\\\\\\\$')); // exact "C1\\"
-        if(closeMatch){
-          i++; // consume closing
-          break;
-        } else {
-          contentLines.push(l);
-          i++;
-        }
-      }
-      // optional SPACE// after code
-      if(i < lines.length && lines[i].trim() === 'SPACE//') i++;
-      codes.push({ id: 'C' + idx, title: title.trim(), content: contentLines.join('\n') });
-      continue;
-    }
-
-    // NOTE block: N// optional title
-    const noteStart = line.match(/^N\/\/\s*(.*)$/);
-    if(noteStart){
-      const title = noteStart[1] || '';
-      i++;
-      const contentLines = [];
-      while(i < lines.length){
-        const l = lines[i];
-        if(l.trim() === 'N\\\\'){
-          i++;
-          break;
-        } else {
-          contentLines.push(l);
-          i++;
-        }
-      }
-      notes.push({ id: null, title: title.trim(), content: contentLines.join('\n') });
-      continue;
-    }
-
-    // RM block
-    if(line.startsWith('RM//')){
-      i++;
-      const contentLines = [];
-      while(i < lines.length){
-        const l = lines[i];
-        if(l.trim() === 'RM\\\\'){ i++; break; }
-        contentLines.push(l);
-        i++;
-      }
-      rm = contentLines.join('\n');
-      continue;
-    }
-
-    // Branding block B//
-    if(line.startsWith('B//')){
-      i++;
-      const contentLines = [];
-      while(i < lines.length){
-        const l = lines[i];
-        if(l.trim() === 'B\\\\'){ i++; break; }
-        contentLines.push(l);
-        i++;
-      }
-      branding = contentLines.join('\n').trim();
-      continue;
-    }
-
-    // END//
-    if(line.trim() === 'END//'){ i++; break; }
-
-    // Skip other lines
-    i++;
-  }
-
-  if(branding === null) return null;
-  return { codes, notes, branding, rm };
+}
+function clearCentralEditor(){
+  if(!confirm('Clear central editor content?')) return;
+  centralEditor.setValue('', -1);
+  centralEditor.session.setMode('ace/mode/text');
+  selectedSectionId=null;
+  saveToBrowser();
+  showToast('Cleared','Editor cleared.');
 }
 
-/* -------------------------
-   Preview functions
-   ------------------------- */
-function isLivePreviewActive(){
-  return liveToggle.classList.contains('active');
-}
-liveToggle.addEventListener('click', ()=>{
+/* ---------- preview ---------- */
+function isLivePreviewActive(){ return liveToggle.classList.contains('active'); }
+liveToggle.addEventListener('click',()=>{
   liveToggle.classList.toggle('active');
-  liveToggle.style.background = liveToggle.classList.contains('active') ? 'linear-gradient(90deg,var(--accent),var(--accent-2))' : '#26303a';
+  liveToggle.style.background = liveToggle.classList.contains('active')
+    ? 'linear-gradient(90deg,var(--accent),var(--accent-2))' : '#26303a';
   updatePreview();
 });
 btnReloadPreview.addEventListener('click', updatePreview);
 
 function firstHtmlSection(){
-  // find first code section with title or content suggesting HTML (oldest-first)
   for(const s of sections){
-    if(s.type !== 'code') continue;
-    const t = (s.title || '').toLowerCase();
-    if(t.includes('html') || t.includes('htm')) return s;
-    if((s.content || '').trim().slice(0,100).toLowerCase().startsWith('<!doctype') || (s.content || '').trim().startsWith('<html')) return s;
+    if(s.type!=='code') continue;
+    const t=(s.title||'').toLowerCase();
+    if(t.includes('html')||t.includes('htm')) return s;
+    const c=(s.content||'').trim().toLowerCase();
+    if(c.startsWith('<!doctype')||c.startsWith('<html')) return s;
   }
   return null;
 }
 function updatePreview(){
   if(!isLivePreviewActive()){
-    previewFrame.srcdoc = '<!doctype html><html><body style="font-family:system-ui;color:#fff;background:#111;padding:20px"><h3 style="color:#72a4f2">Preview paused</h3><p style="color:var(--muted)">Toggle Live in the preview controls to enable.</p></body></html>';
+    previewFrame.srcdoc='<!doctype html><html><body style="font-family:system-ui;color:#fff;background:#111;padding:20px"><h3 style="color:#72a4f2">Preview paused</h3><p style="opacity:.8">Toggle Live to enable.</p></body></html>';
     return;
   }
-  const s = firstHtmlSection();
+  const s=firstHtmlSection();
   if(!s){
-    previewFrame.srcdoc = '<!doctype html><html><body style="font-family:system-ui;color:#fff;background:#111;padding:20px"><h3 style="color:#72a4f2">No HTML section</h3><p style="color:var(--muted)">Add a code section containing HTML and load it to preview.</p></body></html>';
+    previewFrame.srcdoc='<!doctype html><html><body style="font-family:system-ui;color:#fff;background:#111;padding:20px"><h3 style="color:#72a4f2">No HTML section</h3><p style="opacity:.8">Add a code section with HTML.</p></body></html>';
     return;
   }
-  const html = s.content || '';
-  const blob = new Blob([html], { type: 'text/html' });
-  const url = URL.createObjectURL(blob);
-  previewFrame.src = url;
-  previewFrame.onload = ()=> { try{ URL.revokeObjectURL(url); } catch(e){ } };
+  const html=s.content||'';
+  const blob=new Blob([html],{type:'text/html'});
+  const url=URL.createObjectURL(blob);
+  previewFrame.src=url;
+  previewFrame.onload=()=>{ try{URL.revokeObjectURL(url);}catch(e){} };
 }
 
-/* -------------------------
-   THEMES: live changes, no persistence
-   ------------------------- */
+/* ---------- themes ---------- */
 function applyWebsiteTheme(key){
-  const root = document.documentElement;
+  const root=document.documentElement;
   switch(key){
     case 'light':
       root.style.setProperty('--bg','#f6f8fb');
@@ -835,32 +670,414 @@ function applyWebsiteTheme(key){
       break;
   }
 }
-function applyEditorTheme(themeName){
-  try{ centralEditor.setTheme(themeName); }catch(e){ console.warn('Theme set failed', e); }
+function applyEditorTheme(themeName){ try{centralEditor.setTheme(themeName);}catch(e){} }
+
+btnThemes.addEventListener('click',()=>{ themesModal.style.display='flex'; });
+themesClose.addEventListener('click',()=>{ themesModal.style.display='none'; });
+editorThemeSelect.addEventListener('change',()=>applyEditorTheme(editorThemeSelect.value));
+websiteThemeSelect.addEventListener('change',()=>applyWebsiteTheme(websiteThemeSelect.value));
+
+/* ---------- metadata modal ---------- */
+function safeStringify(obj, spaces){ try{return JSON.stringify(obj??{}, null, spaces);}catch(e){return '{}';} }
+function safeParseJson(txt){
+  try{ const v=JSON.parse(txt); return (v && typeof v==='object') ? v : null; }catch(e){ return null; }
+}
+function openMetaModal(){
+  metaJsonEl.value = safeStringify(projectMeta, 2);
+  metaModal.style.display='flex';
+  metaJsonEl.focus();
+}
+function closeMetaModal(){ metaModal.style.display='none'; }
+
+addMetaBtn.addEventListener('click', openMetaModal);
+metaClose.addEventListener('click', closeMetaModal);
+metaSave.addEventListener('click', ()=>{
+  const parsed = safeParseJson(metaJsonEl.value||'');
+  if(!parsed){ showToast('Invalid JSON','Fix metadata JSON and try again.'); return; }
+  projectMeta = parsed;
+  closeMetaModal();
+  saveToBrowser();
+  showToast('Saved','Metadata updated.');
+});
+
+/* ---------- media handling (stored in browser as data URLs) ---------- */
+function formatBytes(n){
+  n=Number(n)||0;
+  if(n<1024) return n+' B';
+  const kb=n/1024; if(kb<1024) return kb.toFixed(1)+' KB';
+  const mb=kb/1024; if(mb<1024) return mb.toFixed(1)+' MB';
+  const gb=mb/1024; return gb.toFixed(2)+' GB';
+}
+function updateAttachCounts(){
+  const imgs = media.filter(m=>m.kind==='image').length;
+  const vids = media.filter(m=>m.kind==='video').length;
+  attachCounts.textContent = `${imgs} images • ${vids} videos`;
+}
+function renderAttachments(){
+  updateAttachCounts();
+  attachList.innerHTML='';
+  if(media.length===0){
+    const d=document.createElement('div');
+    d.style.color='var(--muted)'; d.style.padding='10px';
+    d.textContent='No media added yet.';
+    attachList.appendChild(d);
+    return;
+  }
+  const sorted=[...media].sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+  sorted.forEach(item=>{
+    const card=document.createElement('div');
+    card.className='attach-card';
+
+    const row1=document.createElement('div');
+    row1.className='row1';
+    row1.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
+        <div class="name" title="${escapeHtml(item.name||'')}">${escapeHtml(item.name||'(unnamed)')}</div>
+        <div class="meta">${escapeHtml(item.kind.toUpperCase())} • ${formatBytes(item.bytes||0)} • ${escapeHtml(item.mime||'')}</div>
+      </div>
+      <div class="pill">${escapeHtml((item.createdAt||'').replace('T',' ').replace('Z',''))}</div>
+    `;
+
+    const preview=document.createElement('div');
+    preview.style.marginTop='10px';
+    if(item.kind==='image'){
+      preview.innerHTML = `<img src="${item.dataUrl}" alt="" style="max-width:100%;border-radius:10px;border:1px solid rgba(255,255,255,0.06)"/>`;
+    }else{
+      preview.innerHTML = `<video src="${item.dataUrl}" controls style="width:100%;border-radius:10px;border:1px solid rgba(255,255,255,0.06)"></video>`;
+    }
+
+    const actions=document.createElement('div');
+    actions.className='actions';
+
+    const copyBtn=document.createElement('button');
+    copyBtn.className='btn small secondary'; copyBtn.textContent='Copy DataURL';
+    copyBtn.addEventListener('click', async ()=>{
+      try{
+        await navigator.clipboard.writeText(item.dataUrl);
+        showToast('Copied','Data URL copied.');
+      }catch(e){
+        showToast('Copy Failed','Clipboard blocked.');
+      }
+    });
+
+    const delBtn=document.createElement('button');
+    delBtn.className='btn small danger'; delBtn.textContent='Remove';
+    delBtn.addEventListener('click', ()=>{
+      if(!confirm('Remove this media from project?')) return;
+      media = media.filter(m=>m.id!==item.id);
+      renderAttachments();
+      saveToBrowser();
+      showToast('Removed','Media removed.');
+    });
+
+    actions.appendChild(copyBtn);
+    actions.appendChild(delBtn);
+
+    card.appendChild(row1);
+    card.appendChild(preview);
+    card.appendChild(actions);
+    attachList.appendChild(card);
+  });
 }
 
-/* Themes UI handlers */
-btnThemes.addEventListener('click', ()=> {
-  themesModal.style.display = 'flex';
+function newMediaId(){
+  return 'M' + Math.random().toString(16).slice(2) + Date.now().toString(16);
+}
+
+async function fileToDataUrl(file){
+  return new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onerror=()=>reject(new Error('read failed'));
+    r.onload=()=>resolve(String(r.result||''));
+    r.readAsDataURL(file);
+  });
+}
+
+async function addFiles(fileList){
+  const files = Array.from(fileList||[]);
+  const supported = files.filter(f => (f.type||'').startsWith('image/') || (f.type||'').startsWith('video/'));
+  if(supported.length===0){
+    showToast('No media','Select images/videos only.');
+    return;
+  }
+  setStatus('Saving…');
+  for(const f of supported){
+    // WARNING: base64 makes ALLF huge; still does what user requested
+    const dataUrl = await fileToDataUrl(f);
+    media.push({
+      id: newMediaId(),
+      name: f.name || 'file',
+      kind: (f.type||'').startsWith('video/') ? 'video' : 'image',
+      mime: f.type || '',
+      bytes: f.size || 0,
+      createdAt: new Date().toISOString(),
+      dataUrl
+    });
+  }
+  renderAttachments();
+  saveToBrowser();
+  showToast('Added', supported.length + ' file(s) embedded.');
+}
+
+addMediaBtn.addEventListener('click', ()=>{
+  mediaInput.value='';
+  mediaInput.click();
 });
-themesClose.addEventListener('click', ()=> {
-  themesModal.style.display = 'none';
-});
-editorThemeSelect.addEventListener('change', ()=> {
-  applyEditorTheme(editorThemeSelect.value);
-});
-websiteThemeSelect.addEventListener('change', ()=> {
-  applyWebsiteTheme(websiteThemeSelect.value);
+mediaInput.addEventListener('change', async (e)=>{
+  const files = e.target.files;
+  if(!files || files.length===0) return;
+  try{ await addFiles(files); }catch(err){ console.error(err); showToast('Error','Failed to add files.'); }
 });
 
-/* -------------------------
-   Helpers & events
-   ------------------------- */
-function escapeHtml(s){ return String(s || '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+/* Drag/drop */
+;['dragenter','dragover'].forEach(evt=>{
+  dropZone.addEventListener(evt,(e)=>{
+    e.preventDefault(); e.stopPropagation();
+    dropZone.classList.add('drag');
+  });
+});
+;['dragleave','drop'].forEach(evt=>{
+  dropZone.addEventListener(evt,(e)=>{
+    e.preventDefault(); e.stopPropagation();
+    dropZone.classList.remove('drag');
+  });
+});
+dropZone.addEventListener('drop', async (e)=>{
+  const dt = e.dataTransfer;
+  if(!dt || !dt.files) return;
+  try{ await addFiles(dt.files); }catch(err){ console.error(err); showToast('Error','Failed to add dropped files.'); }
+});
 
-/* Button wiring */
-addCodeBtn.addEventListener('click', ()=> createCodeSection('', ''));
-addNoteBtn.addEventListener('click', ()=> createNoteSection('', ''));
+/* ---------- ALLF export/import with embedded media ---------- */
+function generateRMBlock(){
+  return `RM// Read Me
+This ALLF file format is designed to hold multiple pieces of code, notes, metadata, and embedded media in a human-readable structure.
+Media is embedded as Base64 Data URLs inside the file.
+Please respect the mandatory branding block (B// ... B\\\\) — files missing the exact branding will be rejected by ALLF Studio.
+RM\\\\`;
+}
+
+function generateALLFText(exportNotesText){
+  const out=[];
+  const codes=sections.filter(s=>s.type==='code');
+  if(codes.length===0){
+    out.push('C1//');
+    out.push('');
+    out.push('C1\\\\');
+    out.push('SPACE//');
+  }else{
+    codes.forEach(c=>{
+      const title=(c.title||'').trim();
+      out.push(`${c.id}// ${title}`.trim());
+      out.push(c.content||'');
+      out.push(`${c.id}\\\\`);
+      out.push('SPACE//');
+    });
+  }
+
+  const notes=sections.filter(s=>s.type==='note');
+  if(notes.length===0){
+    out.push('N//');
+    out.push(exportNotesText||'');
+    out.push('N\\\\');
+  }else{
+    notes.forEach(n=>{
+      const ntitle=(n.title||'').trim();
+      out.push(`N// ${ntitle}`.trim());
+      out.push(n.content||'');
+      out.push('N\\\\');
+    });
+    if(exportNotesText && exportNotesText.trim()){
+      out.push('N// Export Notes');
+      out.push(exportNotesText);
+      out.push('N\\\\');
+    }
+  }
+
+  // Metadata block
+  out.push('M// metadata (json)');
+  out.push(safeStringify(projectMeta, 2));
+  out.push('M\\\\');
+
+  // Embedded media block
+  out.push('E// embedded media (json list, dataUrl inside each item)');
+  out.push(safeStringify(media, 2));
+  out.push('E\\\\');
+
+  out.push(generateRMBlock());
+
+  out.push('B//');
+  out.push(BRANDING_TEXT);
+  out.push('B\\\\');
+
+  out.push('END//');
+  return out.join('\n');
+}
+
+function triggerDownload(filename, content){
+  const blob = new Blob([content], { type:'text/plain;charset=utf-8' });
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{ try{URL.revokeObjectURL(a.href);}catch(e){} a.remove(); }, 800);
+}
+
+function openExportPopup(){
+  const base = (projectNameEl.value || 'project').split('.').slice(0,-1).join('') || 'project';
+  exportFilename.value = base + '.allf';
+  exportNotes.value = '';
+  exportMetaPreview.value = safeStringify(projectMeta, 2);
+  exportMediaPreview.value = JSON.stringify({
+    items: media.length,
+    images: media.filter(m=>m.kind==='image').length,
+    videos: media.filter(m=>m.kind==='video').length,
+    totalBytes: media.reduce((a,m)=>a+(Number(m.bytes)||0),0)
+  }, null, 2);
+  exportModal.style.display='flex';
+  exportFilename.focus();
+}
+function closeExportPopup(){ exportModal.style.display='none'; }
+function confirmExport(){
+  const filename=(exportFilename.value||'project.allf').trim();
+  const notesText=exportNotes.value||'';
+  const content=generateALLFText(notesText);
+  triggerDownload(filename, content);
+  closeExportPopup();
+  showToast('Exported', filename+' downloaded.');
+}
+
+function parseALLF(text){
+  if(!text) return null;
+  const lines=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+
+  const codes=[], notes=[];
+  let metaObj=null;
+  let embeddedMedia=null;
+  let branding=null;
+
+  let i=0;
+  while(i<lines.length){
+    const line=lines[i];
+
+    const codeStart=line.match(/^C(\d+)\/\/\s*(.*)$/);
+    if(codeStart){
+      const idx=codeStart[1];
+      const title=(codeStart[2]||'').trim();
+      i++;
+      const contentLines=[];
+      while(i<lines.length){
+        const l=lines[i];
+        if(l.match(new RegExp('^C'+idx+'\\\\\\\\$'))){ i++; break; }
+        contentLines.push(l); i++;
+      }
+      if(i<lines.length && lines[i].trim()==='SPACE//') i++;
+      codes.push({id:'C'+idx,title,content:contentLines.join('\n')});
+      continue;
+    }
+
+    const noteStart=line.match(/^N\/\/\s*(.*)$/);
+    if(noteStart){
+      const title=(noteStart[1]||'').trim();
+      i++;
+      const contentLines=[];
+      while(i<lines.length){
+        const l=lines[i];
+        if(l.trim()==='N\\\\'){ i++; break; }
+        contentLines.push(l); i++;
+      }
+      notes.push({title,content:contentLines.join('\n')});
+      continue;
+    }
+
+    if(line.startsWith('M//')){
+      i++;
+      const contentLines=[];
+      while(i<lines.length){
+        const l=lines[i];
+        if(l.trim()==='M\\\\'){ i++; break; }
+        contentLines.push(l); i++;
+      }
+      const parsed=safeParseJson(contentLines.join('\n').trim());
+      metaObj = parsed || {};
+      continue;
+    }
+
+    if(line.startsWith('E//')){
+      i++;
+      const contentLines=[];
+      while(i<lines.length){
+        const l=lines[i];
+        if(l.trim()==='E\\\\'){ i++; break; }
+        contentLines.push(l); i++;
+      }
+      const parsed=safeParseJson(contentLines.join('\n').trim());
+      embeddedMedia = Array.isArray(parsed) ? parsed : [];
+      continue;
+    }
+
+    if(line.startsWith('B//')){
+      i++;
+      const contentLines=[];
+      while(i<lines.length){
+        const l=lines[i];
+        if(l.trim()==='B\\\\'){ i++; break; }
+        contentLines.push(l); i++;
+      }
+      branding = contentLines.join('\n').trim();
+      continue;
+    }
+
+    if(line.trim()==='END//'){ i++; break; }
+    i++;
+  }
+
+  if(branding===null) return null;
+  return {codes, notes, meta:metaObj, media:embeddedMedia, branding};
+}
+
+/* Import */
+function openImportPicker(){ importInput.value=''; importInput.click(); }
+importInput.addEventListener('change', async (ev)=>{
+  const f=ev.target.files && ev.target.files[0];
+  if(!f) return;
+  try{
+    const text=await f.text();
+    const parsed=parseALLF(text);
+    if(!parsed){ alert('Invalid .allf file format.'); return; }
+    if(!parsed.branding || parsed.branding.trim()!==BRANDING_TEXT){
+      alert('Import failed: required branding block B// with exact content "'+BRANDING_TEXT+'" not found.');
+      return;
+    }
+
+    sections=[];
+    selectedSectionId=null;
+
+    (parsed.codes||[]).forEach(c=>sections.push({type:'code',id:c.id,title:c.title||'',content:c.content||''}));
+    (parsed.notes||[]).forEach(n=>sections.push({type:'note',id:nextNoteId(),title:n.title||'',content:n.content||''}));
+
+    projectMeta = (parsed.meta && typeof parsed.meta==='object') ? parsed.meta : {};
+    media = Array.isArray(parsed.media) ? parsed.media : [];
+
+    renderSectionList();
+    renderAttachments();
+    centralEditor.setValue('', -1);
+    centralEditor.session.setMode('ace/mode/text');
+
+    saveToBrowser();
+    showToast('Imported', f.name+' loaded.');
+  }catch(e){
+    console.error(e);
+    alert('Failed to read file.');
+  }finally{
+    importInput.value='';
+  }
+});
+
+/* ---------- buttons ---------- */
+addCodeBtn.addEventListener('click', ()=>createCodeSection('', ''));
+addNoteBtn.addEventListener('click', ()=>createNoteSection('', ''));
 
 btnSaveSection.addEventListener('click', saveCentralToSection);
 btnClearEditor.addEventListener('click', clearCentralEditor);
@@ -871,59 +1088,74 @@ exportConfirm.addEventListener('click', confirmExport);
 
 btnImport.addEventListener('click', openImportPicker);
 
-btnReloadPreview.addEventListener('click', updatePreview);
-
-/* Keyboard shortcuts */
-document.addEventListener('keydown', (e) => {
-  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's'){
+/* shortcuts */
+document.addEventListener('keydown',(e)=>{
+  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='s'){
     e.preventDefault();
-    // save central editor to selected or create
     saveCentralToSection();
   }
-  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'e'){
+  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='e'){
     e.preventDefault();
     openExportPopup();
   }
-});
-
-/* Hide modals on Escape */
-document.addEventListener('keydown', (e) => {
-  if(e.key === 'Escape'){
-    exportModal.style.display = 'none';
-    themesModal.style.display = 'none';
+  if(e.key==='Escape'){
+    exportModal.style.display='none';
+    themesModal.style.display='none';
+    metaModal.style.display='none';
   }
 });
 
-/* On page unload, clear any in-memory state (not necessary but explicit) */
-window.addEventListener('beforeunload', ()=> {
-  sections = [];
-  selectedSectionId = null;
+/* project name change -> load different browser-saved project */
+projectNameEl.addEventListener('change', ()=>{
+  if(loadFromBrowser()){
+    renderSectionList();
+    renderAttachments();
+    selectedSectionId = null;
+    centralEditor.setValue('', -1);
+    centralEditor.session.setMode('ace/mode/text');
+    showToast('Loaded','Project loaded from browser save.');
+  }else{
+    // create new
+    sections = [{type:'code',id:'C1',title:'',content:''}];
+    selectedSectionId=null;
+    projectMeta={};
+    media=[];
+    renderSectionList();
+    renderAttachments();
+    centralEditor.setValue('', -1);
+    centralEditor.session.setMode('ace/mode/text');
+    saveToBrowser();
+    showToast('New','New project created.');
+  }
 });
 
-/* -------------------------
-   Starter: single empty C1 (no title, no content)
-   ------------------------- */
-(function initStarter(){
-  // create empty C1
-  sections = [];
-  sections.push({ type: 'code', id: 'C1', title: '', content: '' });
-  renderSectionList();
-  // central editor empty
-  centralEditor.setValue('', -1);
-  centralEditor.session.setMode('ace/mode/text');
-  // default theme selections
-  editorThemeSelect.value = 'ace/theme/monokai';
-  websiteThemeSelect.value = 'dark';
+/* ---------- init ---------- */
+(function init(){
+  // Defaults
+  editorThemeSelect.value='ace/theme/monokai';
+  websiteThemeSelect.value='dark';
   applyEditorTheme(editorThemeSelect.value);
   applyWebsiteTheme(websiteThemeSelect.value);
-  // default preview paused
+
   liveToggle.classList.remove('active');
-  liveToggle.style.background = '#26303a';
-  // focus editor
+  liveToggle.style.background='#26303a';
+  updatePreview();
+
+  // Load from browser if exists, else create starter
+  if(!loadFromBrowser()){
+    sections = [{type:'code',id:'C1',title:'',content:''}];
+    selectedSectionId=null;
+    projectMeta={};
+    media=[];
+    saveToBrowser();
+  }
+
+  renderSectionList();
+  renderAttachments();
+  centralEditor.setValue('', -1);
+  centralEditor.session.setMode('ace/mode/text');
   centralEditor.focus();
 })();
-
-/* End of script */
 </script>
 </body>
 </html>
