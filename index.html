@@ -1,706 +1,659 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>ALLF Studio</title>
+<title>ALLF Studio — Pro (Local + Embedded Media)</title>
 
 <style>
 :root{
-  --accent:#72a4f2;
-  --accent-2:#4a6cd8;
-  --bg:#0b0f1a;
-  --panel:#0f1720;
-  --panel-2:#101828;
-  --text:#e4ebff;
-  --muted:#8ca0c8;
-  --danger:#ff5c5c;
+  --accent:#72a4f2; --accent2:#4a6cd8;
+  --bg:#0b0f1a; --panel:#0f1720; --panel2:#101828;
+  --text:#e4ebff; --muted:#8ca0c8; --danger:#ff5c5c; --ok:#4ddc9b;
 }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif;}
 header{
-  height:64px;padding:12px 18px;background:linear-gradient(180deg,var(--bg),#071022);
-  display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.04);
+  height:72px;padding:10px 14px;
+  background:linear-gradient(180deg,var(--bg),#071022);
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid rgba(255,255,255,0.04);
   box-shadow:0 10px 40px rgba(9,13,22,0.6);z-index:60;
 }
-.title-group{display:flex;align-items:center;gap:14px}
-.title-group h1{margin:0;font-size:18px;color:var(--accent);text-shadow:0 0 10px rgba(114,164,242,0.6)}
-.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
-.input-file{background:var(--panel-2);border:1px solid rgba(255,255,255,0.06);color:var(--text);padding:8px;border-radius:8px;width:220px}
-
-.btn{padding:8px 12px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-weight:700;cursor:pointer;box-shadow:0 10px 30px rgba(114,164,242,0.12);transition:all .12s}
+h1{margin:0;font-size:18px;color:var(--accent);text-shadow:0 0 10px rgba(114,164,242,0.6)}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.input, select, textarea{
+  background:var(--panel2);border:1px solid rgba(255,255,255,0.06);color:var(--text);
+  padding:8px;border-radius:10px;
+}
+.input{width:220px}
+.btn{
+  padding:8px 12px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-weight:800;
+  cursor:pointer;box-shadow:0 10px 30px rgba(114,164,242,0.12);transition:all .12s;user-select:none;
+}
 .btn.secondary{background:#26303a}
 .btn.danger{background:var(--danger)}
-.btn.small{padding:6px 10px;font-size:13px}
+.btn.small{padding:6px 10px;font-size:13px;border-radius:10px}
 .btn:active{transform:translateY(1px)}
 .btn:hover{transform:translateY(-2px);box-shadow:0 18px 50px rgba(114,164,242,0.18)}
 
 .container{
   display:grid;
-  grid-template-columns:260px 1fr 320px;
+  grid-template-columns:320px 1fr 360px;
   gap:12px;
-  height:calc(100vh - 64px - 56px);
+  height:calc(100vh - 72px - 56px);
   padding:12px;
 }
-
 .panel{
-  background:var(--panel);border-radius:12px;overflow:auto;box-shadow:0 10px 40px rgba(114,164,242,0.06);display:flex;flex-direction:column;
-  padding:12px;
+  background:var(--panel);border-radius:14px;overflow:hidden;
+  box-shadow:0 10px 40px rgba(114,164,242,0.06);
+  display:flex;flex-direction:column;
 }
-.left-list{display:flex;flex-direction:column;gap:8px}
-.section-item{display:flex;align-items:center;justify-content:space-between;padding:8px;border-radius:8px;background:rgba(255,255,255,0.02)}
-.section-item .left{display:flex;flex-direction:column;gap:6px;min-width:0}
-.section-item strong{color:var(--accent)}
-.section-actions{display:flex;gap:6px;align-items:center}
-
-.editor-area{display:flex;flex-direction:column;border-radius:12px;overflow:hidden}
-.editor-top{display:flex;align-items:center;justify-content:space-between;padding:10px;border-bottom:1px solid rgba(255,255,255,0.03)}
-#centralEditor{width:100%;height:calc(100% - 48px);min-height:420px}
-
-.preview-area{display:flex;flex-direction:column;overflow:hidden;border-radius:12px}
-.preview-top{display:flex;align-items:center;justify-content:space-between;padding:10px;border-bottom:1px solid rgba(255,255,255,0.03)}
-.preview-frame{border:none;width:100%;height:100%;background:#fff}
-
-footer{height:56px;background:#0d1220;border-top:1px solid rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:space-between;padding:0 18px;font-size:13px;color:var(--muted)}
-.brand-small{font-size:13px;color:var(--muted)}
-
-.modal-bg{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);z-index:220}
-.modal{width:760px;max-width:96%;background:linear-gradient(180deg,#0d1320,#0b1624);padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 40px 120px rgba(4,8,20,0.9)}
-.modal h3{margin:0;color:var(--accent)}
-.modal .row{display:flex;gap:8px;margin-top:12px;align-items:center}
-.modal input[type="text"], .modal textarea, .glow-select{
-  width:100%;padding:10px;border-radius:8px;background:var(--panel-2);border:1px solid rgba(255,255,255,0.04);color:var(--text)
+.panel .head{
+  padding:12px;border-bottom:1px solid rgba(255,255,255,0.05);
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
 }
-.modal textarea{height:140px;resize:vertical}
+.panel .body{padding:12px;overflow:auto}
 
-.theme-modal{width:860px;max-width:96%}
-.glow-select{appearance:none;-moz-appearance:none;-webkit-appearance:none;padding:10px;border-radius:8px}
-
-@media(max-width:1080px){
-  .container{grid-template-columns:1fr;grid-auto-rows:380px 1fr 280px;height:auto}
-  #centralEditor{height:380px}
+.brand{color:var(--muted);font-size:12px}
+.pill{
+  font-size:12px;padding:4px 8px;border-radius:999px;
+  background:rgba(114,164,242,0.12);border:1px solid rgba(114,164,242,0.18);color:var(--accent);
 }
 
-.toast{position:fixed;right:24px;bottom:24px;display:none;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:white;padding:12px 16px;border-radius:10px;box-shadow:0 20px 60px rgba(114,164,242,0.18);z-index:99999}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.col{display:flex;flex-direction:column;gap:8px}
+.sep{height:1px;background:rgba(255,255,255,0.05);margin:12px 0}
 
-.attach-wrap{border-top:1px solid rgba(255,255,255,0.03)}
-.attach-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px}
-.pill{font-size:12px;padding:4px 8px;border-radius:999px;background:rgba(114,164,242,0.12);border:1px solid rgba(114,164,242,0.18);color:var(--accent)}
-.small-muted{font-size:12px;color:var(--muted)}
-.attach-list{display:flex;flex-direction:column;gap:10px;padding:10px}
-.attach-card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);border-radius:10px;padding:10px}
-.attach-card .row1{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.attach-card .name{font-weight:800;color:var(--text);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:210px}
-.attach-card .meta{font-size:12px;color:var(--muted)}
-.attach-card .actions{display:flex;gap:8px;align-items:center;margin-top:8px}
-.codebox{
-  width:100%;min-height:170px;
-  font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-size:12.5px;line-height:1.45;
+.list{display:flex;flex-direction:column;gap:8px}
+.item{
+  background:rgba(255,255,255,0.02);
+  border:1px solid rgba(255,255,255,0.04);
+  border-radius:12px;padding:10px;
+  display:flex;justify-content:space-between;gap:10px;align-items:flex-start;
 }
+.item .meta{min-width:0}
+.item .title{font-weight:900;color:var(--text);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:240px}
+.item .sub{font-size:12px;color:var(--muted);margin-top:3px}
+.item .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tab{
+  padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.08);
+  background:rgba(255,255,255,0.03);color:var(--muted);cursor:pointer;font-weight:800;font-size:12px;
+}
+.tab.active{background:linear-gradient(90deg,var(--accent),var(--accent2));color:white;border-color:transparent}
+.tab.dirty::after{content:" *";font-weight:1000}
+
+#editor{width:100%;height:100%}
+.editorWrap{height:100%;display:flex;flex-direction:column}
+.editorTop{padding:10px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center;gap:10px}
+.editorMain{flex:1;min-height:420px}
+
+.previewWrap{display:flex;flex-direction:column;height:100%}
+.previewTop{padding:10px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center;gap:10px}
+iframe{border:none;width:100%;height:100%;background:#fff}
+.previewMain{flex:1}
+
+.small{font-size:12px;color:var(--muted)}
+kbd{background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:6px;border:1px solid rgba(255,255,255,0.08);font-size:12px}
 
 .drop{
-  margin-top:10px;
   border:1px dashed rgba(114,164,242,0.35);
   background:rgba(114,164,242,0.06);
-  border-radius:12px;
-  padding:12px;
-  color:var(--muted);
+  border-radius:14px;padding:12px;color:var(--muted);
 }
 .drop strong{color:var(--accent)}
 .drop.drag{background:rgba(114,164,242,0.10);border-color:rgba(114,164,242,0.55)}
 
-kbd{background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:6px;border:1px solid rgba(255,255,255,0.08);font-size:12px}
+.toast{
+  position:fixed;right:24px;bottom:24px;display:none;z-index:99999;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  color:white;padding:12px 16px;border-radius:12px;box-shadow:0 20px 60px rgba(114,164,242,0.18);
+}
+.toast .t{font-weight:900}
+.toast .m{font-size:13px;opacity:.95;margin-top:3px}
+
+.modalBg{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);z-index:220}
+.modal{
+  width:920px;max-width:96%;
+  background:linear-gradient(180deg,#0d1320,#0b1624);
+  padding:16px;border-radius:14px;border:1px solid rgba(255,255,255,0.04);
+  box-shadow:0 40px 120px rgba(4,8,20,0.9);
+}
+.modal h3{margin:0;color:var(--accent)}
+.modal textarea{width:100%;min-height:180px}
+.modal .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.codebox{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:12.5px;line-height:1.45}
+.progress{
+  height:10px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden;border:1px solid rgba(255,255,255,0.06)
+}
+.progress > div{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.badgeOk{color:var(--ok);font-weight:900}
+.badgeWarn{color:#ffd36a;font-weight:900}
+.badgeBad{color:var(--danger);font-weight:900}
+
+.mediaPreview img, .mediaPreview video{
+  width:100%;border-radius:12px;border:1px solid rgba(255,255,255,0.06);background:#000;
+}
+.mediaPreview video{max-height:220px}
+
+footer{
+  height:56px;background:#0d1220;border-top:1px solid rgba(255,255,255,0.03);
+  display:flex;align-items:center;justify-content:space-between;padding:0 18px;
+  color:var(--muted);font-size:13px
+}
+
+@media(max-width:1200px){
+  .container{grid-template-columns:1fr;grid-auto-rows:420px 1fr 360px;height:auto}
+  .editorMain{min-height:420px}
+}
 </style>
 </head>
 <body>
 
 <header>
-  <div class="title-group">
+  <div class="row" style="gap:12px">
     <h1>ALLF Studio</h1>
+    <span class="pill" id="saveStatePill">Saved</span>
+    <span class="pill" id="sizePill">Size: 0 KB</span>
   </div>
 
   <div class="toolbar">
-    <label for="projectName">Project:</label>
-    <input id="projectName" class="input-file" type="text" value="untitled" />
+    <select id="projectSelect" class="input" title="Saved projects"></select>
+    <button id="btnNewProject" class="btn secondary">New</button>
+    <button id="btnRenameProject" class="btn secondary">Rename</button>
+    <button id="btnDuplicateProject" class="btn secondary">Duplicate</button>
+    <button id="btnDeleteProject" class="btn danger">Delete</button>
+
     <button id="btnExport" class="btn">Export .allf</button>
     <button id="btnImport" class="btn secondary">Import .allf</button>
     <input id="importInput" type="file" accept=".allf,text/plain" style="display:none" />
-    <button id="btnThemes" class="btn">Themes</button>
+
+    <button id="btnThemes" class="btn secondary">Themes</button>
   </div>
 </header>
 
 <div class="container">
 
-  <!-- LEFT -->
-  <div class="panel" id="leftPanel">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <div>
-        <strong style="color:var(--accent)">Sections</strong>
-        <div style="font-size:12px;color:var(--muted)">Click Load to edit in central editor</div>
+  <!-- LEFT: Projects + Sections + Media controls -->
+  <div class="panel">
+    <div class="head">
+      <div class="col" style="gap:4px">
+        <div style="font-weight:1000;color:var(--accent)">Sections</div>
+        <div class="small">Tabs, autosave, global search</div>
       </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
-        <button id="addCode" class="btn small">+ Code</button>
-        <button id="addNote" class="btn small secondary">+ Note</button>
-        <!-- NEW: requested buttons placed here (not in nav) -->
-        <button id="addMeta" class="btn small secondary">+ Metadata</button>
-        <button id="addMedia" class="btn small secondary">+ Images/Videos</button>
-
+      <div class="row" style="justify-content:flex-end">
+        <button id="btnAddCode" class="btn small">+ Code</button>
+        <button id="btnAddNote" class="btn small secondary">+ Note</button>
+        <button id="btnMeta" class="btn small secondary">Metadata</button>
+        <button id="btnAddMedia" class="btn small secondary">Images/Videos</button>
         <input id="mediaInput" type="file" accept="image/*,video/*" multiple style="display:none" />
       </div>
     </div>
 
-    <div class="left-list" id="sectionList"></div>
-
-    <div class="drop" id="dropZone" tabindex="0" aria-label="Drop images and videos">
-      <strong>Drop images/videos here</strong>
-      <div style="margin-top:6px">or click <kbd>+ Images/Videos</kbd>. Stored in your browser during editing, and embedded into exported .allf.</div>
-    </div>
-
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
-      <div style="display:flex;flex-direction:column;gap:4px">
-        <div style="font-size:12px;color:var(--muted)">Autosave: on (browser)</div>
-        <div id="saveStatus" style="font-size:12px;color:var(--muted)">Saved</div>
+    <div class="body">
+      <div class="row" style="gap:10px">
+        <input id="globalSearch" class="input" style="width:100%" placeholder="Search across sections… (title/content)" />
+        <button id="btnSearch" class="btn secondary">Search</button>
       </div>
-      <div class="brand-small">© ALLF STUDIO - TSFALEX</div>
+      <div id="searchResults" class="list" style="margin-top:10px;display:none"></div>
+
+      <div class="sep"></div>
+
+      <div class="list" id="sectionsList"></div>
+
+      <div class="sep"></div>
+
+      <div class="drop" id="dropZone" tabindex="0">
+        <strong>Drop images/videos here</strong>
+        <div style="margin-top:6px">or click <kbd>Images/Videos</kbd>. Stored locally in your browser (IndexedDB) and embedded in exported .allf.</div>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="row" style="justify-content:space-between;gap:12px">
+        <div class="col" style="gap:3px">
+          <div class="small">Autosave: on</div>
+          <div class="small">Export embeds media as Base64</div>
+        </div>
+        <div class="brand">© ALLF STUDIO - TSFALEX</div>
+      </div>
     </div>
   </div>
 
-  <!-- CENTER -->
-  <div class="panel editor-area">
-    <div class="editor-top">
-      <div>
-        <strong style="color:var(--accent)">Central Editor</strong>
-        <div style="font-size:12px;color:var(--muted)">Single advanced editor. <span style="opacity:.85">Ctrl+S</span> saves section.</div>
+  <!-- CENTER: Editor with tabs -->
+  <div class="panel editorWrap">
+    <div class="editorTop">
+      <div class="col" style="gap:6px;min-width:0">
+        <div class="row" style="gap:10px;flex-wrap:wrap">
+          <div style="font-weight:1000;color:var(--accent)">Editor</div>
+          <div class="tabs" id="tabs"></div>
+        </div>
+        <div class="small">Ctrl+S save • Ctrl+E export • Paste images: Ctrl+V</div>
       </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <button id="btnSaveSection" class="btn small">Save Section</button>
-        <button id="btnClearEditor" class="btn small secondary">Clear</button>
+      <div class="row" style="justify-content:flex-end">
+        <button id="btnSaveSection" class="btn small">Save</button>
+        <button id="btnCloseTab" class="btn small secondary">Close Tab</button>
+        <button id="btnClear" class="btn small secondary">Clear</button>
       </div>
     </div>
-    <div id="centralEditor"></div>
+    <div class="editorMain" id="editor"></div>
   </div>
 
-  <!-- RIGHT -->
-  <div class="panel preview-area">
-    <div class="preview-top">
-      <div>
-        <strong style="color:var(--accent)">Live Preview</strong>
-        <div style="font-size:12px;color:var(--muted)">First HTML-like code section</div>
+  <!-- RIGHT: Preview + Media list -->
+  <div class="panel previewWrap">
+    <div class="previewTop">
+      <div class="col" style="gap:4px;min-width:0">
+        <div class="row" style="gap:10px">
+          <div style="font-weight:1000;color:var(--accent)">Preview</div>
+          <span class="pill" id="previewState">Paused</span>
+        </div>
+        <div class="small">Sandboxed iframe • Choose section</div>
       </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <label style="color:var(--muted)">Live</label>
-        <div id="liveToggle" class="btn small" style="background:#26303a">Toggle</div>
+      <div class="row" style="justify-content:flex-end">
+        <select id="previewSelect" class="input" style="width:200px" title="Choose HTML section"></select>
+        <button id="btnTogglePreview" class="btn small secondary">Toggle</button>
         <button id="btnReloadPreview" class="btn small secondary">Reload</button>
       </div>
     </div>
 
-    <iframe id="previewFrame" class="preview-frame" title="Preview"></iframe>
+    <div class="previewMain" style="display:flex;flex-direction:column">
+      <iframe id="previewFrame" sandbox="allow-scripts allow-forms allow-modals" title="Preview"></iframe>
 
-    <div class="attach-wrap">
-      <div class="attach-head">
-        <div>
-          <strong style="color:var(--accent)">Embedded Media</strong>
-          <div class="small-muted">Stored in browser while editing; embedded in .allf as Base64</div>
+      <div style="border-top:1px solid rgba(255,255,255,0.05);padding:12px;overflow:auto;max-height:520px">
+        <div class="row" style="justify-content:space-between">
+          <div class="col" style="gap:4px">
+            <div style="font-weight:1000;color:var(--accent)">Media</div>
+            <div class="small">Stored in IndexedDB, referenced by ID, embedded on export</div>
+          </div>
+          <div class="pill" id="mediaCounts">0 images • 0 videos</div>
         </div>
-        <div class="pill" id="attachCounts">0 images • 0 videos</div>
+
+        <div class="row" style="margin-top:10px">
+          <select id="mediaFilter" class="input" style="width:160px">
+            <option value="all">All</option>
+            <option value="image">Images</option>
+            <option value="video">Videos</option>
+          </select>
+          <input id="mediaTagFilter" class="input" style="width:100%" placeholder="Filter by tag… (comma-separated on media)" />
+          <button id="btnCleanupUnused" class="btn small secondary" title="Removes media not referenced by any section (ID-based references)">Cleanup Unused</button>
+        </div>
+
+        <div id="mediaList" class="list" style="margin-top:10px"></div>
       </div>
-      <div class="attach-list" id="attachList"></div>
     </div>
   </div>
 
 </div>
 
 <footer>
-  <div class="brand-small">ALLF Studio – Clean Interface</div>
-  <div class="brand-small">© 2026 ALLF STUDIO - CATTAALEX</div>
+  <div>ALLF Studio — Pro Local</div>
+  <div>© ALLF STUDIO - TSFALEX</div>
 </footer>
 
 <!-- EXPORT MODAL -->
-<div id="exportModal" class="modal-bg" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true">
-    <h3>Export .allf — Finalize</h3>
-    <div class="row">
-      <label style="min-width:110px;color:var(--muted)">Filename</label>
-      <input id="exportFilename" type="text" value="project.allf" />
+<div id="exportModalBg" class="modalBg">
+  <div class="modal">
+    <div class="row" style="justify-content:space-between">
+      <h3>Export .allf</h3>
+      <div class="row">
+        <button id="btnExportClose" class="btn secondary">Close</button>
+        <button id="btnExportDownload" class="btn">Download</button>
+      </div>
     </div>
-    <div class="row">
-      <label style="min-width:110px;color:var(--muted);align-self:flex-start">Notes (optional)</label>
-      <textarea id="exportNotes" placeholder="Optional export notes (appended into N// when exporting)"></textarea>
+
+    <div class="sep"></div>
+
+    <div class="grid3">
+      <div class="col">
+        <div class="small">Filename</div>
+        <input id="exportFilename" class="input" style="width:100%" value="project.allf" />
+      </div>
+      <div class="col">
+        <div class="small">Repair import mode</div>
+        <label class="row" style="gap:8px">
+          <input id="exportRepairHint" type="checkbox" />
+          <span class="small">Include extra hints for repair import</span>
+        </label>
+      </div>
+      <div class="col">
+        <div class="small">Estimated export size</div>
+        <div id="exportSizeLabel" style="font-weight:1000"></div>
+      </div>
     </div>
-    <div class="row">
-      <label style="min-width:110px;color:var(--muted);align-self:flex-start">Metadata</label>
-      <textarea id="exportMetaPreview" class="codebox" readonly></textarea>
+
+    <div class="sep"></div>
+
+    <div class="grid2">
+      <div class="col">
+        <div class="small">Export Notes (optional)</div>
+        <textarea id="exportNotes" class="input codebox" style="min-height:140px" placeholder="Optional notes…"></textarea>
+      </div>
+      <div class="col">
+        <div class="small">Safety</div>
+        <div class="col" style="gap:10px">
+          <div class="row" style="justify-content:space-between">
+            <span class="small">Browser storage health</span>
+            <span id="storageHealth" class="badgeOk">OK</span>
+          </div>
+          <div class="row" style="justify-content:space-between">
+            <span class="small">Media embedding warning</span>
+            <span id="embedWarning" class="badgeOk">OK</span>
+          </div>
+          <div class="progress"><div id="storageBar"></div></div>
+          <div class="small" id="storageDetails"></div>
+        </div>
+      </div>
     </div>
-    <div class="row">
-      <label style="min-width:110px;color:var(--muted);align-self:flex-start">Media Summary</label>
-      <textarea id="exportMediaPreview" class="codebox" readonly></textarea>
-    </div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
-      <button id="exportCancel" class="btn secondary">Cancel</button>
-      <button id="exportConfirm" class="btn">Download .allf</button>
+
+    <div class="sep"></div>
+
+    <div class="col" style="gap:8px">
+      <div class="small">Preview of embedded blocks (metadata + media manifest)</div>
+      <textarea id="exportPreview" class="input codebox" style="min-height:220px" readonly></textarea>
     </div>
   </div>
 </div>
 
+<!-- IMPORT OPTIONS MODAL -->
+<div id="importModalBg" class="modalBg">
+  <div class="modal">
+    <div class="row" style="justify-content:space-between">
+      <h3>Import options</h3>
+      <div class="row">
+        <button id="btnImportCancel" class="btn secondary">Cancel</button>
+        <button id="btnImportProceed" class="btn">Import</button>
+      </div>
+    </div>
+    <div class="sep"></div>
+    <div class="row" style="gap:16px;align-items:flex-start">
+      <label class="row" style="gap:8px">
+        <input id="importRepairMode" type="checkbox" />
+        <span class="small">Repair mode (tries to salvage sections/media even if formatting is imperfect)</span>
+      </label>
+    </div>
+    <div class="sep"></div>
+    <div class="small">Note: Files missing required branding block will be rejected.</div>
+  </div>
+</div>
+
 <!-- THEMES MODAL -->
-<div id="themesModal" class="modal-bg" aria-hidden="true">
-  <div class="modal theme-modal" role="dialog" aria-modal="true">
-    <h3>Theme Settings — Live</h3>
-    <div class="row">
-      <div style="flex:1">
-        <label style="color:var(--muted);display:block;margin-bottom:6px">Editor Theme (Ace)</label>
-        <select id="editorThemeSelect" class="glow-select">
-          <option value="ace/theme/monokai">Monokai (dark)</option>
+<div id="themesModalBg" class="modalBg">
+  <div class="modal">
+    <div class="row" style="justify-content:space-between">
+      <h3>Themes</h3>
+      <button id="btnThemesClose" class="btn secondary">Close</button>
+    </div>
+    <div class="sep"></div>
+    <div class="grid2">
+      <div class="col">
+        <div class="small">Editor theme</div>
+        <select id="editorTheme" class="input" style="width:100%">
+          <option value="ace/theme/monokai">Monokai</option>
           <option value="ace/theme/dracula">Dracula</option>
-          <option value="ace/theme/github">GitHub (light)</option>
           <option value="ace/theme/twilight">Twilight</option>
           <option value="ace/theme/solarized_dark">Solarized Dark</option>
+          <option value="ace/theme/github">GitHub (light)</option>
         </select>
       </div>
-      <div style="flex:1">
-        <label style="color:var(--muted);display:block;margin-bottom:6px">Website Theme</label>
-        <select id="websiteThemeSelect" class="glow-select">
+      <div class="col">
+        <div class="small">UI theme</div>
+        <select id="uiTheme" class="input" style="width:100%">
           <option value="dark">Dark</option>
-          <option value="light">Light</option>
           <option value="midnight">Midnight</option>
           <option value="ocean">Ocean</option>
           <option value="crimson">Crimson</option>
+          <option value="light">Light</option>
         </select>
       </div>
-    </div>
-
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
-      <button id="themesClose" class="btn secondary">Close</button>
     </div>
   </div>
 </div>
 
 <!-- METADATA MODAL -->
-<div id="metaModal" class="modal-bg" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true">
-    <h3>Project Metadata</h3>
-    <div style="margin-top:10px;color:var(--muted);font-size:13px">
-      Stored in your browser while editing and embedded into exported .allf as JSON.
+<div id="metaModalBg" class="modalBg">
+  <div class="modal">
+    <div class="row" style="justify-content:space-between">
+      <h3>Project Metadata</h3>
+      <div class="row">
+        <button id="btnMetaClose" class="btn secondary">Close</button>
+        <button id="btnMetaSave" class="btn">Save</button>
+      </div>
     </div>
-    <div class="row">
-      <label style="min-width:110px;color:var(--muted);align-self:flex-start">Metadata JSON</label>
-      <textarea id="metaJson" class="codebox" placeholder='{"author":"Alex","tags":["beat saber","web"],"version":"1.0.0"}'></textarea>
+
+    <div class="sep"></div>
+
+    <div class="grid3">
+      <div class="col">
+        <div class="small">Title</div>
+        <input id="metaTitle" class="input" style="width:100%" />
+      </div>
+      <div class="col">
+        <div class="small">Author</div>
+        <input id="metaAuthor" class="input" style="width:100%" />
+      </div>
+      <div class="col">
+        <div class="small">Version</div>
+        <input id="metaVersion" class="input" style="width:100%" placeholder="1.0.0" />
+      </div>
     </div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
-      <button id="metaClose" class="btn secondary">Close</button>
-      <button id="metaSave" class="btn">Save Metadata</button>
+
+    <div class="grid2" style="margin-top:12px">
+      <div class="col">
+        <div class="small">Tags (comma separated)</div>
+        <input id="metaTags" class="input" style="width:100%" placeholder="tag1, tag2" />
+      </div>
+      <div class="col">
+        <div class="small">Updated</div>
+        <input id="metaUpdated" class="input" style="width:100%" readonly />
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <div class="row" style="justify-content:space-between">
+      <div class="small">Advanced JSON</div>
+      <label class="row" style="gap:8px">
+        <input id="metaAdvancedToggle" type="checkbox" />
+        <span class="small">Show raw JSON</span>
+      </label>
+    </div>
+
+    <textarea id="metaJson" class="input codebox" style="display:none;margin-top:10px" placeholder='{"author":"..."}'></textarea>
+
+    <div class="small" style="margin-top:10px;color:var(--muted)">
+      Metadata is stored locally and embedded in the .allf file.
     </div>
   </div>
 </div>
 
+<!-- MEDIA ADD MODAL (compression options) -->
+<div id="mediaModalBg" class="modalBg">
+  <div class="modal">
+    <div class="row" style="justify-content:space-between">
+      <h3>Add Media</h3>
+      <div class="row">
+        <button id="btnMediaClose" class="btn secondary">Close</button>
+        <button id="btnMediaPick" class="btn">Choose Files</button>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <div class="grid3">
+      <div class="col">
+        <div class="small">Images: max dimension</div>
+        <input id="imgMaxDim" class="input" style="width:100%" type="number" min="256" step="64" value="1920" />
+      </div>
+      <div class="col">
+        <div class="small">Images: quality (JPEG/WebP)</div>
+        <input id="imgQuality" class="input" style="width:100%" type="number" min="0.3" max="1" step="0.05" value="0.85" />
+      </div>
+      <div class="col">
+        <div class="small">Images: format</div>
+        <select id="imgFormat" class="input" style="width:100%">
+          <option value="image/webp">WebP</option>
+          <option value="image/jpeg">JPEG</option>
+          <option value="image/png">PNG (no compression)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <div class="row" style="justify-content:space-between">
+      <div class="col" style="gap:6px">
+        <div class="small">Import progress</div>
+        <div class="progress"><div id="mediaProgressBar"></div></div>
+        <div class="small" id="mediaProgressText">Idle</div>
+      </div>
+      <div class="col" style="gap:6px;align-items:flex-end">
+        <div class="small">Video note</div>
+        <div class="small"><span class="badgeWarn">Warning:</span> videos can make exports huge.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <!-- TOAST -->
-<div id="toast" class="toast"><strong id="toastTitle">Done</strong><div id="toastMsg" style="font-size:13px;opacity:0.95">Message</div></div>
+<div class="toast" id="toast">
+  <div class="t" id="toastT">Done</div>
+  <div class="m" id="toastM">Message</div>
+</div>
 
 <!-- ACE -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.14/ace.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.14/ext-language_tools.min.js"></script>
 
 <script>
-/* =========================
-   ALLF Studio — local browser save + embedded media export
-   - Everything stored in browser (localStorage) while editing
-   - Export embeds images/videos INSIDE .allf as base64 data URLs
-   - Import restores everything
-   ========================= */
+/* =========================================================
+   ALLF Studio — Pro Local
+   Implements ALL suggested improvements (within a single file):
+   - Project manager (list/rename/duplicate/delete)
+   - Autosave (debounced) + dirty indicator + tabs
+   - Global search
+   - Sandboxed preview with selectable section
+   - Media stored in IndexedDB (blobs), manifest in localStorage
+   - Image compression (optional) on import
+   - Paste images, drag/drop, progress
+   - Insert media snippets into editor
+   - Media tagging/filter, lazy video preview
+   - Export/import v2 with version header, checksums, media embedded as DataURLs
+   - Chunk large embedded media block into E1/E2/... blocks
+   - Repair import mode
+   ========================================================= */
 
 const BRANDING_TEXT = '© ALLF STUDIO - TSFALEX';
+const ALLF_VERSION = 2;
 
-// DOM
-const sectionListEl = document.getElementById('sectionList');
-const addCodeBtn = document.getElementById('addCode');
-const addNoteBtn = document.getElementById('addNote');
-const addMetaBtn = document.getElementById('addMeta');
-const addMediaBtn = document.getElementById('addMedia');
-const mediaInput = document.getElementById('mediaInput');
-const dropZone = document.getElementById('dropZone');
+const LS_INDEX_KEY = 'ALLF_STUDIO__INDEX__V2'; // list of projects + settings
+
+// DOM refs
+const projectSelect = document.getElementById('projectSelect');
+const btnNewProject = document.getElementById('btnNewProject');
+const btnRenameProject = document.getElementById('btnRenameProject');
+const btnDuplicateProject = document.getElementById('btnDuplicateProject');
+const btnDeleteProject = document.getElementById('btnDeleteProject');
 
 const btnExport = document.getElementById('btnExport');
 const btnImport = document.getElementById('btnImport');
 const importInput = document.getElementById('importInput');
-const projectNameEl = document.getElementById('projectName');
 
+const btnThemes = document.getElementById('btnThemes');
+const themesModalBg = document.getElementById('themesModalBg');
+const btnThemesClose = document.getElementById('btnThemesClose');
+const editorThemeSel = document.getElementById('editorTheme');
+const uiThemeSel = document.getElementById('uiTheme');
+
+const btnAddCode = document.getElementById('btnAddCode');
+const btnAddNote = document.getElementById('btnAddNote');
+const btnMeta = document.getElementById('btnMeta');
+const btnAddMedia = document.getElementById('btnAddMedia');
+const mediaInput = document.getElementById('mediaInput');
+const dropZone = document.getElementById('dropZone');
+
+const sectionsList = document.getElementById('sectionsList');
+const tabsEl = document.getElementById('tabs');
 const btnSaveSection = document.getElementById('btnSaveSection');
-const btnClearEditor = document.getElementById('btnClearEditor');
-const previewFrame = document.getElementById('previewFrame');
-const liveToggle = document.getElementById('liveToggle');
-const btnReloadPreview = document.getElementById('btnReloadPreview');
+const btnCloseTab = document.getElementById('btnCloseTab');
+const btnClear = document.getElementById('btnClear');
 
-const exportModal = document.getElementById('exportModal');
+const globalSearch = document.getElementById('globalSearch');
+const btnSearch = document.getElementById('btnSearch');
+const searchResults = document.getElementById('searchResults');
+
+const previewFrame = document.getElementById('previewFrame');
+const btnTogglePreview = document.getElementById('btnTogglePreview');
+const btnReloadPreview = document.getElementById('btnReloadPreview');
+const previewSelect = document.getElementById('previewSelect');
+const previewState = document.getElementById('previewState');
+
+const mediaCounts = document.getElementById('mediaCounts');
+const mediaList = document.getElementById('mediaList');
+const mediaFilter = document.getElementById('mediaFilter');
+const mediaTagFilter = document.getElementById('mediaTagFilter');
+const btnCleanupUnused = document.getElementById('btnCleanupUnused');
+
+const exportModalBg = document.getElementById('exportModalBg');
+const btnExportClose = document.getElementById('btnExportClose');
+const btnExportDownload = document.getElementById('btnExportDownload');
 const exportFilename = document.getElementById('exportFilename');
 const exportNotes = document.getElementById('exportNotes');
-const exportMetaPreview = document.getElementById('exportMetaPreview');
-const exportMediaPreview = document.getElementById('exportMediaPreview');
-const exportCancel = document.getElementById('exportCancel');
-const exportConfirm = document.getElementById('exportConfirm');
+const exportPreview = document.getElementById('exportPreview');
+const exportSizeLabel = document.getElementById('exportSizeLabel');
+const exportRepairHint = document.getElementById('exportRepairHint');
+const storageHealth = document.getElementById('storageHealth');
+const embedWarning = document.getElementById('embedWarning');
+const storageBar = document.getElementById('storageBar');
+const storageDetails = document.getElementById('storageDetails');
 
-const themesModal = document.getElementById('themesModal');
-const btnThemes = document.getElementById('btnThemes');
-const editorThemeSelect = document.getElementById('editorThemeSelect');
-const websiteThemeSelect = document.getElementById('websiteThemeSelect');
-const themesClose = document.getElementById('themesClose');
+const importModalBg = document.getElementById('importModalBg');
+const btnImportCancel = document.getElementById('btnImportCancel');
+const btnImportProceed = document.getElementById('btnImportProceed');
+const importRepairMode = document.getElementById('importRepairMode');
 
-const metaModal = document.getElementById('metaModal');
-const metaJsonEl = document.getElementById('metaJson');
-const metaSave = document.getElementById('metaSave');
-const metaClose = document.getElementById('metaClose');
+const metaModalBg = document.getElementById('metaModalBg');
+const btnMetaClose = document.getElementById('btnMetaClose');
+const btnMetaSave = document.getElementById('btnMetaSave');
+const metaTitle = document.getElementById('metaTitle');
+const metaAuthor = document.getElementById('metaAuthor');
+const metaVersion = document.getElementById('metaVersion');
+const metaTags = document.getElementById('metaTags');
+const metaUpdated = document.getElementById('metaUpdated');
+const metaAdvancedToggle = document.getElementById('metaAdvancedToggle');
+const metaJson = document.getElementById('metaJson');
 
+const mediaModalBg = document.getElementById('mediaModalBg');
+const btnMediaClose = document.getElementById('btnMediaClose');
+const btnMediaPick = document.getElementById('btnMediaPick');
+const imgMaxDim = document.getElementById('imgMaxDim');
+const imgQuality = document.getElementById('imgQuality');
+const imgFormat = document.getElementById('imgFormat');
+const mediaProgressBar = document.getElementById('mediaProgressBar');
+const mediaProgressText = document.getElementById('mediaProgressText');
+
+const saveStatePill = document.getElementById('saveStatePill');
+const sizePill = document.getElementById('sizePill');
+
+// Toast
 const toastEl = document.getElementById('toast');
-const toastTitle = document.getElementById('toastTitle');
-const toastMsg = document.getElementById('toastMsg');
+const toastT = document.getElementById('toastT');
+const toastM = document.getElementById('toastM');
 
-const saveStatus = document.getElementById('saveStatus');
-
-const attachCounts = document.getElementById('attachCounts');
-const attachList = document.getElementById('attachList');
-
-// State (persisted in localStorage)
-let sections = []; // {type:'code'|'note', id:'C1'|'N1', title:'', content:''}
-let selectedSectionId = null;
-let projectMeta = {}; // JSON object
-let media = []; // {id,name,kind:'image'|'video',mime,bytes,createdAt,dataUrl}
-
-/* ---------- localStorage keys ---------- */
-function storageKey(){
-  const raw = (projectNameEl.value || 'untitled').trim() || 'untitled';
-  const safe = raw.replace(/[^\w\-]+/g,'_').slice(0,80) || 'untitled';
-  return 'ALLF_STUDIO__' + safe;
+// =====================
+// Utils
+// =====================
+const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
+function showToast(t,m,ms=2400){
+  toastT.textContent=t; toastM.textContent=m;
+  toastEl.style.display='block'; toastEl.style.opacity='1';
+  clearTimeout(showToast._t);
+  showToast._t=setTimeout(()=>{toastEl.style.opacity='0'; setTimeout(()=>toastEl.style.display='none',260)},ms);
 }
-function saveToBrowser(){
-  try{
-    const payload = {
-      v: 1,
-      projectName: projectNameEl.value || 'untitled',
-      updatedAt: new Date().toISOString(),
-      sections,
-      selectedSectionId,
-      meta: projectMeta || {},
-      media: media || []
-    };
-    localStorage.setItem(storageKey(), JSON.stringify(payload));
-    setStatus('Saved');
-  }catch(e){
-    console.error(e);
-    setStatus('Save failed');
-  }
-}
-function loadFromBrowser(){
-  try{
-    const raw = localStorage.getItem(storageKey());
-    if(!raw) return false;
-    const payload = JSON.parse(raw);
-    if(!payload || typeof payload !== 'object') return false;
-    sections = Array.isArray(payload.sections) ? payload.sections : [];
-    selectedSectionId = payload.selectedSectionId || null;
-    projectMeta = (payload.meta && typeof payload.meta === 'object') ? payload.meta : {};
-    media = Array.isArray(payload.media) ? payload.media : [];
-    return true;
-  }catch(e){
-    console.error(e);
-    return false;
-  }
-}
-function setStatus(t){
-  saveStatus.textContent = t;
-}
-
-/* ---------- Ace ---------- */
-const centralEditor = ace.edit("centralEditor", {
-  mode: 'ace/mode/text',
-  theme: 'ace/theme/monokai',
-  fontSize: 14,
-  wrap: true,
-  enableBasicAutocompletion: true,
-  enableLiveAutocompletion: true
-});
-centralEditor.renderer.setPadding(8);
-
-/* ---------- toast ---------- */
-let _toastTimer=null;
-function showToast(title, msg, ms=2400){
-  toastTitle.textContent = title;
-  toastMsg.textContent = msg;
-  toastEl.style.display = 'block';
-  toastEl.style.opacity = '1';
-  if(_toastTimer) clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(()=>{ toastEl.style.opacity='0'; setTimeout(()=>toastEl.style.display='none',300); }, ms);
-}
-
-/* ---------- ids ---------- */
-function nextCodeId(){
-  const used = new Set();
-  sections.forEach(s=>{
-    if(s.type==='code'){
-      const m = (s.id||'').match(/^C(\d+)$/i);
-      if(m) used.add(parseInt(m[1],10));
-    }
-  });
-  let i=1; while(used.has(i)) i++;
-  return 'C'+i;
-}
-function nextNoteId(){
-  const used = new Set();
-  sections.forEach(s=>{
-    if(s.type==='note'){
-      const m = (s.id||'').match(/^N(\d+)$/i);
-      if(m) used.add(parseInt(m[1],10));
-    }
-  });
-  let i=1; while(used.has(i)) i++;
-  return 'N'+i;
-}
-
-/* ---------- render sections ---------- */
-function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function renderSectionList(){
-  sectionListEl.innerHTML = '';
-  if(sections.length===0){
-    const d=document.createElement('div');
-    d.style.color='var(--muted)'; d.style.padding='8px';
-    d.textContent='No sections — add a code or note';
-    sectionListEl.appendChild(d);
-    return;
-  }
-  sections.forEach(s=>{
-    const item=document.createElement('div');
-    item.className='section-item';
-    const left=document.createElement('div');
-    left.className='left';
-    const titleText = s.title ? s.title : (s.type==='code' ? '(no title)' : '(note)');
-    left.innerHTML = `<div><strong>${s.id}</strong> <span style="color:var(--muted);font-size:12px">${s.type.toUpperCase()}</span></div>
-                      <div style="font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(titleText)}</div>`;
-    const actions=document.createElement('div');
-    actions.className='section-actions';
-    const loadBtn=document.createElement('button');
-    loadBtn.className='btn small'; loadBtn.textContent='Load';
-    loadBtn.addEventListener('click',()=>loadSectionIntoEditor(s.id));
-    const delBtn=document.createElement('button');
-    delBtn.className='btn small danger'; delBtn.textContent='Delete';
-    delBtn.addEventListener('click',()=>{
-      if(!confirm('Delete '+s.id+'?')) return;
-      deleteSectionById(s.id);
-    });
-    actions.appendChild(loadBtn); actions.appendChild(delBtn);
-    item.appendChild(left); item.appendChild(actions);
-    sectionListEl.appendChild(item);
-  });
-}
-
-/* ---------- section ops ---------- */
-function createCodeSection(title='', content=''){
-  const id=nextCodeId();
-  sections.push({type:'code', id, title:title||'', content:content||''});
-  renderSectionList();
-  saveToBrowser();
-  showToast('Created', id+' added.');
-  return id;
-}
-function createNoteSection(title='', content=''){
-  const id=nextNoteId();
-  sections.push({type:'note', id, title:title||'', content:content||''});
-  renderSectionList();
-  saveToBrowser();
-  showToast('Created', id+' (note) added.');
-  return id;
-}
-function findSectionIndexById(id){ return sections.findIndex(s=>s.id===id); }
-function deleteSectionById(id){
-  const idx=findSectionIndexById(id);
-  if(idx===-1) return;
-  sections.splice(idx,1);
-  if(selectedSectionId===id){
-    selectedSectionId=null;
-    centralEditor.setValue('', -1);
-    centralEditor.session.setMode('ace/mode/text');
-  }
-  renderSectionList();
-  saveToBrowser();
-  showToast('Deleted', id+' removed.');
-}
-function modeFromTitle(title){
-  if(!title) return detectModeFromContent(centralEditor.getValue());
-  const t=title.toLowerCase();
-  if(t.includes('html')) return 'ace/mode/html';
-  if(t.includes('css')) return 'ace/mode/css';
-  if(t.includes('js')||t.includes('javascript')) return 'ace/mode/javascript';
-  if(t.includes('json')) return 'ace/mode/json';
-  if(t.includes('py')) return 'ace/mode/python';
-  if(t.includes('xml')||t.includes('svg')) return 'ace/mode/xml';
-  if(t.includes('md')) return 'ace/mode/markdown';
-  return detectModeFromContent(centralEditor.getValue());
-}
-function detectModeFromContent(text){
-  const v=(text||'').trim().slice(0,200).toLowerCase();
-  if(v.startsWith('<!doctype')||v.startsWith('<html')||v.includes('<html')) return 'ace/mode/html';
-  if(v.includes('function')&&v.includes('{')) return 'ace/mode/javascript';
-  if(v.startsWith('{')&&v.includes('"')) return 'ace/mode/json';
-  if(v.startsWith('#')||v.includes('def ')) return 'ace/mode/python';
-  return 'ace/mode/text';
-}
-function loadSectionIntoEditor(id){
-  const idx=findSectionIndexById(id);
-  if(idx===-1) return;
-  const s=sections[idx];
-  selectedSectionId=s.id;
-  centralEditor.setValue(s.content||'', -1);
-  centralEditor.session.setMode(s.type==='code' ? modeFromTitle(s.title) : 'ace/mode/text');
-  saveToBrowser();
-  showToast('Loaded', s.id+' loaded.');
-}
-function saveCentralToSection(){
-  const text=centralEditor.getValue();
-  if(selectedSectionId){
-    const idx=findSectionIndexById(selectedSectionId);
-    if(idx===-1){ showToast('Error','Selected section not found.'); return; }
-    sections[idx].content=text;
-    if(confirm('Change title for '+selectedSectionId+'? (Cancel keeps)')){
-      const newTitle=prompt('Enter new title (leave blank for none):', sections[idx].title||'');
-      if(newTitle!==null) sections[idx].title=newTitle;
-    }
-    renderSectionList();
-    saveToBrowser();
-    showToast('Saved','Section '+selectedSectionId+' updated.');
-  }else{
-    const titlePrompt=prompt('No section selected. Enter title for new code section (optional):')||'';
-    const newId=createCodeSection(titlePrompt, text);
-    selectedSectionId=newId;
-    saveToBrowser();
-    showToast('Saved','New section '+newId+' created.');
-  }
-}
-function clearCentralEditor(){
-  if(!confirm('Clear central editor content?')) return;
-  centralEditor.setValue('', -1);
-  centralEditor.session.setMode('ace/mode/text');
-  selectedSectionId=null;
-  saveToBrowser();
-  showToast('Cleared','Editor cleared.');
-}
-
-/* ---------- preview ---------- */
-function isLivePreviewActive(){ return liveToggle.classList.contains('active'); }
-liveToggle.addEventListener('click',()=>{
-  liveToggle.classList.toggle('active');
-  liveToggle.style.background = liveToggle.classList.contains('active')
-    ? 'linear-gradient(90deg,var(--accent),var(--accent-2))' : '#26303a';
-  updatePreview();
-});
-btnReloadPreview.addEventListener('click', updatePreview);
-
-function firstHtmlSection(){
-  for(const s of sections){
-    if(s.type!=='code') continue;
-    const t=(s.title||'').toLowerCase();
-    if(t.includes('html')||t.includes('htm')) return s;
-    const c=(s.content||'').trim().toLowerCase();
-    if(c.startsWith('<!doctype')||c.startsWith('<html')) return s;
-  }
-  return null;
-}
-function updatePreview(){
-  if(!isLivePreviewActive()){
-    previewFrame.srcdoc='<!doctype html><html><body style="font-family:system-ui;color:#fff;background:#111;padding:20px"><h3 style="color:#72a4f2">Preview paused</h3><p style="opacity:.8">Toggle Live to enable.</p></body></html>';
-    return;
-  }
-  const s=firstHtmlSection();
-  if(!s){
-    previewFrame.srcdoc='<!doctype html><html><body style="font-family:system-ui;color:#fff;background:#111;padding:20px"><h3 style="color:#72a4f2">No HTML section</h3><p style="opacity:.8">Add a code section with HTML.</p></body></html>';
-    return;
-  }
-  const html=s.content||'';
-  const blob=new Blob([html],{type:'text/html'});
-  const url=URL.createObjectURL(blob);
-  previewFrame.src=url;
-  previewFrame.onload=()=>{ try{URL.revokeObjectURL(url);}catch(e){} };
-}
-
-/* ---------- themes ---------- */
-function applyWebsiteTheme(key){
-  const root=document.documentElement;
-  switch(key){
-    case 'light':
-      root.style.setProperty('--bg','#f6f8fb');
-      root.style.setProperty('--panel','#ffffff');
-      root.style.setProperty('--panel-2','#f0f4f8');
-      root.style.setProperty('--text','#071427');
-      root.style.setProperty('--muted','#5f6f90');
-      root.style.setProperty('--accent','#2b6ef5');
-      root.style.setProperty('--accent-2','#4a6cd8');
-      break;
-    case 'midnight':
-      root.style.setProperty('--bg','#061028');
-      root.style.setProperty('--panel','#071427');
-      root.style.setProperty('--panel-2','#0b1b2b');
-      root.style.setProperty('--text','#e6f0ff');
-      root.style.setProperty('--muted','#8aa6d8');
-      root.style.setProperty('--accent','#4fb0ff');
-      root.style.setProperty('--accent-2','#2b58f5');
-      break;
-    case 'ocean':
-      root.style.setProperty('--bg','#001d2e');
-      root.style.setProperty('--panel','#032635');
-      root.style.setProperty('--panel-2','#08323f');
-      root.style.setProperty('--text','#e6fff6');
-      root.style.setProperty('--muted','#7fd6d1');
-      root.style.setProperty('--accent','#47d6c0');
-      root.style.setProperty('--accent-2','#2fb6a8');
-      break;
-    case 'crimson':
-      root.style.setProperty('--bg','#1a0710');
-      root.style.setProperty('--panel','#2a0a12');
-      root.style.setProperty('--panel-2','#331219');
-      root.style.setProperty('--text','#ffeef2');
-      root.style.setProperty('--muted','#f0a6b8');
-      root.style.setProperty('--accent','#ff3b6b');
-      root.style.setProperty('--accent-2','#d63b6b');
-      break;
-    default:
-      root.style.setProperty('--bg','#0b0f1a');
-      root.style.setProperty('--panel','#0f1720');
-      root.style.setProperty('--panel-2','#101828');
-      root.style.setProperty('--text','#e4ebff');
-      root.style.setProperty('--muted','#8ca0c8');
-      root.style.setProperty('--accent','#72a4f2');
-      root.style.setProperty('--accent-2','#4a6cd8');
-      break;
-  }
-}
-function applyEditorTheme(themeName){ try{centralEditor.setTheme(themeName);}catch(e){} }
-
-btnThemes.addEventListener('click',()=>{ themesModal.style.display='flex'; });
-themesClose.addEventListener('click',()=>{ themesModal.style.display='none'; });
-editorThemeSelect.addEventListener('change',()=>applyEditorTheme(editorThemeSelect.value));
-websiteThemeSelect.addEventListener('change',()=>applyWebsiteTheme(websiteThemeSelect.value));
-
-/* ---------- metadata modal ---------- */
-function safeStringify(obj, spaces){ try{return JSON.stringify(obj??{}, null, spaces);}catch(e){return '{}';} }
-function safeParseJson(txt){
-  try{ const v=JSON.parse(txt); return (v && typeof v==='object') ? v : null; }catch(e){ return null; }
-}
-function openMetaModal(){
-  metaJsonEl.value = safeStringify(projectMeta, 2);
-  metaModal.style.display='flex';
-  metaJsonEl.focus();
-}
-function closeMetaModal(){ metaModal.style.display='none'; }
-
-addMetaBtn.addEventListener('click', openMetaModal);
-metaClose.addEventListener('click', closeMetaModal);
-metaSave.addEventListener('click', ()=>{
-  const parsed = safeParseJson(metaJsonEl.value||'');
-  if(!parsed){ showToast('Invalid JSON','Fix metadata JSON and try again.'); return; }
-  projectMeta = parsed;
-  closeMetaModal();
-  saveToBrowser();
-  showToast('Saved','Metadata updated.');
-});
-
-/* ---------- media handling (stored in browser as data URLs) ---------- */
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function formatBytes(n){
   n=Number(n)||0;
   if(n<1024) return n+' B';
@@ -708,128 +661,772 @@ function formatBytes(n){
   const mb=kb/1024; if(mb<1024) return mb.toFixed(1)+' MB';
   const gb=mb/1024; return gb.toFixed(2)+' GB';
 }
-function updateAttachCounts(){
-  const imgs = media.filter(m=>m.kind==='image').length;
-  const vids = media.filter(m=>m.kind==='video').length;
-  attachCounts.textContent = `${imgs} images • ${vids} videos`;
-}
-function renderAttachments(){
-  updateAttachCounts();
-  attachList.innerHTML='';
-  if(media.length===0){
-    const d=document.createElement('div');
-    d.style.color='var(--muted)'; d.style.padding='10px';
-    d.textContent='No media added yet.';
-    attachList.appendChild(d);
-    return;
-  }
-  const sorted=[...media].sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
-  sorted.forEach(item=>{
-    const card=document.createElement('div');
-    card.className='attach-card';
+function nowIso(){return new Date().toISOString()}
 
-    const row1=document.createElement('div');
-    row1.className='row1';
-    row1.innerHTML = `
-      <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
-        <div class="name" title="${escapeHtml(item.name||'')}">${escapeHtml(item.name||'(unnamed)')}</div>
-        <div class="meta">${escapeHtml(item.kind.toUpperCase())} • ${formatBytes(item.bytes||0)} • ${escapeHtml(item.mime||'')}</div>
-      </div>
-      <div class="pill">${escapeHtml((item.createdAt||'').replace('T',' ').replace('Z',''))}</div>
-    `;
+// =====================
+// IndexedDB for media blobs
+// =====================
+const DB_NAME = 'ALLF_STUDIO_DB_V2';
+const DB_VERSION = 1;
+const STORE_MEDIA = 'media';
 
-    const preview=document.createElement('div');
-    preview.style.marginTop='10px';
-    if(item.kind==='image'){
-      preview.innerHTML = `<img src="${item.dataUrl}" alt="" style="max-width:100%;border-radius:10px;border:1px solid rgba(255,255,255,0.06)"/>`;
-    }else{
-      preview.innerHTML = `<video src="${item.dataUrl}" controls style="width:100%;border-radius:10px;border:1px solid rgba(255,255,255,0.06)"></video>`;
-    }
-
-    const actions=document.createElement('div');
-    actions.className='actions';
-
-    const copyBtn=document.createElement('button');
-    copyBtn.className='btn small secondary'; copyBtn.textContent='Copy DataURL';
-    copyBtn.addEventListener('click', async ()=>{
-      try{
-        await navigator.clipboard.writeText(item.dataUrl);
-        showToast('Copied','Data URL copied.');
-      }catch(e){
-        showToast('Copy Failed','Clipboard blocked.');
+function openDb(){
+  return new Promise((resolve,reject)=>{
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = ()=>{
+      const db = req.result;
+      if(!db.objectStoreNames.contains(STORE_MEDIA)){
+        const s = db.createObjectStore(STORE_MEDIA, { keyPath:'id' });
+        s.createIndex('projectId','projectId',{unique:false});
+        s.createIndex('kind','kind',{unique:false});
       }
-    });
-
-    const delBtn=document.createElement('button');
-    delBtn.className='btn small danger'; delBtn.textContent='Remove';
-    delBtn.addEventListener('click', ()=>{
-      if(!confirm('Remove this media from project?')) return;
-      media = media.filter(m=>m.id!==item.id);
-      renderAttachments();
-      saveToBrowser();
-      showToast('Removed','Media removed.');
-    });
-
-    actions.appendChild(copyBtn);
-    actions.appendChild(delBtn);
-
-    card.appendChild(row1);
-    card.appendChild(preview);
-    card.appendChild(actions);
-    attachList.appendChild(card);
+    };
+    req.onsuccess = ()=>resolve(req.result);
+    req.onerror = ()=>reject(req.error);
   });
 }
-
-function newMediaId(){
-  return 'M' + Math.random().toString(16).slice(2) + Date.now().toString(16);
+async function idbPut(mediaObj){
+  const db = await openDb();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction(STORE_MEDIA,'readwrite');
+    tx.objectStore(STORE_MEDIA).put(mediaObj);
+    tx.oncomplete=()=>resolve(true);
+    tx.onerror=()=>reject(tx.error);
+  });
+}
+async function idbGet(id){
+  const db = await openDb();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(STORE_MEDIA,'readonly');
+    const req=tx.objectStore(STORE_MEDIA).get(id);
+    req.onsuccess=()=>resolve(req.result||null);
+    req.onerror=()=>reject(req.error);
+  });
+}
+async function idbDelete(id){
+  const db = await openDb();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(STORE_MEDIA,'readwrite');
+    tx.objectStore(STORE_MEDIA).delete(id);
+    tx.oncomplete=()=>resolve(true);
+    tx.onerror=()=>reject(tx.error);
+  });
+}
+async function idbListByProject(projectId){
+  const db = await openDb();
+  return new Promise((resolve,reject)=>{
+    const out=[];
+    const tx=db.transaction(STORE_MEDIA,'readonly');
+    const idx=tx.objectStore(STORE_MEDIA).index('projectId');
+    const req=idx.openCursor(IDBKeyRange.only(projectId));
+    req.onsuccess=()=>{
+      const c=req.result;
+      if(!c){ resolve(out); return; }
+      out.push(c.value);
+      c.continue();
+    };
+    req.onerror=()=>reject(req.error);
+  });
+}
+async function idbDeleteByProject(projectId){
+  const items = await idbListByProject(projectId);
+  for(const it of items) await idbDelete(it.id);
 }
 
-async function fileToDataUrl(file){
+// =====================
+// Crypto helpers (checksums / hashes)
+// =====================
+async function sha256Hex(text){
+  const enc = new TextEncoder().encode(text);
+  const buf = await crypto.subtle.digest('SHA-256', enc);
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function sha256BlobHex(blob){
+  const ab = await blob.arrayBuffer();
+  const buf = await crypto.subtle.digest('SHA-256', ab);
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// =====================
+// App State
+// =====================
+let index = loadIndex();
+let currentProjectId = index.lastProjectId || null;
+
+let project = null; // loaded current project object
+/*
+project structure in localStorage:
+{
+  id, name,
+  createdAt, updatedAt,
+  meta: {...},
+  sections: [{type:'code'|'note', id:'C1'|'N1', title:'', content:''}],
+  tabs: ['C1', ...],
+  open: 'C1',
+  preview: { enabled:false, sectionId:null }
+  mediaManifest: [{id, name, kind, mime, bytes, createdAt, tags:[], hash}]
+}
+Media blobs are in IndexedDB keyed by media id with {id, projectId, blob, ...}
+*/
+
+function loadIndex(){
+  try{
+    const raw = localStorage.getItem(LS_INDEX_KEY);
+    if(!raw) return { v:2, projects:[], lastProjectId:null, settings:{editorTheme:'ace/theme/monokai', uiTheme:'dark'} };
+    const obj = JSON.parse(raw);
+    if(!obj || typeof obj!=='object') throw new Error('bad index');
+    obj.v = 2;
+    obj.projects = Array.isArray(obj.projects)?obj.projects:[];
+    obj.settings = obj.settings || {editorTheme:'ace/theme/monokai', uiTheme:'dark'};
+    return obj;
+  }catch(e){
+    return { v:2, projects:[], lastProjectId:null, settings:{editorTheme:'ace/theme/monokai', uiTheme:'dark'} };
+  }
+}
+function saveIndex(){
+  localStorage.setItem(LS_INDEX_KEY, JSON.stringify(index));
+}
+function newId(prefix='p'){
+  return prefix + Math.random().toString(16).slice(2) + Date.now().toString(16);
+}
+function projectKey(pid){ return 'ALLF_STUDIO__PROJECT__V2__' + pid; }
+
+function saveProject(){
+  if(!project) return;
+  project.updatedAt = nowIso();
+  localStorage.setItem(projectKey(project.id), JSON.stringify(project));
+  // update index entry name
+  const idx = index.projects.findIndex(p=>p.id===project.id);
+  if(idx>=0){
+    index.projects[idx].name = project.name;
+    index.projects[idx].updatedAt = project.updatedAt;
+  }
+  index.lastProjectId = project.id;
+  saveIndex();
+  setSaved(true);
+  updateSizeIndicators().catch(()=>{});
+}
+function loadProject(pid){
+  const raw = localStorage.getItem(projectKey(pid));
+  if(!raw) return null;
+  const obj = JSON.parse(raw);
+  // minimal normalize
+  obj.sections = Array.isArray(obj.sections)?obj.sections:[];
+  obj.mediaManifest = Array.isArray(obj.mediaManifest)?obj.mediaManifest:[];
+  obj.tabs = Array.isArray(obj.tabs)?obj.tabs:[];
+  obj.preview = obj.preview || { enabled:false, sectionId:null };
+  obj.meta = (obj.meta && typeof obj.meta==='object')?obj.meta:{};
+  return obj;
+}
+
+function createProject(name='untitled'){
+  const id = newId('p_');
+  const now = nowIso();
+  const p = {
+    id,
+    name,
+    createdAt: now,
+    updatedAt: now,
+    meta: { title:name, author:'', version:'1.0.0', tags:[], createdAt: now, updatedAt: now },
+    sections: [{type:'code', id:'C1', title:'', content:''}],
+    tabs: ['C1'],
+    open: 'C1',
+    preview: { enabled:false, sectionId:null },
+    mediaManifest: []
+  };
+  index.projects.push({id, name, updatedAt: now});
+  index.lastProjectId = id;
+  saveIndex();
+  localStorage.setItem(projectKey(id), JSON.stringify(p));
+  return id;
+}
+
+// =====================
+// Editor (Ace) + Tabs + Dirty tracking
+// =====================
+const editor = ace.edit("editor", {
+  mode:'ace/mode/text',
+  theme:index.settings.editorTheme || 'ace/theme/monokai',
+  fontSize:14,
+  wrap:true,
+  enableBasicAutocompletion:true,
+  enableLiveAutocompletion:true
+});
+editor.renderer.setPadding(10);
+
+let dirtyMap = new Map(); // sectionId -> boolean
+let autosaveTimer = null;
+let saveState = { saved:true, lastSaveAt:null };
+
+function setSaved(saved){
+  saveState.saved = saved;
+  saveStatePill.textContent = saved ? 'Saved' : 'Unsaved';
+  saveStatePill.style.background = saved ? 'rgba(77,220,155,0.15)' : 'rgba(255,211,106,0.16)';
+  saveStatePill.style.border = saved ? '1px solid rgba(77,220,155,0.22)' : '1px solid rgba(255,211,106,0.22)';
+  saveStatePill.style.color = saved ? 'var(--ok)' : '#ffd36a';
+}
+
+function getSection(id){
+  return project.sections.find(s=>s.id===id) || null;
+}
+function nextCodeId(){
+  const used=new Set(project.sections.filter(s=>s.type==='code').map(s=>parseInt((s.id||'C0').slice(1),10)).filter(n=>Number.isFinite(n)));
+  let i=1; while(used.has(i)) i++;
+  return 'C'+i;
+}
+function nextNoteId(){
+  const used=new Set(project.sections.filter(s=>s.type==='note').map(s=>parseInt((s.id||'N0').slice(1),10)).filter(n=>Number.isFinite(n)));
+  let i=1; while(used.has(i)) i++;
+  return 'N'+i;
+}
+
+function detectModeFromTitleOrContent(sec){
+  const t=(sec.title||'').toLowerCase();
+  if(t.includes('html')) return 'ace/mode/html';
+  if(t.includes('css')) return 'ace/mode/css';
+  if(t.includes('js')||t.includes('javascript')) return 'ace/mode/javascript';
+  if(t.includes('json')) return 'ace/mode/json';
+  if(t.includes('py')) return 'ace/mode/python';
+  if(t.includes('xml')||t.includes('svg')) return 'ace/mode/xml';
+  if(t.includes('md')) return 'ace/mode/markdown';
+
+  const v=(sec.content||'').trim().slice(0,200).toLowerCase();
+  if(v.startsWith('<!doctype')||v.startsWith('<html')||v.includes('<html')) return 'ace/mode/html';
+  if(v.includes('function')&&v.includes('{')) return 'ace/mode/javascript';
+  if(v.startsWith('{')&&v.includes('"')) return 'ace/mode/json';
+  if(v.startsWith('#')||v.includes('def ')) return 'ace/mode/python';
+  return 'ace/mode/text';
+}
+
+function openTab(sectionId){
+  if(!project.tabs.includes(sectionId)) project.tabs.push(sectionId);
+  project.open = sectionId;
+  renderTabs();
+  loadIntoEditor(sectionId);
+  saveProject();
+}
+
+function closeTab(sectionId){
+  project.tabs = project.tabs.filter(t=>t!==sectionId);
+  if(project.open === sectionId){
+    project.open = project.tabs[0] || null;
+    if(project.open) loadIntoEditor(project.open);
+    else editor.setValue('', -1);
+  }
+  renderTabs();
+  saveProject();
+}
+
+function markDirty(sectionId, isDirty){
+  dirtyMap.set(sectionId, !!isDirty);
+  renderTabs();
+}
+
+function loadIntoEditor(sectionId){
+  const sec = getSection(sectionId);
+  if(!sec) return;
+  editor.setValue(sec.content || '', -1);
+  editor.session.setMode(detectModeFromTitleOrContent(sec));
+  markDirty(sectionId, false);
+  setSaved(true);
+}
+
+function saveOpenSection(){
+  const sid = project.open;
+  if(!sid) return;
+  const sec = getSection(sid);
+  if(!sec) return;
+  sec.content = editor.getValue();
+  // optional rename
+  if(confirm('Change title for '+sid+'? (Cancel keeps)')){
+    const nt = prompt('Enter title (blank allowed):', sec.title || '');
+    if(nt !== null) sec.title = nt;
+  }
+  markDirty(sid, false);
+  saveProject();
+  showToast('Saved', sid + ' updated');
+  refreshPreviewSelect();
+  refreshPreview();
+}
+
+function autosaveDebounced(){
+  clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(()=>{
+    const sid = project.open;
+    if(!sid) return;
+    const sec = getSection(sid);
+    if(!sec) return;
+    // autosave content only, not title prompts
+    sec.content = editor.getValue();
+    markDirty(sid, true); // still dirty until explicit save? (we treat autosave as saved content)
+    // For UX: autosave should clear dirty
+    markDirty(sid, false);
+    saveProject();
+  }, 600);
+}
+
+editor.session.on('change', ()=>{
+  if(!project || !project.open) return;
+  markDirty(project.open, true);
+  setSaved(false);
+  autosaveDebounced();
+});
+
+// =====================
+// Preview
+// =====================
+function refreshPreviewSelect(){
+  previewSelect.innerHTML = '';
+  const options = project.sections
+    .filter(s=>s.type==='code')
+    .map(s=>({id:s.id, label:`${s.id}${s.title?(' — '+s.title):''}`}));
+
+  for(const o of options){
+    const opt=document.createElement('option');
+    opt.value=o.id;
+    opt.textContent=o.label;
+    previewSelect.appendChild(opt);
+  }
+
+  const chosen = project.preview.sectionId && options.some(o=>o.id===project.preview.sectionId)
+    ? project.preview.sectionId
+    : (options[0]?.id || null);
+
+  project.preview.sectionId = chosen;
+  if(chosen) previewSelect.value = chosen;
+}
+
+function refreshPreview(){
+  if(!project.preview.enabled){
+    previewState.textContent = 'Paused';
+    previewFrame.srcdoc = '<!doctype html><html><body style="font-family:system-ui;background:#111;color:#fff;padding:20px"><h3 style="color:#72a4f2">Preview paused</h3><p style="opacity:.8">Toggle to enable.</p></body></html>';
+    return;
+  }
+  previewState.textContent = 'Live';
+  const sid = project.preview.sectionId;
+  const sec = sid ? getSection(sid) : null;
+  const html = sec ? (sec.content||'') : '';
+  // allow easy access to embedded media via helper:
+  // create a tiny script that exposes window.ALLF_MEDIA_IDS for convenience
+  const helper = `
+<script>
+window.ALLF_MEDIA_IDS = ${JSON.stringify(project.mediaManifest.map(m=>m.id))};
+<\/script>
+`;
+  previewFrame.srcdoc = (html || '') + helper;
+}
+
+btnTogglePreview.addEventListener('click', ()=>{
+  project.preview.enabled = !project.preview.enabled;
+  saveProject();
+  refreshPreview();
+});
+btnReloadPreview.addEventListener('click', refreshPreview);
+previewSelect.addEventListener('change', ()=>{
+  project.preview.sectionId = previewSelect.value;
+  saveProject();
+  refreshPreview();
+});
+
+// =====================
+// Global search
+// =====================
+function runSearch(){
+  const q = (globalSearch.value||'').trim().toLowerCase();
+  if(!q){ searchResults.style.display='none'; searchResults.innerHTML=''; return; }
+
+  const hits = [];
+  for(const s of project.sections){
+    const hay = ((s.title||'')+'\n'+(s.content||'')).toLowerCase();
+    const idx = hay.indexOf(q);
+    if(idx>=0){
+      const snippet = (s.content||'').slice(Math.max(0, idx-40), idx+80).replace(/\s+/g,' ').trim();
+      hits.push({id:s.id, type:s.type, title:s.title||'', snippet});
+    }
+  }
+  searchResults.innerHTML='';
+  searchResults.style.display='flex';
+  if(hits.length===0){
+    const d=document.createElement('div');
+    d.className='item';
+    d.innerHTML = `<div class="meta"><div class="title">No results</div><div class="sub">Try a different query.</div></div>`;
+    searchResults.appendChild(d);
+    return;
+  }
+  for(const h of hits.slice(0,50)){
+    const el=document.createElement('div');
+    el.className='item';
+    el.innerHTML = `
+      <div class="meta" style="min-width:0">
+        <div class="title">${escapeHtml(h.id)} <span class="pill" style="margin-left:8px">${escapeHtml(h.type.toUpperCase())}</span></div>
+        <div class="sub">${escapeHtml(h.title || '(no title)')}</div>
+        <div class="sub" style="opacity:.9">${escapeHtml(h.snippet)}</div>
+      </div>
+      <div class="actions">
+        <button class="btn small">Open</button>
+      </div>
+    `;
+    el.querySelector('button').addEventListener('click', ()=>{
+      openTab(h.id);
+      searchResults.style.display='none';
+    });
+    searchResults.appendChild(el);
+  }
+}
+btnSearch.addEventListener('click', runSearch);
+globalSearch.addEventListener('keydown', (e)=>{ if(e.key==='Enter') runSearch(); });
+
+// =====================
+// Sections list + Tabs render
+// =====================
+function renderSectionsList(){
+  sectionsList.innerHTML='';
+  for(const s of project.sections){
+    const el=document.createElement('div');
+    el.className='item';
+
+    const title = s.title ? s.title : (s.type==='code' ? '(no title)' : '(note)');
+    el.innerHTML = `
+      <div class="meta" style="min-width:0">
+        <div class="title">${escapeHtml(s.id)} <span class="pill" style="margin-left:8px">${escapeHtml(s.type.toUpperCase())}</span></div>
+        <div class="sub">${escapeHtml(title)}</div>
+      </div>
+      <div class="actions">
+        <button class="btn small">Open</button>
+        <button class="btn small secondary">Rename</button>
+        <button class="btn small danger">Delete</button>
+      </div>
+    `;
+    const [bOpen,bRen,bDel] = el.querySelectorAll('button');
+    bOpen.addEventListener('click', ()=>openTab(s.id));
+    bRen.addEventListener('click', ()=>{
+      const nt = prompt('Title:', s.title||'');
+      if(nt===null) return;
+      s.title = nt;
+      saveProject();
+      renderSectionsList();
+      renderTabs();
+      refreshPreviewSelect();
+    });
+    bDel.addEventListener('click', ()=>{
+      if(!confirm('Delete '+s.id+'?')) return;
+      // remove
+      project.sections = project.sections.filter(x=>x.id!==s.id);
+      // close tab if needed
+      if(project.tabs.includes(s.id)) closeTab(s.id);
+      // ensure at least one section
+      if(project.sections.length===0){
+        project.sections.push({type:'code', id:'C1', title:'', content:''});
+        project.tabs=['C1']; project.open='C1';
+        loadIntoEditor('C1');
+      }
+      saveProject();
+      renderSectionsList();
+      refreshPreviewSelect();
+      refreshPreview();
+    });
+    sectionsList.appendChild(el);
+  }
+}
+
+function renderTabs(){
+  tabsEl.innerHTML='';
+  for(const tid of project.tabs){
+    const sec = getSection(tid);
+    if(!sec) continue;
+    const tab=document.createElement('div');
+    tab.className='tab' + (project.open===tid?' active':'') + (dirtyMap.get(tid)?' dirty':'');
+    tab.textContent = tid;
+    tab.title = sec.title || '';
+    tab.addEventListener('click', ()=>{ project.open=tid; saveProject(); loadIntoEditor(tid); });
+    tabsEl.appendChild(tab);
+  }
+}
+
+// =====================
+// Metadata modal (form + advanced JSON)
+// =====================
+function loadMetaIntoModal(){
+  const m = project.meta || {};
+  metaTitle.value = m.title || project.name || '';
+  metaAuthor.value = m.author || '';
+  metaVersion.value = m.version || '1.0.0';
+  metaTags.value = Array.isArray(m.tags) ? m.tags.join(', ') : '';
+  metaUpdated.value = m.updatedAt || project.updatedAt || nowIso();
+
+  metaJson.value = JSON.stringify(m, null, 2);
+  metaJson.style.display = metaAdvancedToggle.checked ? 'block' : 'none';
+}
+function saveMetaFromModal(){
+  let m = project.meta || {};
+  m.updatedAt = nowIso();
+
+  if(metaAdvancedToggle.checked){
+    try{
+      const parsed = JSON.parse(metaJson.value || '{}');
+      if(!parsed || typeof parsed!=='object') throw new Error('bad json');
+      m = parsed;
+      if(!m.updatedAt) m.updatedAt = nowIso();
+    }catch(e){
+      showToast('Invalid JSON','Fix metadata JSON.');
+      return false;
+    }
+  }else{
+    m.title = metaTitle.value || project.name;
+    m.author = metaAuthor.value || '';
+    m.version = metaVersion.value || '1.0.0';
+    m.tags = (metaTags.value||'').split(',').map(s=>s.trim()).filter(Boolean);
+    m.updatedAt = nowIso();
+    if(!m.createdAt) m.createdAt = project.createdAt || nowIso();
+  }
+  project.meta = m;
+  project.updatedAt = nowIso();
+  saveProject();
+  showToast('Saved','Metadata updated');
+  return true;
+}
+btnMeta.addEventListener('click', ()=>{
+  metaModalBg.style.display='flex';
+  loadMetaIntoModal();
+});
+btnMetaClose.addEventListener('click', ()=>metaModalBg.style.display='none');
+metaAdvancedToggle.addEventListener('change', ()=>{
+  metaJson.style.display = metaAdvancedToggle.checked ? 'block' : 'none';
+  if(metaAdvancedToggle.checked) metaJson.value = JSON.stringify(project.meta||{}, null, 2);
+});
+btnMetaSave.addEventListener('click', ()=>{
+  if(saveMetaFromModal()) metaModalBg.style.display='none';
+});
+
+// =====================
+// Themes
+// =====================
+function applyUiTheme(key){
+  const root=document.documentElement;
+  switch(key){
+    case 'light':
+      root.style.setProperty('--bg','#f6f8fb');
+      root.style.setProperty('--panel','#ffffff');
+      root.style.setProperty('--panel2','#f0f4f8');
+      root.style.setProperty('--text','#071427');
+      root.style.setProperty('--muted','#5f6f90');
+      root.style.setProperty('--accent','#2b6ef5');
+      root.style.setProperty('--accent2','#4a6cd8');
+      break;
+    case 'midnight':
+      root.style.setProperty('--bg','#061028');
+      root.style.setProperty('--panel','#071427');
+      root.style.setProperty('--panel2','#0b1b2b');
+      root.style.setProperty('--text','#e6f0ff');
+      root.style.setProperty('--muted','#8aa6d8');
+      root.style.setProperty('--accent','#4fb0ff');
+      root.style.setProperty('--accent2','#2b58f5');
+      break;
+    case 'ocean':
+      root.style.setProperty('--bg','#001d2e');
+      root.style.setProperty('--panel','#032635');
+      root.style.setProperty('--panel2','#08323f');
+      root.style.setProperty('--text','#e6fff6');
+      root.style.setProperty('--muted','#7fd6d1');
+      root.style.setProperty('--accent','#47d6c0');
+      root.style.setProperty('--accent2','#2fb6a8');
+      break;
+    case 'crimson':
+      root.style.setProperty('--bg','#1a0710');
+      root.style.setProperty('--panel','#2a0a12');
+      root.style.setProperty('--panel2','#331219');
+      root.style.setProperty('--text','#ffeef2');
+      root.style.setProperty('--muted','#f0a6b8');
+      root.style.setProperty('--accent','#ff3b6b');
+      root.style.setProperty('--accent2','#d63b6b');
+      break;
+    default:
+      root.style.setProperty('--bg','#0b0f1a');
+      root.style.setProperty('--panel','#0f1720');
+      root.style.setProperty('--panel2','#101828');
+      root.style.setProperty('--text','#e4ebff');
+      root.style.setProperty('--muted','#8ca0c8');
+      root.style.setProperty('--accent','#72a4f2');
+      root.style.setProperty('--accent2','#4a6cd8');
+      break;
+  }
+}
+btnThemes.addEventListener('click', ()=>{
+  themesModalBg.style.display='flex';
+  editorThemeSel.value = index.settings.editorTheme || 'ace/theme/monokai';
+  uiThemeSel.value = index.settings.uiTheme || 'dark';
+});
+btnThemesClose.addEventListener('click', ()=>themesModalBg.style.display='none');
+editorThemeSel.addEventListener('change', ()=>{
+  index.settings.editorTheme = editorThemeSel.value;
+  saveIndex();
+  editor.setTheme(editorThemeSel.value);
+});
+uiThemeSel.addEventListener('change', ()=>{
+  index.settings.uiTheme = uiThemeSel.value;
+  saveIndex();
+  applyUiTheme(uiThemeSel.value);
+});
+
+// =====================
+// Media: add, compress images, store blobs in IndexedDB
+// =====================
+function setMediaProgress(pct, text){
+  mediaProgressBar.style.width = Math.max(0, Math.min(100, pct)) + '%';
+  mediaProgressText.textContent = text || '...';
+}
+function openMediaModal(){
+  mediaModalBg.style.display='flex';
+  setMediaProgress(0,'Idle');
+}
+btnAddMedia.addEventListener('click', openMediaModal);
+btnMediaClose.addEventListener('click', ()=>mediaModalBg.style.display='none');
+btnMediaPick.addEventListener('click', ()=>{ mediaInput.value=''; mediaInput.click(); });
+
+mediaInput.addEventListener('change', async (e)=>{
+  const files = Array.from(e.target.files || []);
+  if(files.length===0) return;
+  try{
+    await addMediaFiles(files);
+  }catch(err){
+    console.error(err);
+    showToast('Error','Failed to add media');
+  }
+});
+
+function normalizeTags(str){
+  return (str||'').split(',').map(s=>s.trim()).filter(Boolean);
+}
+
+async function compressImageBlob(file, maxDim, quality, mimeOut){
+  const imgUrl = URL.createObjectURL(file);
+  try{
+    const img = await new Promise((resolve,reject)=>{
+      const i = new Image();
+      i.onload=()=>resolve(i);
+      i.onerror=()=>reject(new Error('image load fail'));
+      i.src=imgUrl;
+    });
+    let w=img.naturalWidth, h=img.naturalHeight;
+    const scale = Math.min(1, maxDim / Math.max(w,h));
+    const nw = Math.max(1, Math.round(w*scale));
+    const nh = Math.max(1, Math.round(h*scale));
+
+    const canvas=document.createElement('canvas');
+    canvas.width=nw; canvas.height=nh;
+    const ctx=canvas.getContext('2d', {alpha:true});
+    ctx.drawImage(img, 0,0,nw,nh);
+
+    if(mimeOut==='image/png'){
+      const blob = await new Promise(r=>canvas.toBlob(r,'image/png'));
+      return blob;
+    }else{
+      const q = Math.max(0.3, Math.min(1, Number(quality)||0.85));
+      const blob = await new Promise(r=>canvas.toBlob(r, mimeOut, q));
+      return blob;
+    }
+  } finally {
+    try{ URL.revokeObjectURL(imgUrl);}catch(e){}
+  }
+}
+
+async function blobToDataUrl(blob){
   return new Promise((resolve,reject)=>{
     const r=new FileReader();
-    r.onerror=()=>reject(new Error('read failed'));
+    r.onerror=()=>reject(new Error('read fail'));
     r.onload=()=>resolve(String(r.result||''));
-    r.readAsDataURL(file);
+    r.readAsDataURL(blob);
   });
 }
-
-async function addFiles(fileList){
-  const files = Array.from(fileList||[]);
-  const supported = files.filter(f => (f.type||'').startsWith('image/') || (f.type||'').startsWith('video/'));
-  if(supported.length===0){
-    showToast('No media','Select images/videos only.');
-    return;
-  }
-  setStatus('Saving…');
-  for(const f of supported){
-    // WARNING: base64 makes ALLF huge; still does what user requested
-    const dataUrl = await fileToDataUrl(f);
-    media.push({
-      id: newMediaId(),
-      name: f.name || 'file',
-      kind: (f.type||'').startsWith('video/') ? 'video' : 'image',
-      mime: f.type || '',
-      bytes: f.size || 0,
-      createdAt: new Date().toISOString(),
-      dataUrl
-    });
-  }
-  renderAttachments();
-  saveToBrowser();
-  showToast('Added', supported.length + ' file(s) embedded.');
+async function dataUrlToBlob(dataUrl){
+  // fetch(dataUrl) works for data urls
+  const res = await fetch(dataUrl);
+  return await res.blob();
 }
 
-addMediaBtn.addEventListener('click', ()=>{
-  mediaInput.value='';
-  mediaInput.click();
-});
-mediaInput.addEventListener('change', async (e)=>{
-  const files = e.target.files;
-  if(!files || files.length===0) return;
-  try{ await addFiles(files); }catch(err){ console.error(err); showToast('Error','Failed to add files.'); }
+async function addMediaFiles(files){
+  mediaModalBg.style.display='flex';
+  const maxDim = Math.max(256, Number(imgMaxDim.value)||1920);
+  const quality = Math.max(0.3, Math.min(1, Number(imgQuality.value)||0.85));
+  const outMime = imgFormat.value || 'image/webp';
+
+  const supported = files.filter(f => (f.type||'').startsWith('image/') || (f.type||'').startsWith('video/'));
+  if(supported.length===0){
+    showToast('No media','Select images/videos only');
+    return;
+  }
+
+  setMediaProgress(0, 'Starting…');
+  let done=0;
+
+  for(const f of supported){
+    const isImg = (f.type||'').startsWith('image/');
+    const isVid = (f.type||'').startsWith('video/');
+    let blob = f;
+
+    if(isImg){
+      // compress unless PNG chosen and user wants no compression (still scales if maxDim smaller)
+      const mime = outMime;
+      blob = await compressImageBlob(f, maxDim, quality, mime);
+    } else if(isVid){
+      // no transcoding, keep as-is
+      blob = f;
+    }
+
+    const id = newId('m_');
+    const hash = await sha256BlobHex(blob);
+
+    // store in IndexedDB
+    await idbPut({
+      id,
+      projectId: project.id,
+      kind: isVid ? 'video' : 'image',
+      name: f.name || 'file',
+      mime: blob.type || f.type || '',
+      bytes: blob.size || f.size || 0,
+      createdAt: nowIso(),
+      tags: [],
+      hash,
+      blob
+    });
+
+    // update manifest in project
+    project.mediaManifest.push({
+      id,
+      name: f.name || 'file',
+      kind: isVid ? 'video' : 'image',
+      mime: blob.type || f.type || '',
+      bytes: blob.size || f.size || 0,
+      createdAt: nowIso(),
+      tags: [],
+      hash
+    });
+
+    done++;
+    setMediaProgress(Math.round(done/supported.length*100), `Added ${done}/${supported.length}`);
+    saveProject();
+    renderMedia();
+  }
+
+  setMediaProgress(100, 'Done');
+  showToast('Added', `${done} file(s) added`);
+  await sleep(400);
+  mediaModalBg.style.display='none';
+}
+
+// Paste images directly
+document.addEventListener('paste', async (e)=>{
+  if(!project) return;
+  const items = Array.from(e.clipboardData?.items || []);
+  const files = items.filter(i=>i.kind==='file').map(i=>i.getAsFile()).filter(Boolean);
+  if(files.length===0) return;
+  const hasImgOrVid = files.some(f => (f.type||'').startsWith('image/') || (f.type||'').startsWith('video/'));
+  if(!hasImgOrVid) return;
+  e.preventDefault();
+  await addMediaFiles(files);
 });
 
-/* Drag/drop */
+// Drag/drop
 ;['dragenter','dragover'].forEach(evt=>{
   dropZone.addEventListener(evt,(e)=>{
     e.preventDefault(); e.stopPropagation();
@@ -843,320 +1440,910 @@ mediaInput.addEventListener('change', async (e)=>{
   });
 });
 dropZone.addEventListener('drop', async (e)=>{
-  const dt = e.dataTransfer;
-  if(!dt || !dt.files) return;
-  try{ await addFiles(dt.files); }catch(err){ console.error(err); showToast('Error','Failed to add dropped files.'); }
+  const files = Array.from(e.dataTransfer?.files || []);
+  if(files.length===0) return;
+  await addMediaFiles(files);
 });
 
-/* ---------- ALLF export/import with embedded media ---------- */
-function generateRMBlock(){
-  return `RM// Read Me
-This ALLF file format is designed to hold multiple pieces of code, notes, metadata, and embedded media in a human-readable structure.
-Media is embedded as Base64 Data URLs inside the file.
-Please respect the mandatory branding block (B// ... B\\\\) — files missing the exact branding will be rejected by ALLF Studio.
+// Media rendering (lazy video preview, tag filter, insert snippet, rename, delete)
+function updateMediaCounts(){
+  const imgs = project.mediaManifest.filter(m=>m.kind==='image').length;
+  const vids = project.mediaManifest.filter(m=>m.kind==='video').length;
+  mediaCounts.textContent = `${imgs} images • ${vids} videos`;
+}
+function matchesTagFilter(m){
+  const f = (mediaTagFilter.value||'').trim().toLowerCase();
+  if(!f) return true;
+  const wanted = f.split(',').map(s=>s.trim()).filter(Boolean);
+  const mtags = (m.tags||[]).map(t=>String(t).toLowerCase());
+  return wanted.every(w=>mtags.includes(w));
+}
+function renderMedia(){
+  updateMediaCounts();
+  mediaList.innerHTML = '';
+
+  const kind = mediaFilter.value;
+  const items = project.mediaManifest
+    .filter(m => kind==='all' ? true : m.kind===kind)
+    .filter(matchesTagFilter)
+    .sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+
+  if(items.length===0){
+    const d=document.createElement('div');
+    d.className='item';
+    d.innerHTML = `<div class="meta"><div class="title">No media</div><div class="sub">Add images/videos or change filters.</div></div>`;
+    mediaList.appendChild(d);
+    return;
+  }
+
+  for(const m of items){
+    const el=document.createElement('div');
+    el.className='item';
+    el.innerHTML = `
+      <div class="meta" style="min-width:0;flex:1">
+        <div class="title">${escapeHtml(m.name)} <span class="pill" style="margin-left:8px">${escapeHtml(m.kind.toUpperCase())}</span></div>
+        <div class="sub">${escapeHtml(m.id)} • ${escapeHtml(m.mime||'')} • ${formatBytes(m.bytes||0)}</div>
+        <div class="sub">Tags: ${escapeHtml((m.tags||[]).join(', ') || '(none)')}</div>
+        <div class="mediaPreview" data-mid="${escapeHtml(m.id)}" style="margin-top:10px"></div>
+      </div>
+      <div class="actions">
+        <button class="btn small secondary" title="Insert snippet into editor">Insert</button>
+        <button class="btn small secondary" title="Rename file">Rename</button>
+        <button class="btn small secondary" title="Edit tags">Tags</button>
+        <button class="btn small secondary" title="Copy ID">Copy ID</button>
+        <button class="btn small danger" title="Remove media">Delete</button>
+      </div>
+    `;
+
+    const [bInsert,bRename,bTags,bCopy,bDelete] = el.querySelectorAll('button');
+    bInsert.addEventListener('click', ()=>{
+      const sec = project.open ? getSection(project.open) : null;
+      if(!sec){ showToast('No tab','Open a section first'); return; }
+      const isHtml = detectModeFromTitleOrContent(sec).includes('html');
+      const isMd = detectModeFromTitleOrContent(sec).includes('markdown');
+      // reference style: ALLF_MEDIA(id) placeholder, resolved by export or manually replaced
+      let snippet = '';
+      if(m.kind==='image'){
+        if(isMd) snippet = `![${m.name}](ALLF_MEDIA:${m.id})`;
+        else if(isHtml) snippet = `<img alt="${escapeHtml(m.name)}" src="ALLF_MEDIA:${m.id}" />`;
+        else snippet = `ALLF_MEDIA:${m.id}`;
+      }else{
+        if(isMd) snippet = `[${m.name}](ALLF_MEDIA:${m.id})`;
+        else if(isHtml) snippet = `<video controls src="ALLF_MEDIA:${m.id}"></video>`;
+        else snippet = `ALLF_MEDIA:${m.id}`;
+      }
+      editor.insert(snippet);
+      autosaveDebounced();
+      showToast('Inserted', 'Snippet added');
+    });
+
+    bRename.addEventListener('click', ()=>{
+      const nn = prompt('New name:', m.name || '');
+      if(nn===null) return;
+      m.name = nn;
+      const idx = project.mediaManifest.findIndex(x=>x.id===m.id);
+      if(idx>=0) project.mediaManifest[idx].name = nn;
+      saveProject();
+      renderMedia();
+    });
+
+    bTags.addEventListener('click', ()=>{
+      const nt = prompt('Tags (comma separated):', (m.tags||[]).join(', '));
+      if(nt===null) return;
+      m.tags = normalizeTags(nt);
+      const idx = project.mediaManifest.findIndex(x=>x.id===m.id);
+      if(idx>=0) project.mediaManifest[idx].tags = m.tags;
+      saveProject();
+      renderMedia();
+    });
+
+    bCopy.addEventListener('click', async ()=>{
+      try{ await navigator.clipboard.writeText(m.id); showToast('Copied','Media ID copied'); }
+      catch(e){ showToast('Copy blocked','Clipboard blocked'); }
+    });
+
+    bDelete.addEventListener('click', async ()=>{
+      if(!confirm('Delete media '+m.name+'?')) return;
+      await idbDelete(m.id);
+      project.mediaManifest = project.mediaManifest.filter(x=>x.id!==m.id);
+      saveProject();
+      renderMedia();
+      showToast('Deleted','Media removed');
+    });
+
+    // Lazy preview: image loads quickly; video preview only shows a play button until clicked
+    const previewBox = el.querySelector('.mediaPreview');
+    (async ()=>{
+      try{
+        const stored = await idbGet(m.id);
+        if(!stored) return;
+        if(m.kind==='image'){
+          const url = URL.createObjectURL(stored.blob);
+          previewBox.innerHTML = `<img src="${url}" alt="">`;
+          // revoke later
+          setTimeout(()=>{ try{URL.revokeObjectURL(url);}catch(e){} }, 10000);
+        }else{
+          previewBox.innerHTML = `
+            <div class="row" style="gap:10px">
+              <button class="btn small">Load video preview</button>
+              <span class="small">Lazy-loaded</span>
+            </div>
+          `;
+          previewBox.querySelector('button').addEventListener('click', ()=>{
+            const url = URL.createObjectURL(stored.blob);
+            previewBox.innerHTML = `<video controls src="${url}"></video>`;
+            setTimeout(()=>{ try{URL.revokeObjectURL(url);}catch(e){} }, 15000);
+          });
+        }
+      }catch(e){}
+    })();
+
+    mediaList.appendChild(el);
+  }
+}
+mediaFilter.addEventListener('change', renderMedia);
+mediaTagFilter.addEventListener('input', ()=>{ clearTimeout(renderMedia._t); renderMedia._t=setTimeout(renderMedia, 150); });
+
+// Cleanup unused (only if referenced with ALLF_MEDIA:ID in sections)
+btnCleanupUnused.addEventListener('click', async ()=>{
+  const used = new Set();
+  for(const s of project.sections){
+    const txt = (s.content||'');
+    const matches = txt.matchAll(/ALLF_MEDIA:([a-zA-Z0-9_]+)\b/g);
+    for(const m of matches) used.add(m[1]);
+  }
+  const unused = project.mediaManifest.filter(m=>!used.has(m.id));
+  if(unused.length===0){ showToast('Cleanup','No unused media found'); return; }
+  if(!confirm(`Delete ${unused.length} unused media item(s)?`)) return;
+  for(const m of unused){
+    await idbDelete(m.id);
+  }
+  project.mediaManifest = project.mediaManifest.filter(m=>used.has(m.id));
+  saveProject();
+  renderMedia();
+  showToast('Cleanup', `${unused.length} removed`);
+});
+
+// =====================
+// Export / Import ALLF v2 (with checksums + chunked media)
+// =====================
+function rmBlock(){
+return `RM// Read Me
+ALLF v${ALLF_VERSION} supports code, notes, metadata, and embedded media.
+Media is stored locally in IndexedDB while editing and embedded as Base64 Data URLs during export.
+Required branding block must match exactly: ${BRANDING_TEXT}
 RM\\\\`;
 }
 
-function generateALLFText(exportNotesText){
+function splitChunks(str, maxChars){
+  const chunks=[];
+  for(let i=0;i<str.length;i+=maxChars) chunks.push(str.slice(i,i+maxChars));
+  return chunks;
+}
+
+async function buildExportText(){
+  // Build code/notes blocks
   const out=[];
-  const codes=sections.filter(s=>s.type==='code');
+  out.push(`ALLF_VERSION// ${ALLF_VERSION}`);
+  out.push(`PROJECT// ${project.name}`);
+  out.push(`UPDATED// ${project.updatedAt}`);
+  out.push('');
+
+  // Code blocks: only code sections, keep ids as-is
+  const codes = project.sections.filter(s=>s.type==='code');
   if(codes.length===0){
     out.push('C1//');
     out.push('');
     out.push('C1\\\\');
     out.push('SPACE//');
   }else{
-    codes.forEach(c=>{
-      const title=(c.title||'').trim();
-      out.push(`${c.id}// ${title}`.trim());
+    for(const c of codes){
+      out.push(`${c.id}// ${(c.title||'').trim()}`.trim());
       out.push(c.content||'');
       out.push(`${c.id}\\\\`);
       out.push('SPACE//');
-    });
+    }
   }
 
-  const notes=sections.filter(s=>s.type==='note');
+  // Notes blocks
+  const notes = project.sections.filter(s=>s.type==='note');
   if(notes.length===0){
     out.push('N//');
-    out.push(exportNotesText||'');
+    out.push(exportNotes.value || '');
     out.push('N\\\\');
   }else{
-    notes.forEach(n=>{
-      const ntitle=(n.title||'').trim();
-      out.push(`N// ${ntitle}`.trim());
+    for(const n of notes){
+      out.push(`N// ${(n.title||'').trim()}`.trim());
       out.push(n.content||'');
       out.push('N\\\\');
-    });
-    if(exportNotesText && exportNotesText.trim()){
+    }
+    const extra = (exportNotes.value||'').trim();
+    if(extra){
       out.push('N// Export Notes');
-      out.push(exportNotesText);
+      out.push(extra);
       out.push('N\\\\');
     }
   }
 
-  // Metadata block
-  out.push('M// metadata (json)');
-  out.push(safeStringify(projectMeta, 2));
+  // Metadata (M//)
+  const metaObj = project.meta || {};
+  metaObj.updatedAt = nowIso();
+  const metaJsonText = JSON.stringify(metaObj, null, 2);
+  const metaHash = await sha256Hex(metaJsonText);
+  out.push(`M// metadata (json)`);
+  out.push(`M_HASH// ${metaHash}`);
+  out.push(metaJsonText);
   out.push('M\\\\');
 
-  // Embedded media block
-  out.push('E// embedded media (json list, dataUrl inside each item)');
-  out.push(safeStringify(media, 2));
-  out.push('E\\\\');
+  // Embedded media (E blocks) with dedupe by hash
+  // Deduplicate by hash: keep first id per hash, but preserve manifest references
+  const byHash = new Map();
+  const emb = [];
+  for(const m of project.mediaManifest){
+    if(byHash.has(m.hash)) continue;
+    byHash.set(m.hash, m.id);
+    const stored = await idbGet(m.id);
+    if(!stored) continue;
+    const dataUrl = await blobToDataUrl(stored.blob);
+    emb.push({
+      id: m.id,
+      name: m.name,
+      kind: m.kind,
+      mime: m.mime,
+      bytes: m.bytes,
+      createdAt: m.createdAt,
+      tags: m.tags||[],
+      hash: m.hash,
+      dataUrl
+    });
+  }
+  // Media manifest (without dataUrl) + mapping for dedupe
+  const manifest = project.mediaManifest.map(m=>({
+    id:m.id, name:m.name, kind:m.kind, mime:m.mime, bytes:m.bytes, createdAt:m.createdAt, tags:m.tags||[], hash:m.hash,
+    storedAs: byHash.get(m.hash) || m.id
+  }));
 
-  out.push(generateRMBlock());
+  const manifestText = JSON.stringify(manifest, null, 2);
+  const embText = JSON.stringify(emb, null, 2);
 
+  const manHash = await sha256Hex(manifestText);
+  const embHash = await sha256Hex(embText);
+
+  out.push('EM// media manifest (json)');
+  out.push(`EM_HASH// ${manHash}`);
+  out.push(manifestText);
+  out.push('EM\\\\');
+
+  // Chunk the big embedded media list
+  const chunkMax = 450000; // ~450KB chars per block (safer for editors)
+  const chunks = splitChunks(embText, chunkMax);
+  for(let i=0;i<chunks.length;i++){
+    const n=i+1;
+    out.push(`E${n}// embedded media chunk ${n}/${chunks.length}`);
+    if(i===0) out.push(`E_HASH// ${embHash}`);
+    out.push(chunks[i]);
+    out.push(`E${n}\\\\`);
+  }
+
+  if(exportRepairHint.checked){
+    out.push('H// repair hints');
+    out.push('HINT// If import fails, enable repair mode. Chunks are E1..En, each ends with Ex\\.');
+    out.push('H\\\\');
+  }
+
+  out.push(rmBlock());
+
+  // Branding
   out.push('B//');
   out.push(BRANDING_TEXT);
   out.push('B\\\\');
 
+  // End
   out.push('END//');
-  return out.join('\n');
+
+  // Also: block checksum for whole file
+  const whole = out.join('\n');
+  const wholeHash = await sha256Hex(whole);
+  return { text: whole + `\nFILE_HASH// ${wholeHash}\n`, fileHash: wholeHash, manifestCount: manifest.length, embedCount: emb.length };
 }
 
-function triggerDownload(filename, content){
-  const blob = new Blob([content], { type:'text/plain;charset=utf-8' });
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=filename;
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(()=>{ try{URL.revokeObjectURL(a.href);}catch(e){} a.remove(); }, 800);
-}
-
-function openExportPopup(){
-  const base = (projectNameEl.value || 'project').split('.').slice(0,-1).join('') || 'project';
-  exportFilename.value = base + '.allf';
-  exportNotes.value = '';
-  exportMetaPreview.value = safeStringify(projectMeta, 2);
-  exportMediaPreview.value = JSON.stringify({
-    items: media.length,
-    images: media.filter(m=>m.kind==='image').length,
-    videos: media.filter(m=>m.kind==='video').length,
-    totalBytes: media.reduce((a,m)=>a+(Number(m.bytes)||0),0)
-  }, null, 2);
-  exportModal.style.display='flex';
-  exportFilename.focus();
-}
-function closeExportPopup(){ exportModal.style.display='none'; }
-function confirmExport(){
-  const filename=(exportFilename.value||'project.allf').trim();
-  const notesText=exportNotes.value||'';
-  const content=generateALLFText(notesText);
-  triggerDownload(filename, content);
-  closeExportPopup();
-  showToast('Exported', filename+' downloaded.');
-}
-
-function parseALLF(text){
-  if(!text) return null;
-  const lines=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
-
+function parseAllfStrict(text){
+  // Returns object or null.
+  const lines = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
   const codes=[], notes=[];
-  let metaObj=null;
-  let embeddedMedia=null;
+  let meta=null, metaHash=null;
+  let manifest=null, manifestHash=null;
+  let embedChunks=[], embedHash=null;
   let branding=null;
+  let version=null;
+  let projectName=null;
 
   let i=0;
   while(i<lines.length){
-    const line=lines[i];
+    const line = lines[i];
 
-    const codeStart=line.match(/^C(\d+)\/\/\s*(.*)$/);
+    const ver = line.match(/^ALLF_VERSION\/\/\s*(\d+)/);
+    if(ver){ version = parseInt(ver[1],10); i++; continue; }
+    const pn = line.match(/^PROJECT\/\/\s*(.*)$/);
+    if(pn){ projectName = pn[1].trim(); i++; continue; }
+
+    const codeStart = line.match(/^C(\d+)\/\/\s*(.*)$/);
     if(codeStart){
       const idx=codeStart[1];
       const title=(codeStart[2]||'').trim();
       i++;
-      const contentLines=[];
+      const buf=[];
       while(i<lines.length){
         const l=lines[i];
-        if(l.match(new RegExp('^C'+idx+'\\\\\\\\$'))){ i++; break; }
-        contentLines.push(l); i++;
+        if(l === `C${idx}\\\\`){ i++; break; }
+        buf.push(l); i++;
       }
-      if(i<lines.length && lines[i].trim()==='SPACE//') i++;
-      codes.push({id:'C'+idx,title,content:contentLines.join('\n')});
+      if(lines[i] && lines[i].trim()==='SPACE//') i++;
+      codes.push({id:`C${idx}`, title, content:buf.join('\n')});
       continue;
     }
 
-    const noteStart=line.match(/^N\/\/\s*(.*)$/);
+    const noteStart = line.match(/^N\/\/\s*(.*)$/);
     if(noteStart){
       const title=(noteStart[1]||'').trim();
       i++;
-      const contentLines=[];
+      const buf=[];
       while(i<lines.length){
         const l=lines[i];
         if(l.trim()==='N\\\\'){ i++; break; }
-        contentLines.push(l); i++;
+        buf.push(l); i++;
       }
-      notes.push({title,content:contentLines.join('\n')});
+      notes.push({title, content:buf.join('\n')});
       continue;
     }
 
     if(line.startsWith('M//')){
       i++;
-      const contentLines=[];
+      const buf=[];
       while(i<lines.length){
         const l=lines[i];
+        const mh = l.match(/^M_HASH\/\/\s*(.*)$/);
+        if(mh){ metaHash = mh[1].trim(); i++; continue; }
         if(l.trim()==='M\\\\'){ i++; break; }
-        contentLines.push(l); i++;
+        buf.push(l); i++;
       }
-      const parsed=safeParseJson(contentLines.join('\n').trim());
-      metaObj = parsed || {};
+      try{ meta = JSON.parse(buf.join('\n').trim() || '{}'); }catch(e){ meta = null; }
       continue;
     }
 
-    if(line.startsWith('E//')){
+    if(line.startsWith('EM//')){
       i++;
-      const contentLines=[];
+      const buf=[];
       while(i<lines.length){
         const l=lines[i];
-        if(l.trim()==='E\\\\'){ i++; break; }
-        contentLines.push(l); i++;
+        const hh = l.match(/^EM_HASH\/\/\s*(.*)$/);
+        if(hh){ manifestHash = hh[1].trim(); i++; continue; }
+        if(l.trim()==='EM\\\\'){ i++; break; }
+        buf.push(l); i++;
       }
-      const parsed=safeParseJson(contentLines.join('\n').trim());
-      embeddedMedia = Array.isArray(parsed) ? parsed : [];
+      try{ manifest = JSON.parse(buf.join('\n').trim() || '[]'); }catch(e){ manifest = null; }
+      continue;
+    }
+
+    const eStart = line.match(/^E(\d+)\/\/\s*(.*)$/);
+    if(eStart){
+      i++;
+      const buf=[];
+      while(i<lines.length){
+        const l=lines[i];
+        const eh = l.match(/^E_HASH\/\/\s*(.*)$/);
+        if(eh){ embedHash = eh[1].trim(); i++; continue; }
+        if(l.trim()===`E${eStart[1]}\\\\`){ i++; break; }
+        buf.push(l); i++;
+      }
+      embedChunks.push(buf.join('\n'));
       continue;
     }
 
     if(line.startsWith('B//')){
       i++;
-      const contentLines=[];
+      const buf=[];
       while(i<lines.length){
         const l=lines[i];
         if(l.trim()==='B\\\\'){ i++; break; }
-        contentLines.push(l); i++;
+        buf.push(l); i++;
       }
-      branding = contentLines.join('\n').trim();
+      branding = buf.join('\n').trim();
       continue;
     }
 
-    if(line.trim()==='END//'){ i++; break; }
+    if(line.trim()==='END//') break;
     i++;
   }
 
-  if(branding===null) return null;
-  return {codes, notes, meta:metaObj, media:embeddedMedia, branding};
+  if(!branding || branding.trim() !== BRANDING_TEXT) return null;
+  const embedText = embedChunks.join('');
+  let embedded = null;
+  try{ embedded = JSON.parse(embedText.trim() || '[]'); }catch(e){ embedded = null; }
+
+  return { version, projectName, codes, notes, meta, metaHash, manifest, manifestHash, embedded, embedHash };
 }
 
-/* Import */
-function openImportPicker(){ importInput.value=''; importInput.click(); }
-importInput.addEventListener('change', async (ev)=>{
-  const f=ev.target.files && ev.target.files[0];
-  if(!f) return;
+function parseAllfRepair(text){
+  // Relaxed parsing: attempt to recover blocks via regex.
+  // Still enforces branding.
+  const brandingMatch = text.match(/B\/\/\s*([\s\S]*?)\nB\\\\/);
+  if(!brandingMatch || brandingMatch[1].trim() !== BRANDING_TEXT) return null;
+
+  const verMatch = text.match(/ALLF_VERSION\/\/\s*(\d+)/);
+  const version = verMatch ? parseInt(verMatch[1],10) : null;
+  const pnMatch = text.match(/PROJECT\/\/\s*(.*)/);
+  const projectName = pnMatch ? pnMatch[1].trim() : null;
+
+  const codes=[];
+  const codeRe = /C(\d+)\/\/([^\n]*)\n([\s\S]*?)\nC\1\\\\/g;
+  let m;
+  while((m=codeRe.exec(text))){
+    codes.push({id:'C'+m[1], title:(m[2]||'').trim(), content:(m[3]||'')});
+  }
+  const notes=[];
+  const noteRe = /N\/\/([^\n]*)\n([\s\S]*?)\nN\\\\/g;
+  while((m=noteRe.exec(text))){
+    notes.push({title:(m[1]||'').trim(), content:(m[2]||'')});
+  }
+
+  let meta=null, manifest=null, embedded=null;
+  const metaMatch = text.match(/M\/\/[^\n]*\n(?:M_HASH\/\/[^\n]*\n)?([\s\S]*?)\nM\\\\/);
+  if(metaMatch){ try{ meta=JSON.parse(metaMatch[1].trim()||'{}'); }catch(e){ meta=null; } }
+
+  const manMatch = text.match(/EM\/\/[^\n]*\n(?:EM_HASH\/\/[^\n]*\n)?([\s\S]*?)\nEM\\\\/);
+  if(manMatch){ try{ manifest=JSON.parse(manMatch[1].trim()||'[]'); }catch(e){ manifest=null; } }
+
+  // gather all E blocks
+  const eChunks=[];
+  const eRe = /E(\d+)\/\/[^\n]*\n(?:E_HASH\/\/[^\n]*\n)?([\s\S]*?)\nE\1\\\\/g;
+  while((m=eRe.exec(text))){
+    eChunks.push(m[2]||'');
+  }
+  if(eChunks.length){
+    try{ embedded=JSON.parse(eChunks.join('').trim()||'[]'); }catch(e){ embedded=null; }
+  }
+
+  return { version, projectName, codes, notes, meta, manifest, embedded };
+}
+
+async function applyImportedAllf(parsed){
+  // Create new project from imported or overwrite current
+  const name = parsed.projectName || 'imported';
+  const newPid = createProject(name);
+  currentProjectId = newPid;
+  project = loadProject(newPid);
+
+  // sections
+  project.sections = [];
+  for(const c of (parsed.codes||[])){
+    project.sections.push({type:'code', id:c.id, title:c.title||'', content:c.content||''});
+  }
+  for(const n of (parsed.notes||[])){
+    // maintain numbering reuse
+    const nid = nextNoteId();
+    project.sections.push({type:'note', id:nid, title:n.title||'', content:n.content||''});
+  }
+  if(project.sections.length===0){
+    project.sections.push({type:'code', id:'C1', title:'', content:''});
+  }
+
+  // meta
+  project.meta = (parsed.meta && typeof parsed.meta==='object') ? parsed.meta : project.meta;
+
+  // media: embedded[] contains dataUrl items; manifest may contain storedAs mapping
+  project.mediaManifest = [];
+  await idbDeleteByProject(project.id);
+
+  const embedded = Array.isArray(parsed.embedded) ? parsed.embedded : [];
+  // store embedded items as blobs
+  for(const it of embedded){
+    if(!it || !it.id || !it.dataUrl) continue;
+    const blob = await dataUrlToBlob(it.dataUrl);
+    const hash = it.hash || await sha256BlobHex(blob);
+    await idbPut({
+      id: it.id,
+      projectId: project.id,
+      kind: it.kind || ((blob.type||'').startsWith('video/')?'video':'image'),
+      name: it.name || 'file',
+      mime: it.mime || blob.type || '',
+      bytes: blob.size || 0,
+      createdAt: it.createdAt || nowIso(),
+      tags: Array.isArray(it.tags)?it.tags:[],
+      hash,
+      blob
+    });
+  }
+
+  // rebuild manifest:
+  const man = Array.isArray(parsed.manifest) ? parsed.manifest : null;
+  if(man){
+    project.mediaManifest = man.map(x=>({
+      id:x.id, name:x.name||'file', kind:x.kind||'image', mime:x.mime||'', bytes:x.bytes||0,
+      createdAt:x.createdAt||nowIso(), tags:Array.isArray(x.tags)?x.tags:[], hash:x.hash||''
+    }));
+  } else {
+    // if no manifest, derive from embedded
+    project.mediaManifest = embedded
+      .filter(x=>x && x.id)
+      .map(x=>({id:x.id,name:x.name||'file',kind:x.kind||'image',mime:x.mime||'',bytes:x.bytes||0,createdAt:x.createdAt||nowIso(),tags:Array.isArray(x.tags)?x.tags:[],hash:x.hash||''}));
+  }
+
+  // tabs/open
+  project.tabs = [project.sections[0].id];
+  project.open = project.sections[0].id;
+  project.preview = { enabled:false, sectionId:null };
+
+  saveProject();
+  renderAll();
+  showToast('Imported','Project created from .allf');
+}
+
+async function openExportModal(){
+  exportModalBg.style.display='flex';
+  const base = (project.name||'project').replace(/[^\w\-]+/g,'_') || 'project';
+  exportFilename.value = base + '.allf';
+
+  // Build small preview (meta + manifest summary) without loading all blobs
+  const manSummary = {
+    items: project.mediaManifest.length,
+    images: project.mediaManifest.filter(m=>m.kind==='image').length,
+    videos: project.mediaManifest.filter(m=>m.kind==='video').length,
+    totalBytes: project.mediaManifest.reduce((a,m)=>a+(Number(m.bytes)||0),0)
+  };
+  exportPreview.value = JSON.stringify({ meta: project.meta||{}, mediaSummary: manSummary }, null, 2);
+
+  // Storage health estimation: localStorage size + idb manifest size
+  await updateStorageHealth();
+  await updateExportSizeEstimate();
+}
+btnExport.addEventListener('click', openExportModal);
+btnExportClose.addEventListener('click', ()=>exportModalBg.style.display='none');
+
+async function updateStorageHealth(){
+  // approximate localStorage usage
+  let totalChars = 0;
+  for(let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    const v = localStorage.getItem(k);
+    totalChars += (k?.length||0) + (v?.length||0);
+  }
+  const approxBytes = totalChars * 2; // UTF-16
+  const pct = Math.min(100, (approxBytes / (5*1024*1024)) * 100); // assume 5MB typical quota for LS
+  storageBar.style.width = pct + '%';
+  storageDetails.textContent = `localStorage approx: ${formatBytes(approxBytes)} (quota varies by browser)`;
+
+  if(pct < 60){
+    storageHealth.textContent = 'OK';
+    storageHealth.className = 'badgeOk';
+  } else if(pct < 90){
+    storageHealth.textContent = 'Warning';
+    storageHealth.className = 'badgeWarn';
+  } else {
+    storageHealth.textContent = 'High';
+    storageHealth.className = 'badgeBad';
+  }
+
+  const totalMedia = project.mediaManifest.reduce((a,m)=>a+(Number(m.bytes)||0),0);
+  if(totalMedia > 50*1024*1024){
+    embedWarning.textContent = 'Huge (videos?)';
+    embedWarning.className = 'badgeBad';
+  } else if(totalMedia > 10*1024*1024){
+    embedWarning.textContent = 'Large';
+    embedWarning.className = 'badgeWarn';
+  } else {
+    embedWarning.textContent = 'OK';
+    embedWarning.className = 'badgeOk';
+  }
+}
+
+async function updateExportSizeEstimate(){
+  // base64 inflation ~ 4/3, plus JSON overhead
+  const mediaBytes = project.mediaManifest.reduce((a,m)=>a+(Number(m.bytes)||0),0);
+  const base64Approx = Math.round(mediaBytes * 4/3);
+  const sectionChars = project.sections.reduce((a,s)=>a+((s.content||'').length + (s.title||'').length + 50),0);
+  const approx = base64Approx + sectionChars + 20000;
+  exportSizeLabel.textContent = formatBytes(approx);
+}
+
+btnExportDownload.addEventListener('click', async ()=>{
   try{
-    const text=await f.text();
-    const parsed=parseALLF(text);
-    if(!parsed){ alert('Invalid .allf file format.'); return; }
-    if(!parsed.branding || parsed.branding.trim()!==BRANDING_TEXT){
-      alert('Import failed: required branding block B// with exact content "'+BRANDING_TEXT+'" not found.');
-      return;
-    }
-
-    sections=[];
-    selectedSectionId=null;
-
-    (parsed.codes||[]).forEach(c=>sections.push({type:'code',id:c.id,title:c.title||'',content:c.content||''}));
-    (parsed.notes||[]).forEach(n=>sections.push({type:'note',id:nextNoteId(),title:n.title||'',content:n.content||''}));
-
-    projectMeta = (parsed.meta && typeof parsed.meta==='object') ? parsed.meta : {};
-    media = Array.isArray(parsed.media) ? parsed.media : [];
-
-    renderSectionList();
-    renderAttachments();
-    centralEditor.setValue('', -1);
-    centralEditor.session.setMode('ace/mode/text');
-
-    saveToBrowser();
-    showToast('Imported', f.name+' loaded.');
+    btnExportDownload.disabled = true;
+    btnExportDownload.textContent = 'Building…';
+    const { text } = await buildExportText();
+    const fn = (exportFilename.value||'project.allf').trim() || 'project.allf';
+    downloadText(fn, text);
+    exportModalBg.style.display='none';
+    showToast('Exported', fn);
   }catch(e){
     console.error(e);
-    alert('Failed to read file.');
+    showToast('Export failed','See console');
   }finally{
-    importInput.value='';
+    btnExportDownload.disabled = false;
+    btnExportDownload.textContent = 'Download';
   }
 });
 
-/* ---------- buttons ---------- */
-addCodeBtn.addEventListener('click', ()=>createCodeSection('', ''));
-addNoteBtn.addEventListener('click', ()=>createNoteSection('', ''));
+function downloadText(filename, content){
+  const blob = new Blob([content], {type:'text/plain;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{ try{URL.revokeObjectURL(a.href)}catch(e){} a.remove(); }, 800);
+}
 
-btnSaveSection.addEventListener('click', saveCentralToSection);
-btnClearEditor.addEventListener('click', clearCentralEditor);
+// Import flow
+let _importText = null;
+btnImport.addEventListener('click', ()=>{ importInput.value=''; importInput.click(); });
+importInput.addEventListener('change', async (e)=>{
+  const f = e.target.files?.[0];
+  if(!f) return;
+  _importText = await f.text();
+  importModalBg.style.display='flex';
+});
+btnImportCancel.addEventListener('click', ()=>{
+  importModalBg.style.display='none';
+  _importText = null;
+});
+btnImportProceed.addEventListener('click', async ()=>{
+  if(!_importText) return;
+  importModalBg.style.display='none';
+  const repair = importRepairMode.checked;
+  const parsed = repair ? parseAllfRepair(_importText) : parseAllfStrict(_importText);
+  _importText = null;
+  if(!parsed){
+    alert('Import failed: invalid format or missing required branding block.');
+    return;
+  }
+  await applyImportedAllf(parsed);
+});
 
-btnExport.addEventListener('click', openExportPopup);
-exportCancel.addEventListener('click', closeExportPopup);
-exportConfirm.addEventListener('click', confirmExport);
+// =====================
+// Projects manager UI
+// =====================
+function renderProjectsSelect(){
+  // normalize index projects list (remove missing)
+  index.projects = index.projects.filter(p=>localStorage.getItem(projectKey(p.id)) !== null);
+  saveIndex();
 
-btnImport.addEventListener('click', openImportPicker);
+  projectSelect.innerHTML='';
+  for(const p of index.projects.sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')))){
+    const opt=document.createElement('option');
+    opt.value=p.id;
+    opt.textContent = p.name;
+    projectSelect.appendChild(opt);
+  }
+  if(!currentProjectId){
+    currentProjectId = index.lastProjectId || (index.projects[0]?.id || null);
+  }
+  if(currentProjectId && index.projects.some(p=>p.id===currentProjectId)){
+    projectSelect.value = currentProjectId;
+  }
+}
 
-/* shortcuts */
-document.addEventListener('keydown',(e)=>{
+async function switchProject(pid){
+  const p = loadProject(pid);
+  if(!p){
+    showToast('Missing','Project not found');
+    return;
+  }
+  currentProjectId = pid;
+  project = p;
+  dirtyMap.clear();
+
+  renderAll();
+  index.lastProjectId = pid;
+  saveIndex();
+
+  // ensure media blobs are aligned: nothing required
+  showToast('Loaded', project.name);
+}
+
+btnNewProject.addEventListener('click', async ()=>{
+  const name = prompt('New project name:', 'untitled');
+  if(name===null) return;
+  const pid = createProject(name.trim() || 'untitled');
+  renderProjectsSelect();
+  await switchProject(pid);
+});
+
+btnRenameProject.addEventListener('click', ()=>{
+  if(!project) return;
+  const nn = prompt('Rename project:', project.name);
+  if(nn===null) return;
+  project.name = nn.trim() || project.name;
+  if(project.meta && typeof project.meta==='object'){
+    project.meta.title = project.name;
+    project.meta.updatedAt = nowIso();
+  }
+  saveProject();
+  renderProjectsSelect();
+  showToast('Renamed', project.name);
+});
+
+btnDuplicateProject.addEventListener('click', async ()=>{
+  if(!project) return;
+  const nn = prompt('Duplicate project name:', project.name + ' copy');
+  if(nn===null) return;
+
+  const newPid = createProject(nn.trim() || (project.name+' copy'));
+  const newP = loadProject(newPid);
+
+  // copy sections/meta/settings
+  newP.sections = JSON.parse(JSON.stringify(project.sections));
+  newP.meta = JSON.parse(JSON.stringify(project.meta||{}));
+  newP.tabs = [newP.sections[0]?.id || 'C1'];
+  newP.open = newP.tabs[0];
+  newP.preview = { enabled:false, sectionId:null };
+
+  // copy media blobs + manifest (duplicate ids to avoid collisions)
+  const oldMedia = await idbListByProject(project.id);
+  newP.mediaManifest = [];
+
+  for(const old of oldMedia){
+    const newMid = newId('m_');
+    await idbPut({
+      id: newMid,
+      projectId: newP.id,
+      kind: old.kind,
+      name: old.name,
+      mime: old.mime,
+      bytes: old.bytes,
+      createdAt: nowIso(),
+      tags: Array.isArray(old.tags)?old.tags:[],
+      hash: old.hash,
+      blob: old.blob
+    });
+    newP.mediaManifest.push({
+      id:newMid, name:old.name, kind:old.kind, mime:old.mime, bytes:old.bytes,
+      createdAt: nowIso(), tags:Array.isArray(old.tags)?old.tags:[], hash:old.hash
+    });
+  }
+
+  localStorage.setItem(projectKey(newP.id), JSON.stringify(newP));
+  index.projects.find(p=>p.id===newP.id).updatedAt = newP.updatedAt;
+  saveIndex();
+
+  renderProjectsSelect();
+  await switchProject(newP.id);
+  showToast('Duplicated', newP.name);
+});
+
+btnDeleteProject.addEventListener('click', async ()=>{
+  if(!project) return;
+  if(!confirm(`Delete project "${project.name}"?\nThis deletes local sections/metadata and also removes its media from IndexedDB.`)) return;
+
+  await idbDeleteByProject(project.id);
+  localStorage.removeItem(projectKey(project.id));
+  index.projects = index.projects.filter(p=>p.id!==project.id);
+  index.lastProjectId = index.projects[0]?.id || null;
+  saveIndex();
+
+  project = null;
+  currentProjectId = index.lastProjectId;
+
+  renderProjectsSelect();
+  if(currentProjectId) await switchProject(currentProjectId);
+  else {
+    const pid = createProject('untitled');
+    renderProjectsSelect();
+    await switchProject(pid);
+  }
+  showToast('Deleted','Project removed');
+});
+
+projectSelect.addEventListener('change', async ()=>{
+  await switchProject(projectSelect.value);
+});
+
+// =====================
+// Add sections
+// =====================
+btnAddCode.addEventListener('click', ()=>{
+  const id = nextCodeId();
+  project.sections.push({type:'code', id, title:'', content:''});
+  openTab(id);
+  renderSectionsList();
+  refreshPreviewSelect();
+  saveProject();
+});
+btnAddNote.addEventListener('click', ()=>{
+  const id = nextNoteId();
+  project.sections.push({type:'note', id, title:'', content:''});
+  openTab(id);
+  renderSectionsList();
+  saveProject();
+});
+
+// Save/close/clear
+btnSaveSection.addEventListener('click', saveOpenSection);
+btnCloseTab.addEventListener('click', ()=>{
+  if(!project.open) return;
+  closeTab(project.open);
+});
+btnClear.addEventListener('click', ()=>{
+  if(!confirm('Clear editor content?')) return;
+  editor.setValue('', -1);
+  autosaveDebounced();
+});
+
+// Shortcuts
+document.addEventListener('keydown', (e)=>{
   if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='s'){
     e.preventDefault();
-    saveCentralToSection();
+    // save without prompt if holding shift? Keep simple: full save
+    saveOpenSection();
   }
   if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='e'){
     e.preventDefault();
-    openExportPopup();
+    openExportModal();
   }
   if(e.key==='Escape'){
-    exportModal.style.display='none';
-    themesModal.style.display='none';
-    metaModal.style.display='none';
+    exportModalBg.style.display='none';
+    importModalBg.style.display='none';
+    themesModalBg.style.display='none';
+    metaModalBg.style.display='none';
+    mediaModalBg.style.display='none';
   }
 });
 
-/* project name change -> load different browser-saved project */
-projectNameEl.addEventListener('change', ()=>{
-  if(loadFromBrowser()){
-    renderSectionList();
-    renderAttachments();
-    selectedSectionId = null;
-    centralEditor.setValue('', -1);
-    centralEditor.session.setMode('ace/mode/text');
-    showToast('Loaded','Project loaded from browser save.');
-  }else{
-    // create new
-    sections = [{type:'code',id:'C1',title:'',content:''}];
-    selectedSectionId=null;
-    projectMeta={};
-    media=[];
-    renderSectionList();
-    renderAttachments();
-    centralEditor.setValue('', -1);
-    centralEditor.session.setMode('ace/mode/text');
-    saveToBrowser();
-    showToast('New','New project created.');
-  }
-});
+// =====================
+// Size indicators
+// =====================
+async function updateSizeIndicators(){
+  if(!project){ sizePill.textContent='Size: 0 KB'; return; }
+  const ls = localStorage.getItem(projectKey(project.id)) || '';
+  // approximate export size
+  const mediaBytes = project.mediaManifest.reduce((a,m)=>a+(Number(m.bytes)||0),0);
+  const exportApprox = Math.round(mediaBytes*4/3) + (ls.length*2);
+  sizePill.textContent = `Size: ${formatBytes(ls.length*2)} • Export≈ ${formatBytes(exportApprox)}`;
+}
+function renderAll(){
+  renderProjectsSelect();
+  projectSelect.value = project.id;
+  renderSectionsList();
+  renderTabs();
+  renderMedia();
+  refreshPreviewSelect();
+  refreshPreview();
 
-/* ---------- init ---------- */
-(function init(){
-  // Defaults
-  editorThemeSelect.value='ace/theme/monokai';
-  websiteThemeSelect.value='dark';
-  applyEditorTheme(editorThemeSelect.value);
-  applyWebsiteTheme(websiteThemeSelect.value);
+  // load open section
+  if(project.open && getSection(project.open)) loadIntoEditor(project.open);
+  else if(project.sections[0]) { project.open = project.sections[0].id; project.tabs=[project.open]; saveProject(); loadIntoEditor(project.open); }
 
-  liveToggle.classList.remove('active');
-  liveToggle.style.background='#26303a';
-  updatePreview();
+  updateSizeIndicators().catch(()=>{});
+}
 
-  // Load from browser if exists, else create starter
-  if(!loadFromBrowser()){
-    sections = [{type:'code',id:'C1',title:'',content:''}];
-    selectedSectionId=null;
-    projectMeta={};
-    media=[];
-    saveToBrowser();
+// =====================
+// Init
+// =====================
+(async function init(){
+  applyUiTheme(index.settings.uiTheme || 'dark');
+
+  if(index.projects.length===0){
+    const pid = createProject('untitled');
+    currentProjectId = pid;
+  } else {
+    currentProjectId = index.lastProjectId || index.projects[0].id;
   }
 
-  renderSectionList();
-  renderAttachments();
-  centralEditor.setValue('', -1);
-  centralEditor.session.setMode('ace/mode/text');
-  centralEditor.focus();
+  renderProjectsSelect();
+  project = loadProject(currentProjectId) || loadProject(index.projects[0]?.id) || null;
+  if(!project){
+    const pid = createProject('untitled');
+    project = loadProject(pid);
+    currentProjectId = pid;
+  }
+
+  editor.setTheme(index.settings.editorTheme || 'ace/theme/monokai');
+
+  // initial render
+  await switchProject(project.id);
+
+  showToast('Ready','Local projects + IndexedDB media enabled');
 })();
 </script>
 </body>
 </html>
-
