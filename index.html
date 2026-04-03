@@ -130,7 +130,9 @@ header {
 .section-header {
   padding: 16px 16px 8px 16px; font-size: 11px; text-transform: uppercase; font-weight: 700;
   color: var(--text-secondary); display: flex; justify-content: space-between; align-items: center;
+  border-top: 1px solid transparent; border-bottom: 1px solid transparent; transition: 0.2s;
 }
+.section-header.drag-over { background: rgba(94, 106, 210, 0.1); border-color: var(--accent); }
 .icon-btn {
   background: transparent; border: none; color: var(--text-secondary); cursor: pointer;
   padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center;
@@ -141,36 +143,38 @@ header {
 /* FOLDERS & FILES */
 .tree-folder {
   display: flex; align-items: center; padding: 6px 16px; cursor: pointer;
-  color: var(--text-primary); font-size: 13px; font-weight: 600;
+  color: var(--text-primary); font-size: 13px; font-weight: 600; border: 1px solid transparent;
 }
 .tree-folder:hover { background: var(--bg-surface-hover); }
+.tree-folder.drag-over { background: rgba(94, 106, 210, 0.2); border-color: var(--accent); }
 .tree-folder svg { width: 14px; height: 14px; margin-right: 8px; fill: var(--accent); transition: transform 0.2s; }
 .tree-folder.open svg { transform: rotate(90deg); }
 
 .tree-item {
-  display: flex; align-items: center; padding: 6px 16px; cursor: pointer;
+  display: flex; align-items: center; padding: 6px 16px; cursor: grab;
   color: var(--text-secondary); font-size: 13px; transition: all 0.2s ease; position: relative;
   border-right: 3px solid transparent;
 }
 .tree-item.nested { padding-left: 36px; }
 .tree-item:hover { background: var(--bg-surface-hover); color: var(--text-primary); }
 .tree-item.active { background: rgba(94, 106, 210, 0.15); color: var(--text-primary); border-right: 3px solid var(--file-color); }
+.tree-item.dragging { opacity: 0.5; background: var(--bg-overlay); }
 .tree-item svg { width: 14px; height: 14px; margin-right: 8px; fill: currentColor; flex-shrink: 0; transition: fill 0.3s ease; }
 .tree-item .name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; outline: none; }
 .tree-item .name[contenteditable="true"] { background: var(--bg-base); color: var(--text-primary); padding: 2px 4px; border-radius: 3px; cursor: text; }
 .tree-actions { opacity: 0; gap: 4px; transition: opacity 0.2s ease; display: flex; }
 .tree-item:hover .tree-actions { opacity: 1; }
 
-/* EDITOR AREA (SPLIT VIEW SUPPORT) */
+/* EDITOR AREA */
 .editor-wrapper {
   flex: 1; display: flex; flex-direction: column; min-width: 0; background: var(--bg-base);
 }
 .editor-split-container {
-  flex: 1; display: flex; flex-direction: row; min-height: 0;
+  flex: 1; display: flex; flex-direction: row; min-height: 0; position: relative;
 }
 .editor-pane {
   flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative;
-  border-right: 1px solid var(--border);
+  border-right: 1px solid var(--border); overflow: hidden;
 }
 .editor-pane:last-child { border-right: none; }
 
@@ -188,25 +192,48 @@ header {
 
 .editor-toolbar {
   height: 35px; background: var(--bg-base); border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; padding: 0 16px; justify-content: flex-end;
+  display: flex; align-items: center; padding: 0 16px; justify-content: flex-end; gap: 10px;
   border-top: 2px solid var(--file-color); transition: border-color 0.4s ease;
 }
 
 .ace-editor-div { flex: 1; width: 100%; font-family: var(--font-mono); }
+
+/* MINIMAP & MEDIA VIEWER */
+.minimap {
+  position: absolute; right: 0; top: 76px; bottom: 0; width: 60px;
+  background: rgba(14, 16, 21, 0.9); border-left: 1px solid var(--border);
+  overflow: hidden; pointer-events: none; z-index: 50; display: none;
+}
+.minimap-content {
+  font-family: var(--font-mono); font-size: 2px; line-height: 1.2; color: var(--text-secondary);
+  white-space: pre; padding: 4px; transform-origin: top left;
+}
+.minimap-viewport {
+  position: absolute; left: 0; right: 0; background: rgba(94, 106, 210, 0.2); border: 1px solid var(--accent);
+}
+
+.media-viewer {
+  flex: 1; display: none; align-items: center; justify-content: center; background: var(--bg-overlay);
+  overflow: auto; padding: 20px;
+}
+.media-viewer img, .media-viewer video { max-width: 100%; max-height: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-radius: 4px; }
+
+/* Color Picker Input Styling */
+.color-picker-wrap { position: relative; width: 24px; height: 24px; border-radius: 50%; overflow: hidden; border: 1px solid var(--border); cursor: pointer; }
+.color-picker-wrap input[type="color"] { position: absolute; top: -10px; left: -10px; width: 50px; height: 50px; cursor: pointer; border: none; }
 
 /* PREVIEW PANEL & CONSOLE */
 .preview-panel {
   width: 0; background: #fff;
   transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden; display: flex; flex-direction: column; position: relative;
 }
-.preview-panel.open { width: 45%; min-width: 200px; }
+.preview-panel.open { width: 45%; min-width: 200px; border-left: 1px solid var(--border); }
 .preview-header {
   height: 40px; background: var(--bg-surface); border-bottom: 1px solid var(--border);
   display: flex; align-items: center; justify-content: space-between; padding: 0 16px; color: var(--text-primary); font-size: 13px; flex-shrink: 0;
 }
 iframe { border: none; width: 100%; flex: 1; background: #fff; }
 
-/* JS CONSOLE */
 .console-panel {
   height: 0; background: var(--bg-base); border-top: 1px solid var(--border);
   display: flex; flex-direction: column; transition: height 0.3s ease; overflow: hidden;
@@ -216,9 +243,7 @@ iframe { border: none; width: 100%; flex: 1; background: #fff; }
   height: 30px; background: var(--bg-surface); border-bottom: 1px solid var(--border);
   display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font-size: 11px; font-weight: 600; color: var(--text-secondary);
 }
-.console-logs {
-  flex: 1; overflow-y: auto; padding: 8px; font-family: var(--font-mono); font-size: 12px;
-}
+.console-logs { flex: 1; overflow-y: auto; padding: 8px; font-family: var(--font-mono); font-size: 12px; }
 .log-line { padding: 4px; border-bottom: 1px solid rgba(255,255,255,0.05); word-wrap: break-word; }
 .log-line.error { color: var(--danger); background: rgba(224, 108, 117, 0.1); }
 .log-line.warn { color: var(--warning); }
@@ -226,16 +251,22 @@ iframe { border: none; width: 100%; flex: 1; background: #fff; }
 /* DROP ZONE */
 .drop-zone {
   margin: 10px 16px; border: 1px dashed var(--border); border-radius: var(--radius);
-  padding: 20px 10px; text-align: center; color: var(--text-secondary); font-size: 12px;
-  cursor: pointer; transition: all 0.3s ease;
+  padding: 24px 10px; text-align: center; color: var(--text-secondary); font-size: 13px;
+  cursor: pointer; transition: all 0.3s ease; background: rgba(0,0,0,0.15);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
 }
-.drop-zone:hover, .drop-zone.drag { border-color: var(--accent); background: rgba(94, 106, 210, 0.05); color: var(--text-primary); transform: scale(0.98); }
+.drop-zone:hover, .drop-zone.drag { 
+  border-color: var(--accent); background: rgba(94, 106, 210, 0.08); 
+  color: var(--text-primary); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); 
+}
+.drop-zone svg { width: 24px; height: 24px; color: var(--accent); transition: transform 0.3s ease; }
+.drop-zone:hover svg { transform: translateY(-3px); }
 
 /* FOOTER */
 footer {
   height: 26px; background: var(--bg-surface); border-top: 1px solid var(--border);
   display: flex; align-items: center; justify-content: center;
-  font-size: 11px; color: var(--text-secondary); letter-spacing: 0.5px;
+  font-size: 11px; color: var(--text-secondary); letter-spacing: 0.5px; z-index: 100;
 }
 
 /* CUSTOM MODALS & TOASTS */
@@ -257,24 +288,21 @@ footer {
 .modal-header { padding: 16px 20px; font-weight: 600; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;}
 .modal-body { padding: 20px; display: flex; flex-direction: column; gap: 12px; max-height: 70vh; overflow-y: auto; }
 .modal-footer { padding: 16px 20px; background: var(--bg-base); display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--border); }
-.input, select.input {
+.input, select.input, textarea.input {
   background: var(--bg-base); border: 1px solid var(--border); color: var(--text-primary);
   padding: 8px 12px; border-radius: 6px; font-size: 13px; outline: none; width: 100%; transition: all 0.2s ease;
 }
 .input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(94, 106, 210, 0.2); }
 
-/* QUICK OPEN MODAL */
 .quick-open-item {
   padding: 10px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.2s;
   display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-primary);
 }
 .quick-open-item:hover, .quick-open-item.selected { background: var(--bg-surface-hover); color: var(--accent); }
 
-/* PROGRESS BARS */
 .progress-track { width: 100%; height: 8px; background: var(--bg-base); border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
 .progress-fill { width: 0%; height: 100%; background: var(--cyan-accent); transition: width 0.1s linear; }
 
-/* PROJECT MANAGER ITEM */
 .pm-list-item {
   display: flex; justify-content: space-between; align-items: center; padding: 12px;
   background: var(--bg-base); border: 1px solid var(--border); border-radius: 6px;
@@ -284,11 +312,10 @@ footer {
 .pm-list-item .pm-name { font-weight: 600; font-size: 13px; color: var(--text-primary); }
 .pm-list-item.active .pm-name { color: var(--accent); }
 
-/* CHANGE FILE TYPE MODAL CSS */
+/* FORMAT MODAL */
 .format-modal {
   width: 760px; max-width: 95vw; background: #111318; border: 1px solid var(--cyan-accent);
-  border-radius: 8px; box-shadow: 0 12px 40px rgba(0,0,0,0.8);
-  display: flex; flex-direction: column; 
+  border-radius: 8px; box-shadow: 0 12px 40px rgba(0,0,0,0.8); display: flex; flex-direction: column; 
   transform: translateY(20px) scale(0.95); opacity: 0; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .modal-overlay.show .format-modal { transform: translateY(0) scale(1); opacity: 1; }
@@ -300,35 +327,19 @@ footer {
 .fm-close-btn:hover { color: #fff; }
 .fm-body { display: flex; height: 380px; }
 .fm-sidebar { width: 200px; border-right: 1px solid #1E222B; overflow-y: auto; padding: 12px 0; }
-.fm-category {
-  padding: 12px 20px; color: #8A919E; font-size: 13px; cursor: pointer;
-  display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease;
-  border-left: 3px solid transparent;
-}
+.fm-category { padding: 12px 20px; color: #8A919E; font-size: 13px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease; border-left: 3px solid transparent; }
 .fm-category:hover { background: #1A1D24; color: #fff; }
 .fm-category.active { color: #fff; border-left: 3px solid var(--cyan-accent); background: rgba(13,226,198,0.05); }
 .fm-content { flex: 1; display: flex; flex-direction: column; }
-.fm-grid {
-  flex: 1; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-  grid-auto-rows: 45px; gap: 16px; overflow-y: auto; align-content: flex-start;
-}
-.fm-btn {
-  background: #181A20; border: 1px solid #2A2E37; border-radius: 6px; color: #D1D5DB;
-  font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;
-}
+.fm-grid { flex: 1; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); grid-auto-rows: 45px; gap: 16px; overflow-y: auto; align-content: flex-start; }
+.fm-btn { background: #181A20; border: 1px solid #2A2E37; border-radius: 6px; color: #D1D5DB; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; }
 .fm-btn:hover { border-color: var(--cyan-accent); background: #1C2028; color: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(13,226,198,0.1); }
 .fm-btn:active { transform: translateY(0); }
 .fm-hover-info { padding: 16px 24px; border-top: 1px solid #1E222B; color: #5A6072; font-size: 12px; min-height: 50px; transition: color 0.2s ease; }
 .fm-bottom { padding: 16px 24px; border-top: 1px solid #1E222B; display: flex; justify-content: space-between; gap: 16px; align-items: center; }
-.fm-bottom-input {
-  flex: 1; background: #111318; border: 1px solid #2A2E37; color: #fff; padding: 10px 14px;
-  border-radius: 6px; font-size: 13px; outline: none; transition: all 0.2s ease;
-}
+.fm-bottom-input { flex: 1; background: #111318; border: 1px solid #2A2E37; color: #fff; padding: 10px 14px; border-radius: 6px; font-size: 13px; outline: none; transition: all 0.2s ease; }
 .fm-bottom-input:focus { border-color: var(--cyan-accent); box-shadow: 0 0 0 2px rgba(13,226,198,0.15); }
-.fm-apply-btn {
-  background: transparent; border: 1px solid #2A2E37; color: #D1D5DB; padding: 10px 24px;
-  border-radius: 6px; font-size: 13px; cursor: pointer; transition: all 0.2s ease;
-}
+.fm-apply-btn { background: transparent; border: 1px solid #2A2E37; color: #D1D5DB; padding: 10px 24px; border-radius: 6px; font-size: 13px; cursor: pointer; transition: all 0.2s ease; }
 .fm-apply-btn:hover { border-color: var(--cyan-accent); color: #fff; background: rgba(13,226,198,0.05); }
 
 /* TOASTS */
@@ -356,6 +367,7 @@ footer {
   <symbol id="icon-trash" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></symbol>
   <symbol id="icon-close" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></symbol>
   <symbol id="icon-download" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></symbol>
+  <symbol id="icon-upload" viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z"/></symbol>
   <symbol id="icon-external" viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></symbol>
   <symbol id="icon-folder" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></symbol>
   <symbol id="icon-arrow-right" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></symbol>
@@ -379,7 +391,7 @@ footer {
         <div class="dropdown-item" id="menuFileConverter" style="color: var(--cyan-accent);">
           File Converter <svg class="svg-icon" style="width:12px; height:12px;"><use href="#icon-external"></use></svg>
         </div>
-        <div class="dropdown-item" id="menuInstallApp" style="color: var(--success); display:none;">
+        <div class="dropdown-item" id="menuInstallApp" style="color: var(--success);">
           Install App (PWA)
         </div>
         <div class="dropdown-divider"></div>
@@ -393,6 +405,7 @@ footer {
       <div class="dropdown">
         <div class="dropdown-item" id="menuAddCode">Add New File <span class="shortcut-hint">Alt+N</span></div>
         <div class="dropdown-item" id="menuFormatCode">Auto-Format Code <span class="shortcut-hint">Shift+Alt+F</span></div>
+        <div class="dropdown-item" id="menuGlobalSearch">Search & Replace <span class="shortcut-hint">Ctrl+Shift+F</span></div>
         <div class="dropdown-divider"></div>
         <div class="dropdown-item" id="menuUploadMedia">Upload Assets</div>
         <div class="dropdown-divider"></div>
@@ -404,6 +417,7 @@ footer {
       <div class="menu-btn">Project</div>
       <div class="dropdown">
         <div class="dropdown-item" id="menuManageProjects">Manage Projects...</div>
+        <div class="dropdown-item" id="menuSnapshots">Snapshots (Time Machine)</div>
         <div class="dropdown-item" id="menuMeta">Settings & Metadata</div>
         <div class="dropdown-divider"></div>
         <div class="dropdown-item danger" id="menuDeleteProj">Delete Current Project</div>
@@ -416,6 +430,7 @@ footer {
         <div class="dropdown-item" id="menuTogglePreview">Toggle Live Preview</div>
         <div class="dropdown-item" id="menuToggleSplit">Toggle Split Editor</div>
         <div class="dropdown-item" id="menuToggleConsole">Toggle JS Console</div>
+        <div class="dropdown-item" id="menuToggleMinimap">Toggle Code Minimap</div>
         <div class="dropdown-divider"></div>
         <div class="dropdown-item" id="menuQuickOpen">Quick Open File <span class="shortcut-hint">Ctrl+P</span></div>
         <div class="dropdown-item" id="menuShortcuts">Keyboard Shortcuts <span class="shortcut-hint">Ctrl+/</span></div>
@@ -441,18 +456,20 @@ footer {
 <div class="workspace">
   
   <div class="sidebar" id="sidebar">
-    <div class="section-header">
+    <div class="section-header root-drop" data-type="code">
       CODE & FILES
       <button class="icon-btn" id="btnAddCode" title="New File"><svg class="svg-icon"><use href="#icon-plus"></use></svg></button>
     </div>
     <div id="sectionsList" style="margin-bottom: 10px;"></div>
 
-    <div class="section-header">
+    <div class="section-header root-drop" data-type="media">
       ASSETS & MEDIA
-      <button class="icon-btn" id="btnAddMedia" title="Upload Asset"><svg class="svg-icon"><use href="#icon-plus"></use></svg></button>
+      <button class="icon-btn" id="btnAddMedia" title="Upload Asset"><svg class="svg-icon"><use href="#icon-upload"></use></svg></button>
     </div>
     <div class="drop-zone" id="dropZone">
-      Click or drag files here<br><span style="font-size:10px; opacity:0.6">(Images, Videos, Fonts)</span>
+      <svg class="svg-icon" style="width: 24px; height: 24px; margin-bottom: 4px; color: var(--accent);"><use href="#icon-upload"></use></svg>
+      <span style="font-weight: 600; color: var(--text-primary);">Click to Upload</span>
+      <span style="font-size:10px; opacity:0.6">or drag and drop files here</span>
     </div>
     <div id="mediaList"></div>
   </div>
@@ -465,17 +482,27 @@ footer {
       <div class="editor-pane" id="editorPane1">
         <div class="tabs" id="tabs"></div>
         <div class="editor-toolbar" id="toolbar1">
+          <div class="color-picker-wrap" title="Pick a color & insert HEX">
+            <input type="color" id="colorPicker1" value="#5E6AD2">
+          </div>
           <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="openFormatModal(1)">Change File Type</button>
         </div>
         <div id="editor" class="ace-editor-div"></div>
+        <div id="mediaViewer1" class="media-viewer"></div>
+        <div id="minimap1" class="minimap"><div class="minimap-viewport"></div><div class="minimap-content"></div></div>
       </div>
 
       <div class="editor-pane" id="editorPane2" style="display:none;">
         <div class="tabs" id="tabs2"></div>
         <div class="editor-toolbar" id="toolbar2">
+          <div class="color-picker-wrap" title="Pick a color & insert HEX">
+            <input type="color" id="colorPicker2" value="#0DE2C6">
+          </div>
           <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="openFormatModal(2)">Change File Type</button>
         </div>
         <div id="editor2" class="ace-editor-div"></div>
+        <div id="mediaViewer2" class="media-viewer"></div>
+        <div id="minimap2" class="minimap"><div class="minimap-viewport"></div><div class="minimap-content"></div></div>
       </div>
 
     </div>
@@ -501,10 +528,37 @@ footer {
 
 </div>
 
-<footer>2026 &copy; TSFAlex Version 1.5.3</footer>
+<footer>2026 &copy; TSFAlex Version 1.6.2</footer>
 
 <input id="mediaInput" type="file" accept="*/*" multiple style="display:none" />
 <input id="importInput" type="file" accept=".allf,text/plain" style="display:none" />
+
+<div id="searchReplaceModal" class="modal-overlay">
+  <div class="modal" style="width: 500px;">
+    <div class="modal-header">Global Search & Replace</div>
+    <div class="modal-body">
+      <input type="text" id="srSearchInput" class="input" placeholder="Search for...">
+      <input type="text" id="srReplaceInput" class="input" placeholder="Replace with...">
+      <div style="display:flex; gap:8px;">
+        <button class="btn primary" id="btnSRSearch" style="flex:1;">Search</button>
+        <button class="btn danger" id="btnSRReplace" style="flex:1;">Replace All</button>
+      </div>
+      <div id="srResults" style="max-height: 200px; overflow-y: auto; border-top:1px solid var(--border); padding-top:10px;"></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-close-modal">Close</button></div>
+  </div>
+</div>
+
+<div id="snapshotsModal" class="modal-overlay">
+  <div class="modal" style="width: 500px;">
+    <div class="modal-header">Snapshots (Time Machine)</div>
+    <div class="modal-body">
+      <button class="btn primary" id="btnCreateSnapshot" style="width:100%; justify-content:center; margin-bottom:10px;">+ Create New Snapshot</button>
+      <div id="snapshotsList" style="max-height: 300px; overflow-y: auto; display:flex; flex-direction:column; gap:8px;"></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-close-modal">Close</button></div>
+  </div>
+</div>
 
 <div id="loadingModal" class="modal-overlay" style="z-index: 9999;">
   <div class="modal" style="width: 320px; text-align: center; padding: 30px;">
@@ -529,6 +583,7 @@ footer {
     <div class="modal-body">
       <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="color:var(--text-secondary)">Save Project</span> <kbd style="background:var(--bg-overlay); padding:2px 6px; border-radius:4px; font-family:var(--font-mono); font-size:11px;">Ctrl + S</kbd></div>
       <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="color:var(--text-secondary)">Quick Open File</span> <kbd style="background:var(--bg-overlay); padding:2px 6px; border-radius:4px; font-family:var(--font-mono); font-size:11px;">Ctrl + P</kbd></div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="color:var(--text-secondary)">Global Search</span> <kbd style="background:var(--bg-overlay); padding:2px 6px; border-radius:4px; font-family:var(--font-mono); font-size:11px;">Ctrl + Shift + F</kbd></div>
       <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="color:var(--text-secondary)">Toggle Sidebar</span> <kbd style="background:var(--bg-overlay); padding:2px 6px; border-radius:4px; font-family:var(--font-mono); font-size:11px;">Ctrl + B</kbd></div>
       <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="color:var(--text-secondary)">Toggle Live Preview</span> <kbd style="background:var(--bg-overlay); padding:2px 6px; border-radius:4px; font-family:var(--font-mono); font-size:11px;">Ctrl + Enter</kbd></div>
       <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="color:var(--text-secondary)">Auto-Format Code</span> <kbd style="background:var(--bg-overlay); padding:2px 6px; border-radius:4px; font-family:var(--font-mono); font-size:11px;">Shift + Alt + F</kbd></div>
@@ -573,7 +628,6 @@ footer {
     </div>
   </div>
 </div>
-
 <div id="factoryResetModal2" class="modal-overlay">
   <div class="modal" style="width: 400px; border-color: var(--danger);">
     <div class="modal-header" style="color: var(--danger);">🚨 FINAL WARNING</div>
@@ -590,23 +644,23 @@ footer {
 
 <div id="whatsNewModal" class="modal-overlay">
   <div class="modal" style="width: 450px;">
-    <div class="modal-header">What's New in v1.5.3</div>
+    <div class="modal-header">What's New in v1.6.2</div>
     <div class="modal-body" style="max-height: 60vh; overflow-y: auto; gap: 16px;">
       
       <div>
-        <h4 style="margin: 0 0 4px 0; color: var(--cyan-accent); display: flex; align-items: center; gap: 6px;">
-          <svg style="width:16px; height:16px; fill:currentColor;" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-          Clean Slate Defaults
+        <h4 style="margin: 0 0 4px 0; color: var(--danger); display: flex; align-items: center; gap: 6px;">
+          <svg style="width:16px; height:16px; fill:currentColor;" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          Critical UI Restoration
         </h4>
-        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;">When creating a new project (or restoring one), ALLF STUDIO now sets you up with a completely blank <code>index.txt</code> file instead of pre-filled HTML.</p>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;">Fixed a major issue where the app engine failed to load properly. The drag-and-drop zone, file creation, upload box, and project selector have all been fully restored to working order.</p>
       </div>
 
       <div>
-        <h4 style="margin: 0 0 4px 0; color: var(--danger); display: flex; align-items: center; gap: 6px;">
-          <svg style="width:16px; height:16px; fill:currentColor;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg> 
-          In-App Safety Warnings
+        <h4 style="margin: 0 0 4px 0; color: var(--success); display: flex; align-items: center; gap: 6px;">
+          <svg style="width:16px; height:16px; fill:currentColor;" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+          App Installation Link
         </h4>
-        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;">The Factory Reset warnings have been completely rebuilt as native, beautiful in-app modals. No more jarring default browser popups!</p>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;">The "Install App (PWA)" button is now always accessible in the File menu, providing better feedback if your environment doesn't natively support desktop installation.</p>
       </div>
 
     </div>
@@ -623,10 +677,30 @@ footer {
     <div class="modal-body" style="max-height: 60vh; overflow-y: auto; gap: 20px;">
       
       <div>
+        <h3 style="margin:0 0 8px 0; color: var(--text-primary); border-bottom: 1px solid var(--border); padding-bottom: 4px;">v1.6.1</h3>
+        <p style="margin: 0 0 6px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Upload UI Enhancements:</b> The file upload area has been redesigned to be a prominent, clickable button zone with clear icons.</p>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>General UI Cleanups:</b> Minor layout refinements, spacing improvements, and replaced generic icons.</p>
+      </div>
+
+      <div>
+        <h3 style="margin:0 0 8px 0; color: var(--text-primary); border-bottom: 1px solid var(--border); padding-bottom: 4px;">v1.6.0</h3>
+        <p style="margin: 0 0 6px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Global Search & Replace:</b> Search and replace code across every file in your project instantly (Ctrl+Shift+F).</p>
+        <p style="margin: 0 0 6px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Drag & Drop Files:</b> Click and drag files in the sidebar to organize them into folders visually.</p>
+        <p style="margin: 0 0 6px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Local Snapshots:</b> Back up your work locally with a Time Machine-like interface under the Project menu.</p>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Asset Viewer & Minimap:</b> View images/videos directly in editor tabs, added a CSS Color Picker, and a Code Minimap.</p>
+      </div>
+
+      <div>
+        <h3 style="margin:0 0 8px 0; color: var(--text-primary); border-bottom: 1px solid var(--border); padding-bottom: 4px;">v1.5.3</h3>
+        <p style="margin: 0 0 6px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Clean Slate Defaults:</b> New projects now start with an empty index.txt.</p>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>In-App Warnings:</b> Replaced all browser confirm alerts for Factory Reset with beautiful native modals.</p>
+      </div>
+
+      <div>
         <h3 style="margin:0 0 8px 0; color: var(--text-primary); border-bottom: 1px solid var(--border); padding-bottom: 4px;">v1.5.2</h3>
         <p style="margin: 0 0 6px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Project Reset Optimization:</b> Restore to Default safely resets ONLY the current active project.</p>
         <p style="margin: 0 0 6px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Factory Reset:</b> Added a complete wipe option with double-confirmation.</p>
-        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>JS Console Fix:</b> Developer Console properly intercepts live code logs and forces preview panel open.</p>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>JS Console Fix:</b> Developer Console properly intercepts live code logs.</p>
       </div>
 
       <div>
@@ -640,31 +714,24 @@ footer {
         <p style="margin: 0 0 6px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Split-Screen & Resizing:</b> View two files side-by-side and drag borders to resize the workspace panels.</p>
         <p style="margin: 0 0 6px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Path-Based Folders:</b> Auto-organize files into collapsible folders by naming them with slashes.</p>
         <p style="margin: 0 0 6px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>JS Console:</b> Intercept and log JavaScript errors in real-time beneath the preview.</p>
-        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Power Features:</b> Added Prettier code auto-formatting and Quick Open (Ctrl+P) shortcut modal.</p>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Power Features:</b> Added Prettier code auto-formatting and Quick Open (Ctrl+P).</p>
       </div>
 
       <div>
         <h3 style="margin:0 0 8px 0; color: var(--text-primary); border-bottom: 1px solid var(--border); padding-bottom: 4px;">v1.4.1</h3>
         <p style="margin: 0 0 6px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Nexus Convert Pro:</b> Added integrated file converter links to the File menu.</p>
-        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>History:</b> Added this update history viewer module.</p>
       </div>
 
       <div>
         <h3 style="margin:0 0 8px 0; color: var(--text-primary); border-bottom: 1px solid var(--border); padding-bottom: 4px;">v1.4.0</h3>
         <p style="margin: 0 0 6px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Project Manager:</b> Centralized menu to manage and delete your existing local projects.</p>
-        <p style="margin: 0 0 6px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Factory Reset:</b> Added a "Restore to Default" option to cleanly wipe all local data and DB stores.</p>
-        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Asset Downloading:</b> Introduced a download button so uploaded assets can be saved directly back to your physical computer.</p>
+        <p style="margin: 0 0 6px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Factory Reset:</b> Added a "Restore to Default" option to cleanly wipe all local data.</p>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Asset Downloading:</b> Introduced a download button for uploaded assets.</p>
       </div>
 
       <div>
         <h3 style="margin:0 0 8px 0; color: var(--text-primary); border-bottom: 1px solid var(--border); padding-bottom: 4px;">v1.3.3</h3>
-        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Bulletproof Importer:</b> Re-engineered the import logic to safely stream huge 1GB+ files without crashing V8 memory limits. Repositioned verification tags.</p>
-      </div>
-
-      <div>
-        <h3 style="margin:0 0 8px 0; color: var(--text-primary); border-bottom: 1px solid var(--border); padding-bottom: 4px;">v1.3.0</h3>
-        <p style="margin: 0 0 6px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>File Extensions:</b> Custom file extension builder with color-coded editor themes based on language.</p>
-        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Smooth UI:</b> Completely rebuilt the UI with glass-morphism blurs and buttery-smooth CSS transitions on all interactive elements.</p>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Bulletproof Importer:</b> Re-engineered the import logic to safely stream huge 1GB+ files without crashing V8 memory limits.</p>
       </div>
 
     </div>
@@ -678,8 +745,7 @@ footer {
 <div id="projectManagerModal" class="modal-overlay">
   <div class="modal" style="width: 500px;">
     <div class="modal-header">Manage Projects</div>
-    <div class="modal-body" id="pmProjectList">
-      </div>
+    <div class="modal-body" id="pmProjectList"></div>
     <div class="modal-footer">
       <button class="btn btn-close-modal primary">Close</button>
     </div>
@@ -716,7 +782,6 @@ footer {
       <div style="font-size: 12px; color: var(--text-secondary); margin-top: 10px;">
         High-Performance Mode: Files are streamed directly to prevent browser crashes.
       </div>
-      
       <div id="exportProgressContainer" style="display:none; margin-top:15px;">
         <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:6px;">
           <span id="exportProgressText" style="color:var(--accent); font-weight:600;">Building...</span>
@@ -726,7 +791,6 @@ footer {
           <div id="exportProgressFill" class="progress-fill" style="width: 0%;"></div>
         </div>
       </div>
-
     </div>
     <div class="modal-footer">
       <button class="btn btn-close-modal" id="btnExportCancel">Cancel</button>
@@ -780,7 +844,7 @@ footer {
 
 <script>
 /* =========================================================
-   ALLF STUDIO - V1.5.3 (Clean Defaults & Safe Factory Resets)
+   ALLF STUDIO - V1.6.2 (Critical Engine Restoration)
    ========================================================= */
 
 const BRANDING_TEXT = '© ALLF STUDIO - TSFALEX';
@@ -800,9 +864,8 @@ function showToast(msg) {
 function openModal(id) {
   const m = el(id); m.style.display = 'flex'; 
   setTimeout(() => m.classList.add('show'), 10);
-  if(id === 'quickOpenModal') {
-    setTimeout(() => el('qoSearch').focus(), 100);
-  }
+  if(id === 'quickOpenModal') setTimeout(() => el('qoSearch').focus(), 100);
+  if(id === 'searchReplaceModal') setTimeout(() => el('srSearchInput').focus(), 100);
 }
 function closeModal(id) {
   const m = el(id); m.classList.remove('show');
@@ -811,21 +874,18 @@ function closeModal(id) {
 
 // Global Loading UI
 function showLoading(title) {
-  el('loadingTitle').textContent = title;
-  el('loadingFill').style.width = '0%';
-  el('loadingText').textContent = '0%';
+  el('loadingTitle').textContent = title; el('loadingFill').style.width = '0%'; el('loadingText').textContent = '0%';
   openModal('loadingModal');
 }
 function updateLoading(percent, text) {
   percent = Math.min(100, Math.max(0, percent));
-  el('loadingFill').style.width = percent + '%';
-  el('loadingText').textContent = text || `${Math.round(percent)}%`;
+  el('loadingFill').style.width = percent + '%'; el('loadingText').textContent = text || `${Math.round(percent)}%`;
 }
 function hideLoading() { closeModal('loadingModal'); }
 
 const yieldThread = () => new Promise(r => setTimeout(r, 0));
 
-// --- High Performance Base64 Converters ---
+// --- Base64 Converters ---
 function bufferToBase64(buffer) {
   let binary = ''; const bytes = new Uint8Array(buffer);
   for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
@@ -879,8 +939,9 @@ let project = null;
 let previewOpen = false;
 let consoleOpen = false;
 let splitViewOpen = false;
-let activeTargetEditor = 1; // 1 or 2
-let openFolders = {}; // tracks which path folders are expanded
+let minimapOpen = false;
+let activeTargetEditor = 1; 
+let openFolders = {}; 
 
 function loadStorage() {
   try { const raw = localStorage.getItem(LS_INDEX_KEY); if(raw) index = JSON.parse(raw); } catch(e){}
@@ -892,6 +953,7 @@ function pKey(id) { return 'ALLF_P_' + id; }
 function saveProject() {
   if(!project) return;
   project.name = el('projectNameInput').value || 'Untitled Project';
+  project.snapshots = project.snapshots || [];
   localStorage.setItem(pKey(project.id), JSON.stringify(project));
   const idx = index.projects.findIndex(p=>p.id===project.id);
   if(idx>=0) index.projects[idx].name = project.name;
@@ -903,17 +965,17 @@ function loadProject(id) {
   if(!raw) return createProject();
   project = JSON.parse(raw);
   project.open2 = project.open2 || null; 
+  project.snapshots = project.snapshots || [];
   el('projectNameInput').value = project.name;
   renderAll();
 }
 
-// v1.5.3: Default project now creates an empty index.txt
 function createProject(name='Untitled Project') {
   const id = newId('p');
   project = {
     id, name, meta: { author:'', version:'1.0.0' },
     sections: [{type:'code', id:'C1', title:'index.txt', content:''}],
-    tabs: ['C1'], open: 'C1', open2: null, media: []
+    tabs: ['C1'], open: 'C1', open2: null, media: [], snapshots: []
   };
   index.projects.push({id, name}); saveStorage(); saveProject();
   el('projectNameInput').value = name; renderAll(); return id;
@@ -958,13 +1020,56 @@ function setupEditorEvents(ed, targetNum) {
       const sec = project.sections.find(s=>s.id===openId);
       if(sec) sec.content = ed.getValue();
       saveProject();
+      updateMinimap(targetNum);
       if(previewOpen) refreshPreview();
     }, 600);
   });
+  
+  ed.session.on('changeScrollTop', () => {
+    if(minimapOpen) syncMinimapScroll(targetNum);
+  });
+
   ed.on('focus', () => activeTargetEditor = targetNum);
 }
 setupEditorEvents(editor1, 1);
 setupEditorEvents(editor2, 2);
+
+// --- Minimap Logic ---
+function toggleMinimap() {
+  minimapOpen = !minimapOpen;
+  el('minimap1').style.display = minimapOpen ? 'block' : 'none';
+  el('minimap2').style.display = minimapOpen ? 'block' : 'none';
+  if(minimapOpen) { updateMinimap(1); updateMinimap(2); }
+}
+el('menuToggleMinimap').onclick = toggleMinimap;
+
+function updateMinimap(targetNum) {
+  if(!minimapOpen) return;
+  const ed = targetNum === 1 ? editor1 : editor2;
+  const mm = el(targetNum === 1 ? 'minimap1' : 'minimap2');
+  const mmC = mm.querySelector('.minimap-content');
+  mmC.textContent = ed.getValue();
+  syncMinimapScroll(targetNum);
+}
+function syncMinimapScroll(targetNum) {
+  const ed = targetNum === 1 ? editor1 : editor2;
+  const mm = el(targetNum === 1 ? 'minimap1' : 'minimap2');
+  const vport = mm.querySelector('.minimap-viewport');
+  
+  const totalLines = ed.session.getLength();
+  const firstVisible = ed.getFirstVisibleRow();
+  const visibleLines = ed.getLastVisibleRow() - firstVisible;
+  
+  const lineHeight = 2.4; 
+  
+  vport.style.top = (firstVisible * lineHeight) + 'px';
+  vport.style.height = (visibleLines * lineHeight) + 'px';
+  mm.scrollTop = (firstVisible * lineHeight) - (mm.clientHeight/2);
+}
+
+// --- Color Pickers ---
+el('colorPicker1').onchange = function() { editor1.insert(this.value.toUpperCase()); };
+el('colorPicker2').onchange = function() { editor2.insert(this.value.toUpperCase()); };
 
 // --- UI Resizers ---
 let isResizing = false;
@@ -1014,7 +1119,12 @@ function enableRename(elNode, sectionObj, callback) {
     document.execCommand('selectAll', false, null);
     const finish = () => {
       elNode.contentEditable = false;
-      sectionObj.title = elNode.textContent.trim() || 'untitled.txt';
+      const newBase = elNode.textContent.trim();
+      if(newBase) {
+        const parts = sectionObj.title.split('/');
+        parts.pop(); 
+        sectionObj.title = parts.length > 0 ? parts.join('/') + '/' + newBase : newBase;
+      }
       saveProject(); callback();
     };
     elNode.onblur = finish;
@@ -1043,6 +1153,9 @@ function buildFileTree(files) {
   return tree;
 }
 
+// Drag & Drop specific logic for Sidebar
+let dragItemInfo = null;
+
 function renderTreeBranch(node, container, path="", isMedia=false) {
   Object.keys(node.folders).forEach(folderName => {
     const fullPath = path + folderName;
@@ -1054,6 +1167,15 @@ function renderTreeBranch(node, container, path="", isMedia=false) {
     const div = document.createElement('div');
     div.className = 'tree-folder' + (isOpen ? ' open' : '');
     div.innerHTML = `<svg><use href="#icon-arrow-right"></use></svg> ${escapeHtml(folderName)}`;
+    
+    // Drop logic for folders
+    div.ondragover = e => { e.preventDefault(); div.classList.add('drag-over'); };
+    div.ondragleave = e => { e.preventDefault(); div.classList.remove('drag-over'); };
+    div.ondrop = e => {
+      e.preventDefault(); div.classList.remove('drag-over');
+      if(dragItemInfo) handleSidebarDrop(dragItemInfo, fullPath);
+    };
+
     div.onclick = () => {
       openFolders[fullPath] = !openFolders[fullPath];
       renderSidebar();
@@ -1090,9 +1212,16 @@ function renderTreeBranch(node, container, path="", isMedia=false) {
     div.innerHTML = `<svg style="fill:${color}"><use href="${icon}"></use></svg><div class="name" title="Double click to rename">${escapeHtml(dispName)}</div>
       <div class="tree-actions">${actionHTML}</div>`;
     
+    // Drag Logic
+    div.draggable = true;
+    div.ondragstart = (e) => {
+      dragItemInfo = { id: f.id, type: isMedia ? 'media' : 'code', baseName: dispName };
+      div.classList.add('dragging');
+    };
+    div.ondragend = () => { div.classList.remove('dragging'); dragItemInfo = null; };
+
     div.onclick = (e) => { 
       if(!e.target.closest('button') && !e.target.closest('[contenteditable]')) { 
-        if(isMedia) return;
         if(activeTargetEditor === 1) project.open = f.id; else project.open2 = f.id;
         if(!project.tabs.includes(f.id)) project.tabs.push(f.id); 
         saveProject(); renderTabs(); loadEditorContent(activeTargetEditor); renderSidebar(); 
@@ -1135,6 +1264,28 @@ function renderTreeBranch(node, container, path="", isMedia=false) {
   });
 }
 
+function handleSidebarDrop(info, folderPath) {
+  let fileRef = null;
+  if(info.type === 'code') fileRef = project.sections.find(s=>s.id === info.id);
+  else fileRef = project.media.find(m=>m.id === info.id);
+  
+  if(fileRef) {
+    fileRef.title = folderPath ? (folderPath + '/' + info.baseName) : info.baseName;
+    saveProject(); renderAll();
+  }
+}
+
+document.querySelectorAll('.root-drop').forEach(hdr => {
+  hdr.ondragover = e => { e.preventDefault(); hdr.classList.add('drag-over'); };
+  hdr.ondragleave = e => { e.preventDefault(); hdr.classList.remove('drag-over'); };
+  hdr.ondrop = e => {
+    e.preventDefault(); hdr.classList.remove('drag-over');
+    if(dragItemInfo && dragItemInfo.type === hdr.dataset.type) {
+      handleSidebarDrop(dragItemInfo, ""); // Drop to root
+    }
+  };
+});
+
 function renderSidebar() {
   const list = el('sectionsList'); list.innerHTML = '';
   const mList = el('mediaList'); mList.innerHTML = '';
@@ -1153,7 +1304,8 @@ function renderTabs() {
     const openId = targetNum === 1 ? project.open : project.open2;
     
     project.tabs.forEach(id => {
-      const s = project.sections.find(x=>x.id===id); if(!s) return;
+      let s = project.sections.find(x=>x.id===id) || project.media.find(x=>x.id===id);
+      if(!s) return;
       const color = getExtColor(s.title);
       const div = document.createElement('div'); div.className = 'tab' + (openId===id?' active':'');
       div.style.setProperty('--file-color', color);
@@ -1178,20 +1330,43 @@ function renderTabs() {
   if(splitViewOpen) renderTabSet(2);
 }
 
-function loadEditorContent(targetNum) {
+async function loadEditorContent(targetNum) {
   const ed = targetNum === 1 ? editor1 : editor2;
+  const edContainer = el(targetNum === 1 ? 'editor' : 'editor2');
+  const viewer = el(targetNum === 1 ? 'mediaViewer1' : 'mediaViewer2');
   const openId = targetNum === 1 ? project.open : project.open2;
   const tb = el(targetNum === 1 ? 'toolbar1' : 'toolbar2');
   
-  const s = project.sections.find(x=>x.id===openId);
-  if(!s) { 
-    ed.setValue('', -1); 
-    tb.style.borderTopColor = 'var(--border)';
-    return; 
+  if(!openId) { 
+    edContainer.style.display = 'block'; viewer.style.display = 'none';
+    ed.setValue('', -1); tb.style.borderTopColor = 'var(--border)'; return; 
   }
+
+  // Handle Media Tabs
+  if(openId.startsWith('F')) {
+    edContainer.style.display = 'none'; viewer.style.display = 'flex';
+    tb.style.borderTopColor = 'var(--accent)';
+    const mRef = project.media.find(x=>x.id===openId);
+    if(mRef) {
+      const stored = await idbAction('get', openId);
+      if(stored) {
+        const url = URL.createObjectURL(stored.blob);
+        if(mRef.type.startsWith('image')) viewer.innerHTML = `<img src="${url}">`;
+        else if(mRef.type.startsWith('video')) viewer.innerHTML = `<video controls src="${url}"></video>`;
+        else viewer.innerHTML = `<span style="color:var(--text-secondary)">Preview not available for this file type.</span>`;
+      }
+    }
+    return;
+  }
+  
+  // Handle Code Tabs
+  edContainer.style.display = 'block'; viewer.style.display = 'none';
+  const s = project.sections.find(x=>x.id===openId);
+  if(!s) return;
   
   const color = getExtColor(s.title);
   tb.style.borderTopColor = color;
+  document.documentElement.style.setProperty('--file-color', color);
 
   if(ed.getValue() !== s.content) ed.setValue(s.content||'', -1);
   const title = s.title.toLowerCase();
@@ -1205,6 +1380,8 @@ function loadEditorContent(targetNum) {
   else if(title.includes('.md')) mode = 'ace/mode/markdown';
   else if(title.includes('.php')) mode = 'ace/mode/php';
   ed.session.setMode(mode);
+  
+  updateMinimap(targetNum);
 }
 
 // --- Features (Console & Previews) ---
@@ -1235,7 +1412,7 @@ function togglePreview() {
   previewOpen = !previewOpen;
   el('previewPanel').classList.toggle('open', previewOpen);
   el('resizer-right').style.display = previewOpen ? 'block' : 'none';
-  if(!previewOpen) el('previewPanel').style.width = '0px';
+  if(!previewOpen) el('previewPanel').style.width = '0px'; 
   setTimeout(() => { editor1.resize(); editor2.resize(); }, 300); 
   if(previewOpen) refreshPreview();
 }
@@ -1246,7 +1423,7 @@ el('btnReloadPreview').onclick = refreshPreview;
 function toggleConsole() {
   consoleOpen = !consoleOpen;
   el('consolePanel').classList.toggle('open', consoleOpen);
-  if(consoleOpen && !previewOpen) togglePreview(); // Auto-open preview if closed to show console
+  if(consoleOpen && !previewOpen) togglePreview(); 
 }
 el('menuToggleConsole').onclick = toggleConsole;
 
@@ -1280,40 +1457,88 @@ function autoFormat() {
 }
 el('menuFormatCode').onclick = autoFormat;
 
+// --- Global Search & Replace ---
+el('menuGlobalSearch').onclick = () => { openModal('searchReplaceModal'); el('srResults').innerHTML = ''; el('srSearchInput').value=''; el('srReplaceInput').value=''; };
+el('btnSRSearch').onclick = () => {
+  const q = el('srSearchInput').value.toLowerCase();
+  const res = el('srResults'); res.innerHTML = '';
+  if(!q) return;
+  project.sections.forEach(s => {
+    if(s.content.toLowerCase().includes(q)) {
+      const div = document.createElement('div'); div.className = 'quick-open-item';
+      div.innerHTML = `<svg class="svg-icon"><use href="#icon-code"></use></svg> Found in ${escapeHtml(s.title)}`;
+      div.onclick = () => {
+        if(activeTargetEditor===1) project.open = s.id; else project.open2 = s.id;
+        if(!project.tabs.includes(s.id)) project.tabs.push(s.id);
+        saveProject(); renderAll(); closeModal('searchReplaceModal');
+      };
+      res.appendChild(div);
+    }
+  });
+  if(res.innerHTML==='') res.innerHTML = '<span style="font-size:12px; color:var(--text-secondary);">No results found.</span>';
+};
+el('btnSRReplace').onclick = () => {
+  const q = el('srSearchInput').value;
+  const rep = el('srReplaceInput').value;
+  if(!q) return;
+  let count = 0;
+  project.sections.forEach(s => {
+    if(s.content.includes(q)) {
+      s.content = s.content.split(q).join(rep);
+      count++;
+    }
+  });
+  if(count > 0) { saveProject(); renderAll(); closeModal('searchReplaceModal'); showToast(`Replaced in ${count} files.`); }
+  else showToast("No occurrences found.");
+};
+
+// --- Snapshots ---
+el('menuSnapshots').onclick = () => { renderSnapshots(); openModal('snapshotsModal'); };
+el('btnCreateSnapshot').onclick = () => {
+  const name = prompt("Name your snapshot:", "Before major changes");
+  if(name) {
+    project.snapshots.push({ id: newId('S'), name: name, date: new Date().toLocaleString(), sections: JSON.parse(JSON.stringify(project.sections)) });
+    saveProject(); renderSnapshots(); showToast("Snapshot created!");
+  }
+};
+function renderSnapshots() {
+  const list = el('snapshotsList'); list.innerHTML = '';
+  if(!project.snapshots || project.snapshots.length === 0) return list.innerHTML = '<span style="font-size:12px; color:var(--text-secondary);">No snapshots yet.</span>';
+  
+  project.snapshots.forEach(s => {
+    const div = document.createElement('div'); div.className = 'pm-list-item';
+    div.innerHTML = `<div class="pm-name">${escapeHtml(s.name)} <br><span style="font-size:10px; font-weight:normal; color:var(--text-secondary);">${s.date}</span></div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-open">Restore</button>
+        <button class="btn danger btn-del">Del</button>
+      </div>`;
+    div.querySelector('.btn-open').onclick = () => {
+      if(confirm(`Restore workspace to snapshot "${s.name}"? Current unsaved changes will be lost.`)) {
+        project.sections = JSON.parse(JSON.stringify(s.sections)); saveProject(); renderAll(); closeModal('snapshotsModal'); showToast("Snapshot Restored");
+      }
+    };
+    div.querySelector('.btn-del').onclick = () => {
+      project.snapshots = project.snapshots.filter(x=>x.id!==s.id); saveProject(); renderSnapshots();
+    };
+    list.appendChild(div);
+  });
+}
+
 // --- Shortcuts ---
 window.addEventListener('keydown', (e) => {
-  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
-    e.preventDefault(); saveProject(); if(previewOpen) refreshPreview(); showToast("Saved & Refreshed");
-  }
-  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
-    e.preventDefault(); openQuickOpen();
-  }
-  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
-    e.preventDefault(); 
-    const w = el('sidebar').style.width;
-    el('sidebar').style.width = (w === '0px') ? '280px' : '0px';
-    setTimeout(() => { editor1.resize(); editor2.resize(); }, 300);
-  }
-  if((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-    e.preventDefault(); togglePreview();
-  }
-  if((e.ctrlKey || e.metaKey) && e.key === '/') {
-    e.preventDefault(); openModal('shortcutsModal');
-  }
-  if(e.shiftKey && e.altKey && e.key.toLowerCase() === 'f') {
-    e.preventDefault(); autoFormat();
-  }
-  if(e.altKey && e.key.toLowerCase() === 'n') {
-    e.preventDefault(); addNewCodeFile();
-  }
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); saveProject(); if(previewOpen) refreshPreview(); showToast("Saved & Refreshed"); }
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') { e.preventDefault(); openQuickOpen(); }
+  if((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'f') { e.preventDefault(); openModal('searchReplaceModal'); }
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') { e.preventDefault(); const w = el('sidebar').style.width; el('sidebar').style.width = (w === '0px') ? '280px' : '0px'; setTimeout(() => { editor1.resize(); editor2.resize(); }, 300); }
+  if((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); togglePreview(); }
+  if((e.ctrlKey || e.metaKey) && e.key === '/') { e.preventDefault(); openModal('shortcutsModal'); }
+  if(e.shiftKey && e.altKey && e.key.toLowerCase() === 'f') { e.preventDefault(); autoFormat(); }
+  if(e.altKey && e.key.toLowerCase() === 'n') { e.preventDefault(); addNewCodeFile(); }
 });
 el('menuShortcuts').onclick = () => openModal('shortcutsModal');
 
 function openQuickOpen() {
-  const list = el('qoList'); list.innerHTML = '';
-  el('qoSearch').value = '';
-  openModal('quickOpenModal');
-  renderQuickOpen();
+  const list = el('qoList'); list.innerHTML = ''; el('qoSearch').value = ''; openModal('quickOpenModal'); renderQuickOpen();
 }
 function renderQuickOpen() {
   const list = el('qoList'); list.innerHTML = '';
@@ -1343,33 +1568,19 @@ el('menuWhatsNew').onclick = () => openModal('whatsNewModal');
 el('btnViewHistory').onclick = () => { closeModal('whatsNewModal'); openModal('updateHistoryModal'); };
 el('btnBackToWhatsNew').onclick = () => { closeModal('updateHistoryModal'); openModal('whatsNewModal'); };
 
-// v1.5.3: Safely reset current project only (now with empty index.txt default)
 el('menuResetProject').onclick = async () => {
   if(confirm("Are you sure you want to reset the CURRENT project to default?\nAll files and media in this project will be deleted.")) {
     await deleteProjectDbFiles(project.id);
     project.sections = [{type:'code', id:'C1', title:'index.txt', content:''}];
-    project.tabs = ['C1'];
-    project.open = 'C1';
-    project.open2 = null;
-    project.media = [];
-    saveProject();
-    renderAll();
-    showToast("Project reset to default");
+    project.tabs = ['C1']; project.open = 'C1'; project.open2 = null; project.media = []; project.snapshots = [];
+    saveProject(); renderAll(); showToast("Project reset to default");
   }
 };
 
-// v1.5.3: Factory Reset custom modals
-el('menuFactoryReset').onclick = () => {
-  openModal('factoryResetModal1');
-};
-el('btnFactoryResetProceed').onclick = () => {
-  closeModal('factoryResetModal1');
-  setTimeout(() => openModal('factoryResetModal2'), 300); // Trigger second warning
-};
+el('menuFactoryReset').onclick = () => openModal('factoryResetModal1');
+el('btnFactoryResetProceed').onclick = () => { closeModal('factoryResetModal1'); setTimeout(() => openModal('factoryResetModal2'), 300); };
 el('btnFactoryResetConfirm').onclick = async () => {
-  const db = await openDb();
-  const tx = db.transaction('files', 'readwrite');
-  tx.objectStore('files').clear();
+  const db = await openDb(); const tx = db.transaction('files', 'readwrite'); tx.objectStore('files').clear();
   Object.keys(localStorage).forEach(k => { if(k.startsWith('ALLF_')) localStorage.removeItem(k); });
   window.location.reload();
 };
@@ -1394,15 +1605,16 @@ el('menuDeleteProj').onclick = async () => {
 // PWA Install Prompt Logic
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault(); deferredPrompt = e; el('menuInstallApp').style.display = 'block';
+  e.preventDefault(); deferredPrompt = e; 
+  el('menuInstallApp').style.display = 'block'; 
 });
 el('menuInstallApp').onclick = async () => {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') deferredPrompt = null;
-  } else {
-    alert("PWA installation requires the app to be hosted securely (HTTPS). If running locally, you can use Chrome's 'Install' button in the address bar if available.");
+  if (deferredPrompt) { 
+    deferredPrompt.prompt(); 
+    const { outcome } = await deferredPrompt.userChoice; 
+    if (outcome === 'accepted') deferredPrompt = null; 
+  } else { 
+    showToast("App install prompt unavailable (requires HTTPS or Localhost).");
   }
 };
 
@@ -1413,23 +1625,16 @@ function renderProjectManager() {
   const list = el('pmProjectList'); list.innerHTML = '';
   if (index.projects.length === 0) return;
   index.projects.forEach(p => {
-    const div = document.createElement('div');
-    const isActive = p.id === project.id;
+    const div = document.createElement('div'); const isActive = p.id === project.id;
     div.className = 'pm-list-item' + (isActive ? ' active' : '');
-    div.innerHTML = `<div class="pm-name">${escapeHtml(p.name)}</div>
-      <div style="display:flex; gap:8px;">
-        <button class="btn btn-open">Open</button>
-        <button class="btn danger btn-del">Delete</button>
-      </div>`;
+    div.innerHTML = `<div class="pm-name">${escapeHtml(p.name)}</div><div style="display:flex; gap:8px;"><button class="btn btn-open">Open</button><button class="btn danger btn-del">Delete</button></div>`;
     div.querySelector('.btn-open').onclick = () => { closeModal('projectManagerModal'); loadProject(p.id); };
-    div.querySelector('.btn-del').onclick = async () => {
-      if (confirm(`Delete project "${p.name}" forever?`)) { await deleteProjectById(p.id); renderProjectManager(); }
-    };
+    div.querySelector('.btn-del').onclick = async () => { if (confirm(`Delete project "${p.name}" forever?`)) { await deleteProjectById(p.id); renderProjectManager(); } };
     list.appendChild(div);
   });
 }
 
-// --- FILE UPLOAD AND DRAG/DROP HANDLING ---
+// --- FILE UPLOAD HANDLING ---
 el('btnAddMedia').onclick = () => el('mediaInput').click();
 el('menuUploadMedia').onclick = () => el('mediaInput').click();
 el('dropZone').onclick = () => el('mediaInput').click();
@@ -1441,9 +1646,7 @@ el('mediaInput').onchange = e => { handleFiles(e.target.files); e.target.value =
 
 async function handleFiles(files) {
   if(!files || !files.length) return;
-  let totalSize = Array.from(files).reduce((a,f) => a + f.size, 0);
-  let processed = 0;
-  
+  let totalSize = Array.from(files).reduce((a,f) => a + f.size, 0); let processed = 0;
   showLoading("Saving Files to Local DB...");
   for(let i=0; i<files.length; i++) {
     const f = files[i]; const id = newId('F');
@@ -1455,9 +1658,7 @@ async function handleFiles(files) {
     await idbAction('put', { id, projectId: project.id, blob: f });
     project.media.push({ id, title: fName, type: f.type, size: f.size });
     
-    processed += f.size;
-    updateLoading((processed/totalSize)*100, `File ${i+1}/${files.length}`);
-    await yieldThread();
+    processed += f.size; updateLoading((processed/totalSize)*100, `File ${i+1}/${files.length}`); await yieldThread();
   }
   saveProject(); renderSidebar(); hideLoading(); showToast(`${files.length} file(s) uploaded`);
 }
@@ -1465,11 +1666,9 @@ async function handleFiles(files) {
 // --- FORMAT MODAL ---
 let activeCategory = "Web & Code";
 function openFormatModal(targetNum) {
-  activeTargetEditor = targetNum;
-  const openId = targetNum === 1 ? project.open : project.open2;
+  activeTargetEditor = targetNum; const openId = targetNum === 1 ? project.open : project.open2;
   if(!openId) return showToast("Open a file first to change its type.");
-  openModal('formatModal');
-  renderFormatSidebar(); renderFormatGrid();
+  openModal('formatModal'); renderFormatSidebar(); renderFormatGrid();
 }
 el('btnFormatClose').onclick = () => closeModal('formatModal');
 
@@ -1489,14 +1688,9 @@ function renderFormatSidebar() {
     sb.appendChild(div);
   });
 }
-
 function renderFormatGrid() {
-  const grid = el('fmGrid'); grid.innerHTML = '';
-  const query = el('fmSearch').value.toLowerCase();
-  let items = FORMATS[activeCategory] || [];
-  if(query) {
-    items = []; Object.values(FORMATS).forEach(arr => { arr.forEach(i => { if(i.ext.includes(query) || i.desc.toLowerCase().includes(query)) items.push(i); }); });
-  }
+  const grid = el('fmGrid'); grid.innerHTML = ''; const query = el('fmSearch').value.toLowerCase(); let items = FORMATS[activeCategory] || [];
+  if(query) { items = []; Object.values(FORMATS).forEach(arr => { arr.forEach(i => { if(i.ext.includes(query) || i.desc.toLowerCase().includes(query)) items.push(i); }); }); }
   items.forEach(item => {
     const btn = document.createElement('button'); btn.className = 'fm-btn'; btn.textContent = item.ext.toUpperCase();
     btn.onmouseover = () => el('fmHoverInfo').textContent = `${item.ext.toUpperCase()}: ${item.desc}`;
@@ -1536,15 +1730,13 @@ el('menuExport').onclick = () => {
 el('btnExportConfirm').onclick = async () => {
   try {
     el('btnExportConfirm').disabled = el('btnExportCancel').disabled = true;
-    el('exportProgressContainer').style.display = 'block';
-    el('exportProgressText').textContent = 'Structuring JSON...'; el('exportProgressPercent').textContent = '0%'; el('exportProgressFill').style.width = '0%';
+    el('exportProgressContainer').style.display = 'block'; el('exportProgressText').textContent = 'Structuring JSON...'; el('exportProgressPercent').textContent = '0%'; el('exportProgressFill').style.width = '0%';
     
     const parts = [ `ALLF_VERSION// ${ALLF_VERSION}\n`, `B//\n${BRANDING_TEXT}\nB\\\\\n`, `PROJECT// ${project.name}\n\n` ];
     project.sections.forEach(s => parts.push(`C// ${s.id}::${s.title}\n${s.content||''}\nC\\\\\nSPACE//\n`));
     parts.push(`EM//\n${JSON.stringify(project.media)}\nEM\\\\\n`);
     
-    const totalMediaBytes = project.media.reduce((acc, m) => acc + m.size, 0);
-    let processedBytes = 0;
+    const totalMediaBytes = project.media.reduce((acc, m) => acc + m.size, 0); let processedBytes = 0;
     
     for(let i=0; i<project.media.length; i++) {
       const m = project.media[i];
@@ -1557,15 +1749,12 @@ el('btnExportConfirm').onclick = async () => {
         parts.push(bufferToBase64(await slice.arrayBuffer()) + '\n');
         processedBytes += slice.size;
         const pct = Math.min(100, (processedBytes / totalMediaBytes) * 100);
-        el('exportProgressText').textContent = `Encoding: ${m.title}`;
-        el('exportProgressPercent').textContent = `${Math.round(pct)}%`;
-        el('exportProgressFill').style.width = `${pct}%`;
+        el('exportProgressText').textContent = `Encoding: ${m.title}`; el('exportProgressPercent').textContent = `${Math.round(pct)}%`; el('exportProgressFill').style.width = `${pct}%`;
         await yieldThread();
       }
       parts.push(`FILE_B64\\\\\n`);
     }
-    parts.push(`END//`);
-    el('exportProgressText').textContent = 'Assembling final file...'; await yieldThread();
+    parts.push(`END//`); el('exportProgressText').textContent = 'Assembling final file...'; await yieldThread();
     
     const blob = new Blob(parts, { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -1583,10 +1772,8 @@ el('importInput').onchange = async e => {
   const f = e.target.files[0]; if(!f) return;
   try {
     showLoading('Parsing File...'); await yieldThread();
-    const headSize = Math.min(f.size, 5 * 1024 * 1024);
-    const headText = await f.slice(0, headSize).text();
-    const tailSize = Math.min(f.size, 5 * 1024 * 1024);
-    const tailText = await f.slice(f.size - tailSize).text();
+    const headSize = Math.min(f.size, 5 * 1024 * 1024); const headText = await f.slice(0, headSize).text();
+    const tailSize = Math.min(f.size, 5 * 1024 * 1024); const tailText = await f.slice(f.size - tailSize).text();
 
     if(!headText.includes(BRANDING_TEXT) && !tailText.includes(BRANDING_TEXT)) { hideLoading(); return alert("Invalid ALLF file."); }
     
@@ -1645,10 +1832,8 @@ el('importInput').onchange = async e => {
     }
     
     updateLoading(100, 'Finalizing...'); await yieldThread();
-    localStorage.setItem(pKey(pid), JSON.stringify(np));
-    index.projects.find(x=>x.id===pid).name = np.name; saveStorage();
+    localStorage.setItem(pKey(pid), JSON.stringify(np)); index.projects.find(x=>x.id===pid).name = np.name; saveStorage();
     hideLoading(); loadProject(pid); showToast('Import Successful');
-    
   } catch(err) { console.error(err); hideLoading(); alert('Import Failed: ' + err.message); }
   e.target.value = '';
 };
