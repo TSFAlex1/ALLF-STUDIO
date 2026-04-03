@@ -289,6 +289,7 @@ footer {
   <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></symbol>
   <symbol id="icon-trash" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></symbol>
   <symbol id="icon-close" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></symbol>
+  <symbol id="icon-download" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></symbol>
 </svg>
 
 <header>
@@ -383,7 +384,7 @@ footer {
 
 </div>
 
-<footer>2026 &copy; TSFAlex Version 1.3.0</footer>
+<footer>2026 &copy; TSFAlex Version 1.3.1</footer>
 
 <input id="mediaInput" type="file" accept="*/*" multiple style="display:none" />
 <input id="importInput" type="file" accept=".allf,text/plain" style="display:none" />
@@ -491,7 +492,7 @@ footer {
 
 <script>
 /* =========================================================
-   ALLF STUDIO - V7 (Ultimate Performance & Loading Bars)
+   ALLF STUDIO - V7.2 (Bulletproof Memory Fix)
    ========================================================= */
 
 const BRANDING_TEXT = '© ALLF STUDIO - TSFALEX';
@@ -537,25 +538,24 @@ function hideLoading() {
 const yieldThread = () => new Promise(r => setTimeout(r, 0));
 
 // --- High Performance Base64 Converters ---
-// Uses native FileReader which handles large chunks much faster and safer than string loops
-function blobToBase64(blob) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const dataUrl = reader.result;
-      const b64 = dataUrl.substring(dataUrl.indexOf(',') + 1);
-      resolve(b64);
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
+// Safely loop through byte array without crashing stack
+function bufferToBase64(buffer) {
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return window.btoa(binary);
 }
 
-// Uses native Fetch to decode Base64 directly into a Blob (100x faster for large data)
-async function base64ToBlob(b64, type) {
-  const url = `data:${type};base64,${b64}`;
-  const res = await fetch(url);
-  return await res.blob();
+// Memory safe base64 to Blob without creating massive strings
+function base64ToBuffer(b64) {
+  const bin = window.atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) {
+    bytes[i] = bin.charCodeAt(i);
+  }
+  return bytes;
 }
 
 // --- DB ---
@@ -711,17 +711,40 @@ function renderSidebar() {
     div.innerHTML = `<svg><use href="${icon}"></use></svg><div class="name" title="Double click to rename">${escapeHtml(m.title)}</div>
       <div class="tree-actions">
         <button class="icon-btn insert" title="Insert into code"><svg><use href="#icon-plus"></use></svg></button>
+        <button class="icon-btn download" title="Download File"><svg><use href="#icon-download"></use></svg></button>
         <button class="icon-btn del" title="Delete"><svg><use href="#icon-trash"></use></svg></button>
       </div>`;
+      
     div.querySelector('.insert').onclick = () => {
       let tag = `ALLF_MEDIA:${m.id}`;
       if(m.type.startsWith('image')) tag = `<img src="${tag}" alt="${m.title}">`;
       else if(m.type.startsWith('video')) tag = `<video src="${tag}" controls></video>`;
       editor.insert(tag);
     };
+    
+    div.querySelector('.download').onclick = async () => {
+      try {
+        const stored = await idbAction('get', m.id);
+        if (!stored || !stored.blob) return showToast("File not found.");
+        const url = URL.createObjectURL(stored.blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = m.title;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast(`Downloaded ${m.title}`);
+      } catch (e) {
+        console.error(e);
+        showToast("Download failed.");
+      }
+    };
+    
     div.querySelector('.del').onclick = async () => {
       await idbAction('del', m.id); project.media = project.media.filter(x=>x.id!==m.id); saveProject(); renderSidebar();
     };
+    
     enableRename(div.querySelector('.name'), m, renderSidebar);
     mList.appendChild(div);
   });
@@ -980,7 +1003,7 @@ el('editorThemeSelect').onchange = (e) => {
   index.theme = e.target.value; saveStorage(); editor.setTheme(index.theme);
 };
 
-// --- Export (High Performance, Non-Blocking, Visible Progress) ---
+// --- HIGH PERFORMANCE EXPORT ---
 el('menuExport').onclick = () => {
   el('exportFilename').value = project.name.replace(/\s+/g,'_') + '.allf';
   el('exportProgressContainer').style.display = 'none';
@@ -992,17 +1015,21 @@ el('btnExportConfirm').onclick = async () => {
     el('btnExportConfirm').disabled = true;
     el('btnExportCancel').disabled = true;
     
-    // Reset and show progress bar
     el('exportProgressContainer').style.display = 'block';
     el('exportProgressText').textContent = 'Structuring JSON...';
     el('exportProgressPercent').textContent = '0%';
     el('exportProgressFill').style.width = '0%';
     
-    const parts = [`ALLF_VERSION// ${ALLF_VERSION}\nPROJECT// ${project.name}\n\n`];
+    // BRANDING GOES AT THE VERY TOP NOW
+    const parts = [
+      `ALLF_VERSION// ${ALLF_VERSION}\n`,
+      `B//\n${BRANDING_TEXT}\nB\\\\\n`,
+      `PROJECT// ${project.name}\n\n`
+    ];
+    
     project.sections.forEach(s => parts.push(`C// ${s.id}::${s.title}\n${s.content||''}\nC\\\\\nSPACE//\n`));
     parts.push(`EM//\n${JSON.stringify(project.media)}\nEM\\\\\n`);
     
-    // Calculate total media bytes for accurate progress
     const totalMediaBytes = project.media.reduce((acc, m) => acc + m.size, 0);
     let processedBytes = 0;
     
@@ -1013,31 +1040,29 @@ el('btnExportConfirm').onclick = async () => {
       
       parts.push(`FILE_B64// ${m.id}\n`);
       
-      // 1MB Chunks for optimal memory vs speed ratio
-      const chunkSize = 1024 * 1024; 
+      // Memory Safe Chunking (2MB)
+      const chunkSize = 2 * 1024 * 1024; 
       
       for(let offset=0; offset<stored.blob.size; offset += chunkSize) {
         const slice = stored.blob.slice(offset, offset + chunkSize);
+        const arrayBuffer = await slice.arrayBuffer();
         
-        // Native Blob to Base64 (Very fast, doesn't crash RAM)
-        const b64Chunk = await blobToBase64(slice);
-        parts.push(b64Chunk + '\n');
+        // Loop conversion to base64 instead of string arrays
+        parts.push(bufferToBase64(arrayBuffer) + '\n');
         
         processedBytes += slice.size;
         
-        // Update Progress UI
         const pct = Math.min(100, (processedBytes / totalMediaBytes) * 100);
         el('exportProgressText').textContent = `Encoding: ${m.title}`;
         el('exportProgressPercent').textContent = `${Math.round(pct)}%`;
         el('exportProgressFill').style.width = `${pct}%`;
         
-        // YIELD thread so UI updates and doesn't freeze
         await yieldThread();
       }
       parts.push(`FILE_B64\\\\\n`);
     }
     
-    parts.push(`B//\n${BRANDING_TEXT}\nB\\\\\nEND//`);
+    parts.push(`END//`);
     
     el('exportProgressText').textContent = 'Assembling final file...';
     await yieldThread();
@@ -1059,62 +1084,90 @@ el('btnExportConfirm').onclick = async () => {
   }
 };
 
-// --- Import (High Performance, Smart Slicing) ---
+// --- HIGH PERFORMANCE IMPORT ---
 el('menuImport').onclick = () => el('importInput').click();
 el('importInput').onchange = async e => {
   const f = e.target.files[0]; if(!f) return;
+  
   try {
     showLoading('Parsing File...');
     await yieldThread();
 
-    const text = await f.text();
-    if(!text.includes(BRANDING_TEXT)) {
+    // 1. Read just the first 5MB to instantly verify the file without loading gigs into memory
+    const headSize = Math.min(f.size, 5 * 1024 * 1024);
+    const headText = await f.slice(0, headSize).text();
+
+    if(!headText.includes(BRANDING_TEXT)) {
       hideLoading();
-      return alert("Invalid ALLF file.");
+      return alert("Invalid ALLF file. (Missing verification branding)");
     }
     
     const pid = createProject("Imported Project");
     const np = JSON.parse(localStorage.getItem(pKey(pid)));
     np.sections = []; np.media = [];
     
-    // Quick meta parsing
-    const pMatch = text.match(/PROJECT\/\/\s*(.*)/); 
+    const pMatch = headText.match(/PROJECT\/\/\s*(.*)/); 
     if(pMatch) np.name = pMatch[1].trim();
     
     const sectionRe = /C\/\/\s*(.*?)::(.*?)\n([\s\S]*?)\nC\\\\/g;
-    let sm; while((sm = sectionRe.exec(text))) np.sections.push({ type:'code', id:sm[1], title:sm[2], content:sm[3] });
+    let sm; while((sm = sectionRe.exec(headText))) np.sections.push({ type:'code', id:sm[1], title:sm[2], content:sm[3] });
     if(!np.sections.length) np.sections.push({type:'code', id:'C1', title:'index.html', content:''});
     np.tabs = [np.sections[0].id]; np.open = np.sections[0].id;
     
-    const manMatch = text.match(/EM\/\/\n([\s\S]*?)\nEM\\\\/);
+    const manMatch = headText.match(/EM\/\/\n([\s\S]*?)\nEM\\\\/);
     if(manMatch) try { np.media = JSON.parse(manMatch[1]); } catch(err){}
     
-    // Smart Parsing for huge strings (Avoids Regex memory limit crashes)
-    let searchIndex = 0;
-    let b64Start = text.indexOf('FILE_B64// ', searchIndex);
-    let totalLength = text.length;
+    // 2. Stream Process Huge Base64 Files 
+    const CHUNK_SIZE = 10 * 1024 * 1024; // Stream in 10MB blocks
+    let offset = 0;
+    let buffer = "";
+    let currentFileId = null;
+    let currentB64Parts = [];
 
-    while(b64Start !== -1) {
-      let idStart = b64Start + 11;
-      let idEnd = text.indexOf('\n', idStart);
-      let fId = text.substring(idStart, idEnd).trim();
+    while(offset < f.size) {
+        updateLoading((offset / f.size) * 100, `Extracting Media...`);
+        await yieldThread();
 
-      let blockEnd = text.indexOf('FILE_B64\\\\', idEnd);
-      if(blockEnd === -1) break;
+        const slice = f.slice(offset, offset + CHUNK_SIZE);
+        buffer += await slice.text();
 
-      let b64Data = text.substring(idEnd + 1, blockEnd).replace(/\n/g, '');
-      
-      let mRef = np.media.find(x=>x.id===fId);
-      
-      updateLoading((blockEnd / totalLength) * 100, `Extracting ${mRef ? mRef.title : 'file'}...`);
-      await yieldThread();
+        while(true) {
+            if(!currentFileId) {
+                const startIdx = buffer.indexOf('FILE_B64// ');
+                if(startIdx === -1) {
+                    buffer = buffer.slice(-50); 
+                    break;
+                }
+                const lineEnd = buffer.indexOf('\n', startIdx);
+                if(lineEnd === -1) break; 
 
-      // Native fetch to convert giant Base64 string to Blob (Incredibly fast)
-      let blob = await base64ToBlob(b64Data, mRef ? mRef.type : 'application/octet-stream');
-      await idbAction('put', { id: fId, projectId: pid, blob });
-
-      searchIndex = blockEnd + 10;
-      b64Start = text.indexOf('FILE_B64// ', searchIndex);
+                currentFileId = buffer.substring(startIdx + 11, lineEnd).trim();
+                buffer = buffer.substring(lineEnd + 1);
+            } else {
+                const endIdx = buffer.indexOf('FILE_B64\\\\');
+                if(endIdx === -1) {
+                    const safeLen = buffer.length - 50;
+                    if(safeLen > 0) {
+                        const b64Data = buffer.substring(0, safeLen).replace(/\s/g, '');
+                        if(b64Data) currentB64Parts.push(base64ToBuffer(b64Data));
+                        buffer = buffer.substring(safeLen);
+                    }
+                    break;
+                } else {
+                    const b64Data = buffer.substring(0, endIdx).replace(/\s/g, '');
+                    if(b64Data) currentB64Parts.push(base64ToBuffer(b64Data));
+                    
+                    const mRef = np.media.find(x => x.id === currentFileId);
+                    const finalBlob = new Blob(currentB64Parts, { type: mRef ? mRef.type : 'application/octet-stream' });
+                    await idbAction('put', { id: currentFileId, projectId: pid, blob: finalBlob });
+                    
+                    currentFileId = null;
+                    currentB64Parts = [];
+                    buffer = buffer.substring(endIdx + 10);
+                }
+            }
+        }
+        offset += CHUNK_SIZE;
     }
     
     updateLoading(100, 'Finalizing...');
@@ -1130,9 +1183,8 @@ el('importInput').onchange = async e => {
   } catch(err) { 
     console.error(err); 
     hideLoading();
-    alert('Import Failed.'); 
+    alert('Import Failed: ' + err.message); 
   }
-  // Reset input
   e.target.value = '';
 };
 
