@@ -384,7 +384,7 @@ footer {
 
 </div>
 
-<footer>2026 &copy; TSFAlex Version 1.3.2</footer>
+<footer>2026 &copy; TSFAlex Version 1.3.3</footer>
 
 <input id="mediaInput" type="file" accept="*/*" multiple style="display:none" />
 <input id="importInput" type="file" accept=".allf,text/plain" style="display:none" />
@@ -492,7 +492,7 @@ footer {
 
 <script>
 /* =========================================================
-   ALLF STUDIO - V7.2 (Bulletproof Memory Fix)
+   ALLF STUDIO - V7.3 (Bulletproof Importer Fix)
    ========================================================= */
 
 const BRANDING_TEXT = '© ALLF STUDIO - TSFALEX';
@@ -538,7 +538,6 @@ function hideLoading() {
 const yieldThread = () => new Promise(r => setTimeout(r, 0));
 
 // --- High Performance Base64 Converters ---
-// Safely loop through byte array without crashing stack
 function bufferToBase64(buffer) {
   let binary = '';
   const bytes = new Uint8Array(buffer);
@@ -548,7 +547,6 @@ function bufferToBase64(buffer) {
   return window.btoa(binary);
 }
 
-// Memory safe base64 to Blob without creating massive strings
 function base64ToBuffer(b64) {
   const bin = window.atob(b64);
   const bytes = new Uint8Array(bin.length);
@@ -1003,7 +1001,7 @@ el('editorThemeSelect').onchange = (e) => {
   index.theme = e.target.value; saveStorage(); editor.setTheme(index.theme);
 };
 
-// --- Export (High Performance, Non-Blocking, Visible Progress) ---
+// --- EXPORT ---
 el('menuExport').onclick = () => {
   el('exportFilename').value = project.name.replace(/\s+/g,'_') + '.allf';
   el('exportProgressContainer').style.display = 'none';
@@ -1015,17 +1013,21 @@ el('btnExportConfirm').onclick = async () => {
     el('btnExportConfirm').disabled = true;
     el('btnExportCancel').disabled = true;
     
-    // Reset and show progress bar
     el('exportProgressContainer').style.display = 'block';
     el('exportProgressText').textContent = 'Structuring JSON...';
     el('exportProgressPercent').textContent = '0%';
     el('exportProgressFill').style.width = '0%';
     
-    const parts = [`ALLF_VERSION// ${ALLF_VERSION}\nPROJECT// ${project.name}\n\n`];
+    // EXPORT FIX: Added branding tag to the very top so the importer easily finds it!
+    const parts = [
+      `ALLF_VERSION// ${ALLF_VERSION}\n`,
+      `B//\n${BRANDING_TEXT}\nB\\\\\n`,
+      `PROJECT// ${project.name}\n\n`
+    ];
+    
     project.sections.forEach(s => parts.push(`C// ${s.id}::${s.title}\n${s.content||''}\nC\\\\\nSPACE//\n`));
     parts.push(`EM//\n${JSON.stringify(project.media)}\nEM\\\\\n`);
     
-    // Calculate total media bytes for accurate progress
     const totalMediaBytes = project.media.reduce((acc, m) => acc + m.size, 0);
     let processedBytes = 0;
     
@@ -1036,8 +1038,7 @@ el('btnExportConfirm').onclick = async () => {
       
       parts.push(`FILE_B64// ${m.id}\n`);
       
-      // EXPORT FIX: 3MB Chunks (MUST be multiple of 3 to avoid internal Base64 padding '=')
-      const chunkSize = 3 * 1024 * 1024; 
+      const chunkSize = 3 * 1024 * 1024; // 3MB exact to avoid Base64 internal '=' padding issues
       
       for(let offset=0; offset<stored.blob.size; offset += chunkSize) {
         const slice = stored.blob.slice(offset, offset + chunkSize);
@@ -1047,19 +1048,17 @@ el('btnExportConfirm').onclick = async () => {
         
         processedBytes += slice.size;
         
-        // Update Progress UI
         const pct = Math.min(100, (processedBytes / totalMediaBytes) * 100);
         el('exportProgressText').textContent = `Encoding: ${m.title}`;
         el('exportProgressPercent').textContent = `${Math.round(pct)}%`;
         el('exportProgressFill').style.width = `${pct}%`;
         
-        // YIELD thread so UI updates and doesn't freeze
         await yieldThread();
       }
       parts.push(`FILE_B64\\\\\n`);
     }
     
-    parts.push(`B//\n${BRANDING_TEXT}\nB\\\\\nEND//`);
+    parts.push(`END//`);
     
     el('exportProgressText').textContent = 'Assembling final file...';
     await yieldThread();
@@ -1081,7 +1080,7 @@ el('btnExportConfirm').onclick = async () => {
   }
 };
 
-// --- Import (High Performance, Smart Slicing) ---
+// --- IMPORT ---
 el('menuImport').onclick = () => el('importInput').click();
 el('importInput').onchange = async e => {
   const f = e.target.files[0]; if(!f) return;
@@ -1090,11 +1089,14 @@ el('importInput').onchange = async e => {
     showLoading('Parsing File...');
     await yieldThread();
 
-    // 1. Read just the first 5MB to instantly verify the file without loading gigs into memory
+    // IMPORT FIX: Check both the top 5MB and the bottom 5MB (for backwards compatibility with old files)
     const headSize = Math.min(f.size, 5 * 1024 * 1024);
     const headText = await f.slice(0, headSize).text();
+    
+    const tailSize = Math.min(f.size, 5 * 1024 * 1024);
+    const tailText = await f.slice(f.size - tailSize).text();
 
-    if(!headText.includes(BRANDING_TEXT)) {
+    if(!headText.includes(BRANDING_TEXT) && !tailText.includes(BRANDING_TEXT)) {
       hideLoading();
       return alert("Invalid ALLF file. (Missing verification branding)");
     }
@@ -1103,7 +1105,6 @@ el('importInput').onchange = async e => {
     const np = JSON.parse(localStorage.getItem(pKey(pid)));
     np.sections = []; np.media = [];
     
-    // Quick meta parsing
     const pMatch = headText.match(/PROJECT\/\/\s*(.*)/); 
     if(pMatch) np.name = pMatch[1].trim();
     
@@ -1115,8 +1116,7 @@ el('importInput').onchange = async e => {
     const manMatch = headText.match(/EM\/\/\n([\s\S]*?)\nEM\\\\/);
     if(manMatch) try { np.media = JSON.parse(manMatch[1]); } catch(err){}
     
-    // 2. Stream Process Huge Base64 Files 
-    const CHUNK_SIZE = 10 * 1024 * 1024; // Stream in 10MB blocks
+    const CHUNK_SIZE = 10 * 1024 * 1024;
     let offset = 0;
     let buffer = "";
     let currentFileId = null;
@@ -1150,7 +1150,7 @@ el('importInput').onchange = async e => {
                     if(safeLen > 0) {
                         let b64Data = leftoverB64 + buffer.substring(0, safeLen).replace(/\s/g, '');
                         
-                        // IMPORT FIX: Ensure length is multiple of 4 for valid atob decoding
+                        // IMPORT FIX: Math Buffer logic to protect atob decoding
                         let validLen = b64Data.length - (b64Data.length % 4);
                         let toProcess = b64Data.substring(0, validLen);
                         leftoverB64 = b64Data.substring(validLen);
