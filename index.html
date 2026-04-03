@@ -81,6 +81,11 @@ header {
 }
 .dropdown-item:hover { background: var(--accent); color: #fff; padding-left: 20px; }
 .dropdown-item.danger:hover { background: var(--danger); color: #fff; }
+
+/* V1.6.4 FIX: Active Project Text Highlight Bug Fix */
+.dropdown-item.active-project { color: var(--accent); font-weight: 600; }
+.dropdown-item.active-project:hover { color: #fff; }
+
 .dropdown-divider { height: 1px; background: var(--border); margin: 4px 0; }
 .shortcut-hint { font-size: 11px; opacity: 0.6; font-family: var(--font-mono); }
 
@@ -91,13 +96,6 @@ header {
 }
 .project-name-input:hover { background: var(--bg-surface-hover); }
 .project-name-input:focus { background: var(--bg-base); border-color: var(--accent); }
-
-.project-select {
-  background: var(--bg-overlay); border: 1px solid var(--border); color: var(--text-primary);
-  padding: 4px 8px; border-radius: 4px; font-size: 12px; outline: none; cursor: pointer;
-  transition: all 0.2s ease;
-}
-.project-select:hover { border-color: var(--text-secondary); }
 
 /* BUTTONS */
 .btn {
@@ -165,7 +163,7 @@ header {
 .tree-actions { opacity: 0; gap: 4px; transition: opacity 0.2s ease; display: flex; }
 .tree-item:hover .tree-actions { opacity: 1; }
 
-/* EDITOR AREA */
+/* EDITOR AREA (SPLIT VIEW SUPPORT) */
 .editor-wrapper {
   flex: 1; display: flex; flex-direction: column; min-width: 0; background: var(--bg-base);
 }
@@ -310,9 +308,8 @@ footer {
 }
 .pm-list-item:hover { border-color: var(--text-secondary); }
 .pm-list-item .pm-name { font-weight: 600; font-size: 13px; color: var(--text-primary); }
-.pm-list-item.active .pm-name { color: var(--accent); }
 
-/* FORMAT MODAL */
+/* CHANGE FILE TYPE MODAL CSS */
 .format-modal {
   width: 760px; max-width: 95vw; background: #111318; border: 1px solid var(--cyan-accent);
   border-radius: 8px; box-shadow: 0 12px 40px rgba(0,0,0,0.8); display: flex; flex-direction: column; 
@@ -373,6 +370,8 @@ footer {
   <symbol id="icon-arrow-right" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></symbol>
   <symbol id="icon-split" viewBox="0 0 24 24"><path d="M3 3h8v18H3V3zm10 0h8v18h-8V3z"/></symbol>
   <symbol id="icon-terminal" viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .9-2 2v12c0 1.1.89 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.89-2-2-2zm0 14H4V8h16v10zm-2-1h-6v-2h6v2zM7.5 17l-1.41-1.41L8.67 13l-2.58-2.59L7.5 9l4 4-4 4z"/></symbol>
+  <symbol id="icon-copy" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></symbol>
+  <symbol id="icon-wrap" viewBox="0 0 24 24"><path d="M4 19h6v-2H4v2zM20 5H4v2h16V5zm-3 6H4v2h13.25c1.1 0 2 .9 2 2s-.9 2-2 2H15v-2l-3 3 3 3v-2h2c2.21 0 4-1.79 4-4s-1.79-4-4-4z"/></symbol>
 </svg>
 
 <header>
@@ -391,9 +390,6 @@ footer {
         <div class="dropdown-item" id="menuFileConverter" style="color: var(--cyan-accent);">
           File Converter <svg class="svg-icon" style="width:12px; height:12px;"><use href="#icon-external"></use></svg>
         </div>
-        <div class="dropdown-item" id="menuInstallApp" style="color: var(--success);">
-          Install App (PWA)
-        </div>
         <div class="dropdown-divider"></div>
         <div class="dropdown-item danger" id="menuResetProject">Restore to Default</div>
         <div class="dropdown-item danger" id="menuFactoryReset" style="font-weight: 800;">Factory Reset</div>
@@ -405,6 +401,7 @@ footer {
       <div class="dropdown">
         <div class="dropdown-item" id="menuAddCode">Add New File <span class="shortcut-hint">Alt+N</span></div>
         <div class="dropdown-item" id="menuFormatCode">Auto-Format Code <span class="shortcut-hint">Shift+Alt+F</span></div>
+        <div class="dropdown-item" id="menuFormatOnSave">Format on Save <span id="fosIndicator">❌</span></div>
         <div class="dropdown-item" id="menuGlobalSearch">Search & Replace <span class="shortcut-hint">Ctrl+Shift+F</span></div>
         <div class="dropdown-divider"></div>
         <div class="dropdown-item" id="menuUploadMedia">Upload Assets</div>
@@ -446,8 +443,12 @@ footer {
   </div>
   
   <div class="header-right">
-    <select id="projectSelect" class="project-select" title="Switch Projects"></select>
-    <button class="btn primary" id="btnLivePreview">
+    <div class="menu-group" id="projectDropdownGroup">
+      <div class="menu-btn" id="currentProjectBtn" style="background: var(--bg-overlay); border: 1px solid var(--border); border-radius: 4px; padding: 4px 10px; display: flex; align-items: center;">Loading...</div>
+      <div class="dropdown" id="projectDropdownList" style="right: 0; left: auto; min-width: 200px; max-height: 400px; overflow-y: auto;">
+        </div>
+    </div>
+    <button class="btn primary" id="btnLivePreview" style="margin-left: 8px;">
       <svg><use href="#icon-play"></use></svg> Live Preview
     </button>
   </div>
@@ -482,6 +483,7 @@ footer {
       <div class="editor-pane" id="editorPane1">
         <div class="tabs" id="tabs"></div>
         <div class="editor-toolbar" id="toolbar1">
+          <button class="btn" id="btnWordWrap1" style="padding: 4px 8px; font-size: 11px;" title="Toggle Word Wrap"><svg class="svg-icon"><use href="#icon-wrap"></use></svg></button>
           <div class="color-picker-wrap" title="Pick a color & insert HEX">
             <input type="color" id="colorPicker1" value="#5E6AD2">
           </div>
@@ -495,6 +497,7 @@ footer {
       <div class="editor-pane" id="editorPane2" style="display:none;">
         <div class="tabs" id="tabs2"></div>
         <div class="editor-toolbar" id="toolbar2">
+          <button class="btn" id="btnWordWrap2" style="padding: 4px 8px; font-size: 11px;" title="Toggle Word Wrap"><svg class="svg-icon"><use href="#icon-wrap"></use></svg></button>
           <div class="color-picker-wrap" title="Pick a color & insert HEX">
             <input type="color" id="colorPicker2" value="#0DE2C6">
           </div>
@@ -528,7 +531,7 @@ footer {
 
 </div>
 
-<footer>2026 &copy; TSFAlex Version 1.6.2</footer>
+<footer>2026 &copy; TSFAlex Version 1.6.4</footer>
 
 <input id="mediaInput" type="file" accept="*/*" multiple style="display:none" />
 <input id="importInput" type="file" accept=".allf,text/plain" style="display:none" />
@@ -644,23 +647,21 @@ footer {
 
 <div id="whatsNewModal" class="modal-overlay">
   <div class="modal" style="width: 450px;">
-    <div class="modal-header">What's New in v1.6.2</div>
+    <div class="modal-header">What's New in v1.6.4</div>
     <div class="modal-body" style="max-height: 60vh; overflow-y: auto; gap: 16px;">
       
       <div>
-        <h4 style="margin: 0 0 4px 0; color: var(--danger); display: flex; align-items: center; gap: 6px;">
-          <svg style="width:16px; height:16px; fill:currentColor;" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-          Critical UI Restoration
+        <h4 style="margin: 0 0 4px 0; color: var(--cyan-accent); display: flex; align-items: center; gap: 6px;">
+          Project Dropdown Bug Fix
         </h4>
-        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;">Fixed a major issue where the app engine failed to load properly. The drag-and-drop zone, file creation, upload box, and project selector have all been fully restored to working order.</p>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;">Fixed an issue where the active project's name would blend into the background highlight and become invisible when hovering over it in the Project Selection menu.</p>
       </div>
 
       <div>
-        <h4 style="margin: 0 0 4px 0; color: var(--success); display: flex; align-items: center; gap: 6px;">
-          <svg style="width:16px; height:16px; fill:currentColor;" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
-          App Installation Link
+        <h4 style="margin: 0 0 4px 0; color: var(--danger); display: flex; align-items: center; gap: 6px;">
+          Menu Cleanup
         </h4>
-        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;">The "Install App (PWA)" button is now always accessible in the File menu, providing better feedback if your environment doesn't natively support desktop installation.</p>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;">Removed the "Install App (PWA)" button from the File menu to streamline the UI based on user feedback.</p>
       </div>
 
     </div>
@@ -677,9 +678,21 @@ footer {
     <div class="modal-body" style="max-height: 60vh; overflow-y: auto; gap: 20px;">
       
       <div>
+        <h3 style="margin:0 0 8px 0; color: var(--text-primary); border-bottom: 1px solid var(--border); padding-bottom: 4px;">v1.6.3</h3>
+        <p style="margin: 0 0 6px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Format on Save:</b> Added a toggle in the Edit menu to automatically format code on Ctrl+S.</p>
+        <p style="margin: 0 0 6px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Word Wrap Toggle:</b> Instantly toggle word wrapping right from the editor toolbar.</p>
+        <p style="margin: 0 0 6px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Duplicate File:</b> Hover over files or assets in the sidebar to quickly clone them.</p>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Premium Dropdowns:</b> Replaced the default browser project selector with a sleek, animated dropdown.</p>
+      </div>
+
+      <div>
+        <h3 style="margin:0 0 8px 0; color: var(--text-primary); border-bottom: 1px solid var(--border); padding-bottom: 4px;">v1.6.2</h3>
+        <p style="margin: 0 0 6px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Critical UI Restoration:</b> Fixed a massive code-truncation bug that broke the core interface. File creation, project selection, and file uploading are fully functional again.</p>
+      </div>
+
+      <div>
         <h3 style="margin:0 0 8px 0; color: var(--text-primary); border-bottom: 1px solid var(--border); padding-bottom: 4px;">v1.6.1</h3>
         <p style="margin: 0 0 6px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Upload UI Enhancements:</b> The file upload area has been redesigned to be a prominent, clickable button zone with clear icons.</p>
-        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>General UI Cleanups:</b> Minor layout refinements, spacing improvements, and replaced generic icons.</p>
       </div>
 
       <div>
@@ -732,6 +745,12 @@ footer {
       <div>
         <h3 style="margin:0 0 8px 0; color: var(--text-primary); border-bottom: 1px solid var(--border); padding-bottom: 4px;">v1.3.3</h3>
         <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Bulletproof Importer:</b> Re-engineered the import logic to safely stream huge 1GB+ files without crashing V8 memory limits.</p>
+      </div>
+
+      <div>
+        <h3 style="margin:0 0 8px 0; color: var(--text-primary); border-bottom: 1px solid var(--border); padding-bottom: 4px;">v1.3.0</h3>
+        <p style="margin: 0 0 6px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>File Extensions:</b> Custom file extension builder with color-coded editor themes based on language.</p>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Smooth UI:</b> Completely rebuilt the UI with glass-morphism blurs and buttery-smooth CSS transitions on all interactive elements.</p>
       </div>
 
     </div>
@@ -844,7 +863,7 @@ footer {
 
 <script>
 /* =========================================================
-   ALLF STUDIO - V1.6.2 (Critical Engine Restoration)
+   ALLF STUDIO - V1.6.4 (Dropdown Fix & Install App Removal)
    ========================================================= */
 
 const BRANDING_TEXT = '© ALLF STUDIO - TSFALEX';
@@ -934,7 +953,7 @@ function deleteProjectDbFiles(pid) {
 }
 
 // --- State ---
-let index = { projects: [], lastProjectId: null, theme: 'ace/theme/tomorrow_night_eighties' };
+let index = { projects: [], lastProjectId: null, settings: {} };
 let project = null;
 let previewOpen = false;
 let consoleOpen = false;
@@ -945,7 +964,11 @@ let openFolders = {};
 
 function loadStorage() {
   try { const raw = localStorage.getItem(LS_INDEX_KEY); if(raw) index = JSON.parse(raw); } catch(e){}
-  if(!index.theme) index.theme = 'ace/theme/tomorrow_night_eighties';
+  if(typeof index.settings !== 'object') index.settings = {};
+  if(!index.settings.theme) index.settings.theme = 'ace/theme/tomorrow_night_eighties';
+  if(typeof index.settings.formatOnSave === 'undefined') index.settings.formatOnSave = false;
+  if(typeof index.settings.wordWrap === 'undefined') index.settings.wordWrap = false;
+  updateFOSUI();
 }
 function saveStorage() { localStorage.setItem(LS_INDEX_KEY, JSON.stringify(index)); }
 function pKey(id) { return 'ALLF_P_' + id; }
@@ -1008,8 +1031,8 @@ function getExtColor(filename) {
   return colors[ext] || 'var(--border)';
 }
 
-const editor1 = ace.edit("editor", { theme: index.theme, mode: 'ace/mode/html', fontSize: 14 });
-const editor2 = ace.edit("editor2", { theme: index.theme, mode: 'ace/mode/html', fontSize: 14 });
+const editor1 = ace.edit("editor", { theme: index.settings?.theme || 'ace/theme/tomorrow_night_eighties', mode: 'ace/mode/html', fontSize: 14 });
+const editor2 = ace.edit("editor2", { theme: index.settings?.theme || 'ace/theme/tomorrow_night_eighties', mode: 'ace/mode/html', fontSize: 14 });
 
 let typingTimer;
 function setupEditorEvents(ed, targetNum) {
@@ -1033,6 +1056,32 @@ function setupEditorEvents(ed, targetNum) {
 }
 setupEditorEvents(editor1, 1);
 setupEditorEvents(editor2, 2);
+
+// Apply Word Wrap based on settings
+function applyWordWrap() {
+  editor1.setOption("wrap", index.settings.wordWrap);
+  editor2.setOption("wrap", index.settings.wordWrap);
+  el('btnWordWrap1').style.color = index.settings.wordWrap ? 'var(--cyan-accent)' : 'var(--text-primary)';
+  el('btnWordWrap2').style.color = index.settings.wordWrap ? 'var(--cyan-accent)' : 'var(--text-primary)';
+}
+function toggleWordWrap() {
+  index.settings.wordWrap = !index.settings.wordWrap;
+  saveStorage();
+  applyWordWrap();
+}
+el('btnWordWrap1').onclick = toggleWordWrap;
+el('btnWordWrap2').onclick = toggleWordWrap;
+
+// Format On Save UI
+function updateFOSUI() {
+  el('fosIndicator').textContent = index.settings.formatOnSave ? '✅' : '❌';
+}
+el('menuFormatOnSave').onclick = (e) => {
+  e.stopPropagation();
+  index.settings.formatOnSave = !index.settings.formatOnSave;
+  saveStorage();
+  updateFOSUI();
+};
 
 // --- Minimap Logic ---
 function toggleMinimap() {
@@ -1096,13 +1145,17 @@ window.onmouseup = () => {
 
 // --- UI Logic ---
 function updateProjectDropdown() {
-  const sel = el('projectSelect'); sel.innerHTML = '';
+  const list = el('projectDropdownList'); list.innerHTML = '';
+  el('currentProjectBtn').innerHTML = escapeHtml(project.name) + ' <span style="font-size:10px; opacity:0.6; margin-left: 6px;">▼</span>';
   index.projects.forEach(p => {
-    const opt = document.createElement('option'); opt.value = p.id; opt.textContent = p.name; sel.appendChild(opt);
+    const div = document.createElement('div');
+    // V1.6.4 FIX: Using CSS class active-project instead of inline styling to prevent hover clash
+    div.className = 'dropdown-item' + (p.id === project.id ? ' active-project' : '');
+    div.textContent = p.name;
+    div.onclick = () => { if(p.id !== project.id) loadProject(p.id); };
+    list.appendChild(div);
   });
-  sel.value = project.id;
 }
-el('projectSelect').onchange = (e) => loadProject(e.target.value);
 
 function renderAll() {
   updateProjectDropdown();
@@ -1111,6 +1164,7 @@ function renderAll() {
   loadEditorContent(1);
   if(splitViewOpen) loadEditorContent(2);
   if(previewOpen) refreshPreview();
+  applyWordWrap();
 }
 
 function enableRename(elNode, sectionObj, callback) {
@@ -1204,9 +1258,11 @@ function renderTreeBranch(node, container, path="", isMedia=false) {
     if(isMedia) {
       actionHTML = `<button class="icon-btn insert" title="Insert"><svg><use href="#icon-plus"></use></svg></button>
                     <button class="icon-btn download" title="Download"><svg><use href="#icon-download"></use></svg></button>
+                    <button class="icon-btn duplicate" title="Duplicate"><svg><use href="#icon-copy"></use></svg></button>
                     <button class="icon-btn del" title="Delete"><svg><use href="#icon-trash"></use></svg></button>`;
     } else {
-      actionHTML = `<button class="icon-btn del" title="Delete"><svg><use href="#icon-trash"></use></svg></button>`;
+      actionHTML = `<button class="icon-btn duplicate" title="Duplicate"><svg><use href="#icon-copy"></use></svg></button>
+                    <button class="icon-btn del" title="Delete"><svg><use href="#icon-trash"></use></svg></button>`;
     }
 
     div.innerHTML = `<svg style="fill:${color}"><use href="${icon}"></use></svg><div class="name" title="Double click to rename">${escapeHtml(dispName)}</div>
@@ -1222,34 +1278,71 @@ function renderTreeBranch(node, container, path="", isMedia=false) {
 
     div.onclick = (e) => { 
       if(!e.target.closest('button') && !e.target.closest('[contenteditable]')) { 
+        if(isMedia) {
+            if(activeTargetEditor === 1) project.open = f.id; else project.open2 = f.id;
+            if(!project.tabs.includes(f.id)) project.tabs.push(f.id); 
+            saveProject(); renderTabs(); loadEditorContent(activeTargetEditor); renderSidebar(); 
+            return;
+        }
         if(activeTargetEditor === 1) project.open = f.id; else project.open2 = f.id;
         if(!project.tabs.includes(f.id)) project.tabs.push(f.id); 
         saveProject(); renderTabs(); loadEditorContent(activeTargetEditor); renderSidebar(); 
       }
     };
 
+    // Duplicate Logic
+    div.querySelector('.duplicate').onclick = async (e) => {
+      e.stopPropagation();
+      let newTitle = f.title;
+      if (newTitle.includes('.')) {
+          let parts = newTitle.split('.');
+          let ext = parts.pop();
+          newTitle = parts.join('.') + '_copy.' + ext;
+      } else {
+          newTitle += '_copy';
+      }
+
+      if(isMedia) {
+        const stored = await idbAction('get', f.id);
+        if(stored && stored.blob) {
+          const newId = newId('F');
+          await idbAction('put', { id: newId, projectId: project.id, blob: stored.blob });
+          project.media.push({ id: newId, title: newTitle, type: f.type, size: f.size });
+          saveProject(); renderSidebar(); showToast("Media duplicated");
+        }
+      } else {
+        const newId = newId('C');
+        project.sections.push({type:'code', id: newId, title: newTitle, content: f.content});
+        saveProject(); renderSidebar(); showToast("File duplicated");
+      }
+    };
+
     if(isMedia) {
-      div.querySelector('.insert').onclick = () => {
+      div.querySelector('.insert').onclick = (e) => {
+        e.stopPropagation();
         let tag = `ALLF_MEDIA:${f.id}`;
         if(f.type.startsWith('image')) tag = `<img src="${tag}" alt="${f.title}">`;
         else if(f.type.startsWith('video')) tag = `<video src="${tag}" controls></video>`;
         (activeTargetEditor===1 ? editor1 : editor2).insert(tag);
       };
-      div.querySelector('.download').onclick = async () => {
+      div.querySelector('.download').onclick = async (e) => {
+        e.stopPropagation();
         try {
           const stored = await idbAction('get', f.id);
-          if (!stored) return showToast("File not found.");
+          if (!stored || !stored.blob) return showToast("File not found.");
           const url = URL.createObjectURL(stored.blob);
           const a = document.createElement('a'); a.href = url; a.download = f.title;
           document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
           showToast(`Downloaded ${f.title}`);
-        } catch (e) { showToast("Download failed."); }
+        } catch (err) { showToast("Download failed."); }
       };
-      div.querySelector('.del').onclick = async () => {
+      div.querySelector('.del').onclick = async (e) => {
+        e.stopPropagation();
         await idbAction('del', f.id); project.media = project.media.filter(x=>x.id!==f.id); saveProject(); renderSidebar();
       };
     } else {
-      div.querySelector('.del').onclick = () => {
+      div.querySelector('.del').onclick = (e) => {
+        e.stopPropagation();
         if(project.sections.length === 1) return showToast("Cannot delete last file.");
         project.sections = project.sections.filter(x=>x.id!==f.id);
         project.tabs = project.tabs.filter(x=>x!==f.id);
@@ -1281,7 +1374,7 @@ document.querySelectorAll('.root-drop').forEach(hdr => {
   hdr.ondrop = e => {
     e.preventDefault(); hdr.classList.remove('drag-over');
     if(dragItemInfo && dragItemInfo.type === hdr.dataset.type) {
-      handleSidebarDrop(dragItemInfo, ""); // Drop to root
+      handleSidebarDrop(dragItemInfo, ""); 
     }
   };
 });
@@ -1453,9 +1546,11 @@ function autoFormat() {
   const beautify = ace.require("ace/ext/beautify");
   if(activeTargetEditor === 1) beautify.beautify(editor1.session);
   else beautify.beautify(editor2.session);
-  showToast("Code Formatted");
 }
-el('menuFormatCode').onclick = autoFormat;
+el('menuFormatCode').onclick = () => {
+    autoFormat();
+    showToast("Code Formatted");
+};
 
 // --- Global Search & Replace ---
 el('menuGlobalSearch').onclick = () => { openModal('searchReplaceModal'); el('srResults').innerHTML = ''; el('srSearchInput').value=''; el('srReplaceInput').value=''; };
@@ -1526,13 +1621,19 @@ function renderSnapshots() {
 
 // --- Shortcuts ---
 window.addEventListener('keydown', (e) => {
-  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); saveProject(); if(previewOpen) refreshPreview(); showToast("Saved & Refreshed"); }
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { 
+      e.preventDefault(); 
+      if(index.settings.formatOnSave) { autoFormat(); }
+      saveProject(); 
+      if(previewOpen) refreshPreview(); 
+      showToast("Saved & Refreshed"); 
+  }
   if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') { e.preventDefault(); openQuickOpen(); }
-  if((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'f') { e.preventDefault(); openModal('searchReplaceModal'); }
+  if((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'f') { e.preventDefault(); openModal('searchReplaceModal'); el('srResults').innerHTML = ''; }
   if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') { e.preventDefault(); const w = el('sidebar').style.width; el('sidebar').style.width = (w === '0px') ? '280px' : '0px'; setTimeout(() => { editor1.resize(); editor2.resize(); }, 300); }
   if((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); togglePreview(); }
   if((e.ctrlKey || e.metaKey) && e.key === '/') { e.preventDefault(); openModal('shortcutsModal'); }
-  if(e.shiftKey && e.altKey && e.key.toLowerCase() === 'f') { e.preventDefault(); autoFormat(); }
+  if(e.shiftKey && e.altKey && e.key.toLowerCase() === 'f') { e.preventDefault(); autoFormat(); showToast("Code Formatted"); }
   if(e.altKey && e.key.toLowerCase() === 'n') { e.preventDefault(); addNewCodeFile(); }
 });
 el('menuShortcuts').onclick = () => openModal('shortcutsModal');
@@ -1600,22 +1701,6 @@ el('menuClearTab').onclick = () => {
 };
 el('menuDeleteProj').onclick = async () => {
   if(confirm('Delete current project entirely?')) { await deleteProjectById(project.id); }
-};
-
-// PWA Install Prompt Logic
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault(); deferredPrompt = e; 
-  el('menuInstallApp').style.display = 'block'; 
-});
-el('menuInstallApp').onclick = async () => {
-  if (deferredPrompt) { 
-    deferredPrompt.prompt(); 
-    const { outcome } = await deferredPrompt.userChoice; 
-    if (outcome === 'accepted') deferredPrompt = null; 
-  } else { 
-    showToast("App install prompt unavailable (requires HTTPS or Localhost).");
-  }
 };
 
 // --- Project Manager Logic ---
@@ -1718,8 +1803,8 @@ el('btnFormatCustomApply').onclick = () => { const val = el('fmCustomInput').val
 document.querySelectorAll('.btn-close-modal').forEach(b => { b.onclick = () => { const p = b.closest('.modal-overlay'); if(p) closeModal(p.id); }; });
 el('menuMeta').onclick = () => { el('metaAuthor').value = project.meta.author; el('metaVersion').value = project.meta.version; openModal('metaModal'); };
 el('btnMetaSave').onclick = () => { project.meta.author = el('metaAuthor').value; project.meta.version = el('metaVersion').value; saveProject(); closeModal('metaModal'); showToast('Settings saved'); };
-el('menuThemes').onclick = () => { el('editorThemeSelect').value = index.theme; openModal('themesModal'); };
-el('editorThemeSelect').onchange = (e) => { index.theme = e.target.value; saveStorage(); editor1.setTheme(index.theme); editor2.setTheme(index.theme); };
+el('menuThemes').onclick = () => { el('editorThemeSelect').value = index.settings.theme; openModal('themesModal'); };
+el('editorThemeSelect').onchange = (e) => { index.settings.theme = e.target.value; saveStorage(); editor1.setTheme(index.settings.theme); editor2.setTheme(index.settings.theme); };
 
 // --- EXPORT ---
 el('menuExport').onclick = () => {
