@@ -384,7 +384,7 @@ footer {
 
 </div>
 
-<footer>2026 &copy; TSFAlex Version 1.3.1</footer>
+<footer>2026 &copy; TSFAlex Version 1.3.2</footer>
 
 <input id="mediaInput" type="file" accept="*/*" multiple style="display:none" />
 <input id="importInput" type="file" accept=".allf,text/plain" style="display:none" />
@@ -1003,7 +1003,7 @@ el('editorThemeSelect').onchange = (e) => {
   index.theme = e.target.value; saveStorage(); editor.setTheme(index.theme);
 };
 
-// --- HIGH PERFORMANCE EXPORT ---
+// --- Export (High Performance, Non-Blocking, Visible Progress) ---
 el('menuExport').onclick = () => {
   el('exportFilename').value = project.name.replace(/\s+/g,'_') + '.allf';
   el('exportProgressContainer').style.display = 'none';
@@ -1015,21 +1015,17 @@ el('btnExportConfirm').onclick = async () => {
     el('btnExportConfirm').disabled = true;
     el('btnExportCancel').disabled = true;
     
+    // Reset and show progress bar
     el('exportProgressContainer').style.display = 'block';
     el('exportProgressText').textContent = 'Structuring JSON...';
     el('exportProgressPercent').textContent = '0%';
     el('exportProgressFill').style.width = '0%';
     
-    // BRANDING GOES AT THE VERY TOP NOW
-    const parts = [
-      `ALLF_VERSION// ${ALLF_VERSION}\n`,
-      `B//\n${BRANDING_TEXT}\nB\\\\\n`,
-      `PROJECT// ${project.name}\n\n`
-    ];
-    
+    const parts = [`ALLF_VERSION// ${ALLF_VERSION}\nPROJECT// ${project.name}\n\n`];
     project.sections.forEach(s => parts.push(`C// ${s.id}::${s.title}\n${s.content||''}\nC\\\\\nSPACE//\n`));
     parts.push(`EM//\n${JSON.stringify(project.media)}\nEM\\\\\n`);
     
+    // Calculate total media bytes for accurate progress
     const totalMediaBytes = project.media.reduce((acc, m) => acc + m.size, 0);
     let processedBytes = 0;
     
@@ -1040,29 +1036,30 @@ el('btnExportConfirm').onclick = async () => {
       
       parts.push(`FILE_B64// ${m.id}\n`);
       
-      // Memory Safe Chunking (2MB)
-      const chunkSize = 2 * 1024 * 1024; 
+      // EXPORT FIX: 3MB Chunks (MUST be multiple of 3 to avoid internal Base64 padding '=')
+      const chunkSize = 3 * 1024 * 1024; 
       
       for(let offset=0; offset<stored.blob.size; offset += chunkSize) {
         const slice = stored.blob.slice(offset, offset + chunkSize);
         const arrayBuffer = await slice.arrayBuffer();
         
-        // Loop conversion to base64 instead of string arrays
         parts.push(bufferToBase64(arrayBuffer) + '\n');
         
         processedBytes += slice.size;
         
+        // Update Progress UI
         const pct = Math.min(100, (processedBytes / totalMediaBytes) * 100);
         el('exportProgressText').textContent = `Encoding: ${m.title}`;
         el('exportProgressPercent').textContent = `${Math.round(pct)}%`;
         el('exportProgressFill').style.width = `${pct}%`;
         
+        // YIELD thread so UI updates and doesn't freeze
         await yieldThread();
       }
       parts.push(`FILE_B64\\\\\n`);
     }
     
-    parts.push(`END//`);
+    parts.push(`B//\n${BRANDING_TEXT}\nB\\\\\nEND//`);
     
     el('exportProgressText').textContent = 'Assembling final file...';
     await yieldThread();
@@ -1084,7 +1081,7 @@ el('btnExportConfirm').onclick = async () => {
   }
 };
 
-// --- HIGH PERFORMANCE IMPORT ---
+// --- Import (High Performance, Smart Slicing) ---
 el('menuImport').onclick = () => el('importInput').click();
 el('importInput').onchange = async e => {
   const f = e.target.files[0]; if(!f) return;
@@ -1106,6 +1103,7 @@ el('importInput').onchange = async e => {
     const np = JSON.parse(localStorage.getItem(pKey(pid)));
     np.sections = []; np.media = [];
     
+    // Quick meta parsing
     const pMatch = headText.match(/PROJECT\/\/\s*(.*)/); 
     if(pMatch) np.name = pMatch[1].trim();
     
@@ -1123,6 +1121,7 @@ el('importInput').onchange = async e => {
     let buffer = "";
     let currentFileId = null;
     let currentB64Parts = [];
+    let leftoverB64 = "";
 
     while(offset < f.size) {
         updateLoading((offset / f.size) * 100, `Extracting Media...`);
@@ -1143,18 +1142,25 @@ el('importInput').onchange = async e => {
 
                 currentFileId = buffer.substring(startIdx + 11, lineEnd).trim();
                 buffer = buffer.substring(lineEnd + 1);
+                leftoverB64 = "";
             } else {
                 const endIdx = buffer.indexOf('FILE_B64\\\\');
                 if(endIdx === -1) {
                     const safeLen = buffer.length - 50;
                     if(safeLen > 0) {
-                        const b64Data = buffer.substring(0, safeLen).replace(/\s/g, '');
-                        if(b64Data) currentB64Parts.push(base64ToBuffer(b64Data));
+                        let b64Data = leftoverB64 + buffer.substring(0, safeLen).replace(/\s/g, '');
+                        
+                        // IMPORT FIX: Ensure length is multiple of 4 for valid atob decoding
+                        let validLen = b64Data.length - (b64Data.length % 4);
+                        let toProcess = b64Data.substring(0, validLen);
+                        leftoverB64 = b64Data.substring(validLen);
+                        
+                        if(toProcess) currentB64Parts.push(base64ToBuffer(toProcess));
                         buffer = buffer.substring(safeLen);
                     }
                     break;
                 } else {
-                    const b64Data = buffer.substring(0, endIdx).replace(/\s/g, '');
+                    let b64Data = leftoverB64 + buffer.substring(0, endIdx).replace(/\s/g, '');
                     if(b64Data) currentB64Parts.push(base64ToBuffer(b64Data));
                     
                     const mRef = np.media.find(x => x.id === currentFileId);
@@ -1163,6 +1169,7 @@ el('importInput').onchange = async e => {
                     
                     currentFileId = null;
                     currentB64Parts = [];
+                    leftoverB64 = "";
                     buffer = buffer.substring(endIdx + 10);
                 }
             }
