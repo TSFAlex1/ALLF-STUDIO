@@ -104,6 +104,8 @@ header {
 .btn:active { transform: translateY(1px); }
 .btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
 .btn.primary:hover { background: var(--accent-hover); box-shadow: 0 4px 12px rgba(94, 106, 210, 0.3); }
+.btn.danger { background: rgba(224, 108, 117, 0.1); color: var(--danger); border-color: rgba(224, 108, 117, 0.3); }
+.btn.danger:hover { background: var(--danger); color: #fff; }
 .btn svg { width: 14px; height: 14px; fill: currentColor; }
 
 /* WORKSPACE */
@@ -203,7 +205,7 @@ footer {
 .modal-overlay.show .modal { transform: translateY(0) scale(1); opacity: 1; }
 
 .modal-header { padding: 16px 20px; font-weight: 600; border-bottom: 1px solid var(--border); }
-.modal-body { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.modal-body { padding: 20px; display: flex; flex-direction: column; gap: 12px; max-height: 70vh; overflow-y: auto; }
 .modal-footer { padding: 16px 20px; background: var(--bg-base); display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--border); }
 .input, select.input {
   background: var(--bg-base); border: 1px solid var(--border); color: var(--text-primary);
@@ -267,6 +269,16 @@ footer {
 }
 .fm-apply-btn:hover { border-color: var(--cyan-accent); color: #fff; background: rgba(13,226,198,0.05); }
 
+/* PROJECT MANAGER ITEM */
+.pm-list-item {
+  display: flex; justify-content: space-between; align-items: center; padding: 12px;
+  background: var(--bg-base); border: 1px solid var(--border); border-radius: 6px;
+  margin-bottom: 8px; transition: all 0.2s ease;
+}
+.pm-list-item:hover { border-color: var(--text-secondary); }
+.pm-list-item .pm-name { font-weight: 600; font-size: 13px; color: var(--text-primary); }
+.pm-list-item.active .pm-name { color: var(--accent); }
+
 .toast {
   position: fixed; bottom: 40px; right: 24px; background: rgba(35, 39, 48, 0.95); backdrop-filter: blur(8px); color: var(--text-primary);
   padding: 12px 20px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.4);
@@ -304,6 +316,8 @@ footer {
         <div class="dropdown-divider"></div>
         <div class="dropdown-item" id="menuImport">Import .allf</div>
         <div class="dropdown-item" id="menuExport">Export .allf</div>
+        <div class="dropdown-divider"></div>
+        <div class="dropdown-item danger" id="menuFactoryReset">Restore to Default</div>
       </div>
     </div>
 
@@ -320,9 +334,10 @@ footer {
     <div class="menu-group">
       <div class="menu-btn">Project</div>
       <div class="dropdown">
+        <div class="dropdown-item" id="menuManageProjects">Manage Projects...</div>
         <div class="dropdown-item" id="menuMeta">Settings & Metadata</div>
         <div class="dropdown-divider"></div>
-        <div class="dropdown-item danger" id="menuDeleteProj">Delete Project</div>
+        <div class="dropdown-item danger" id="menuDeleteProj">Delete Current Project</div>
       </div>
     </div>
 
@@ -384,7 +399,7 @@ footer {
 
 </div>
 
-<footer>2026 &copy; TSFAlex Version 1.3.3</footer>
+<footer>2026 &copy; TSFAlex Version 1.4.0</footer>
 
 <input id="mediaInput" type="file" accept="*/*" multiple style="display:none" />
 <input id="importInput" type="file" accept=".allf,text/plain" style="display:none" />
@@ -396,6 +411,17 @@ footer {
       <div id="loadingFill" class="progress-fill" style="width: 0%;"></div>
     </div>
     <div id="loadingText" style="font-size: 12px; color: var(--text-secondary);">0%</div>
+  </div>
+</div>
+
+<div id="projectManagerModal" class="modal-overlay">
+  <div class="modal" style="width: 500px;">
+    <div class="modal-header">Manage Projects</div>
+    <div class="modal-body" id="pmProjectList">
+      </div>
+    <div class="modal-footer">
+      <button class="btn btn-close-modal primary">Close</button>
+    </div>
   </div>
 </div>
 
@@ -492,7 +518,7 @@ footer {
 
 <script>
 /* =========================================================
-   ALLF STUDIO - V7.3 (Bulletproof Importer Fix)
+   ALLF STUDIO - V1.4.0 (Project Management & Factory Reset)
    ========================================================= */
 
 const BRANDING_TEXT = '© ALLF STUDIO - TSFALEX';
@@ -583,6 +609,19 @@ async function idbAction(type, objOrId) {
   });
 }
 
+function deleteProjectDbFiles(pid) {
+  return new Promise(async (resolve) => {
+    const db = await openDb();
+    const tx = db.transaction('files', 'readwrite');
+    const cur = tx.objectStore('files').index('projectId').openCursor(IDBKeyRange.only(pid));
+    cur.onsuccess = e => { 
+      const c = e.target.result; 
+      if(c) { c.delete(); c.continue(); }
+    };
+    tx.oncomplete = resolve;
+  });
+}
+
 // --- State ---
 let index = { projects: [], lastProjectId: null, theme: 'ace/theme/tomorrow_night_eighties' };
 let project = null;
@@ -621,6 +660,27 @@ function createProject(name='Untitled Project') {
   };
   index.projects.push({id, name}); saveStorage(); saveProject();
   el('projectNameInput').value = name; renderAll(); return id;
+}
+
+async function deleteProjectById(pid) {
+  await deleteProjectDbFiles(pid);
+  localStorage.removeItem(pKey(pid));
+  index.projects = index.projects.filter(x => x.id !== pid);
+
+  if (index.projects.length === 0) {
+    index.lastProjectId = null;
+    saveStorage();
+    window.location.reload();
+  } else {
+    if (pid === project.id) {
+      index.lastProjectId = index.projects[0].id;
+      saveStorage();
+      loadProject(index.lastProjectId);
+    } else {
+      saveStorage();
+      updateProjectDropdown();
+    }
+  }
 }
 
 // --- Editor Colors Map ---
@@ -817,6 +877,20 @@ function refreshPreview() {
 el('projectNameInput').onchange = () => { saveProject(); updateProjectDropdown(); };
 el('menuNewProject').onclick = () => createProject("New Project");
 
+el('menuFactoryReset').onclick = async () => {
+  if(confirm("WARNING: This will delete ALL projects, files, and settings. This cannot be undone. Are you absolutely sure?")) {
+    const db = await openDb();
+    const tx = db.transaction('files', 'readwrite');
+    tx.objectStore('files').clear();
+
+    Object.keys(localStorage).forEach(k => {
+      if(k.startsWith('ALLF_')) localStorage.removeItem(k);
+    });
+
+    window.location.reload();
+  }
+};
+
 function addNewCodeFile() {
   const baseName = prompt("Enter file name (without extension):", "new_file");
   if(baseName !== null) {
@@ -833,17 +907,54 @@ el('menuClearTab').onclick = () => {
   if(confirm('Clear current tab content?')) { editor.setValue('', -1); }
 };
 el('menuDeleteProj').onclick = async () => {
-  if(confirm('Delete project entirely?')) {
-    const db = await openDb();
-    const tx = db.transaction('files','readwrite');
-    const cur = tx.objectStore('files').index('projectId').openCursor(IDBKeyRange.only(project.id));
-    cur.onsuccess = e => { const c = e.target.result; if(c) { c.delete(); c.continue(); }};
-    localStorage.removeItem(pKey(project.id));
-    index.projects = index.projects.filter(x=>x.id!==project.id);
-    index.lastProjectId = index.projects[0]?.id || null; saveStorage();
-    window.location.reload();
+  if(confirm('Delete current project entirely?')) {
+    await deleteProjectById(project.id);
   }
 };
+
+// --- Project Manager Logic ---
+el('menuManageProjects').onclick = () => {
+  renderProjectManager();
+  openModal('projectManagerModal');
+};
+
+function renderProjectManager() {
+  const list = el('pmProjectList');
+  list.innerHTML = '';
+  
+  if (index.projects.length === 0) {
+    list.innerHTML = '<div style="color:var(--text-secondary); font-size:13px; text-align:center; padding:20px;">No projects found.</div>';
+    return;
+  }
+  
+  index.projects.forEach(p => {
+    const div = document.createElement('div');
+    const isActive = p.id === project.id;
+    div.className = 'pm-list-item' + (isActive ? ' active' : '');
+    
+    div.innerHTML = `
+      <div class="pm-name">${escapeHtml(p.name)} ${isActive ? '<span style="font-size:10px; opacity:0.6; margin-left:5px;">(Active)</span>' : ''}</div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-open">Open</button>
+        <button class="btn danger btn-del">Delete</button>
+      </div>
+    `;
+    
+    div.querySelector('.btn-open').onclick = () => {
+      closeModal('projectManagerModal');
+      loadProject(p.id);
+    };
+    
+    div.querySelector('.btn-del').onclick = async () => {
+      if (confirm(`Delete project "${p.name}" forever?`)) {
+        await deleteProjectById(p.id);
+        renderProjectManager(); // Re-render the list immediately
+      }
+    };
+    
+    list.appendChild(div);
+  });
+}
 
 // --- FILE UPLOAD AND DRAG/DROP HANDLING ---
 el('btnAddMedia').onclick = () => el('mediaInput').click();
@@ -1018,7 +1129,6 @@ el('btnExportConfirm').onclick = async () => {
     el('exportProgressPercent').textContent = '0%';
     el('exportProgressFill').style.width = '0%';
     
-    // EXPORT FIX: Added branding tag to the very top so the importer easily finds it!
     const parts = [
       `ALLF_VERSION// ${ALLF_VERSION}\n`,
       `B//\n${BRANDING_TEXT}\nB\\\\\n`,
@@ -1038,7 +1148,7 @@ el('btnExportConfirm').onclick = async () => {
       
       parts.push(`FILE_B64// ${m.id}\n`);
       
-      const chunkSize = 3 * 1024 * 1024; // 3MB exact to avoid Base64 internal '=' padding issues
+      const chunkSize = 3 * 1024 * 1024; 
       
       for(let offset=0; offset<stored.blob.size; offset += chunkSize) {
         const slice = stored.blob.slice(offset, offset + chunkSize);
@@ -1089,7 +1199,6 @@ el('importInput').onchange = async e => {
     showLoading('Parsing File...');
     await yieldThread();
 
-    // IMPORT FIX: Check both the top 5MB and the bottom 5MB (for backwards compatibility with old files)
     const headSize = Math.min(f.size, 5 * 1024 * 1024);
     const headText = await f.slice(0, headSize).text();
     
@@ -1150,7 +1259,6 @@ el('importInput').onchange = async e => {
                     if(safeLen > 0) {
                         let b64Data = leftoverB64 + buffer.substring(0, safeLen).replace(/\s/g, '');
                         
-                        // IMPORT FIX: Math Buffer logic to protect atob decoding
                         let validLen = b64Data.length - (b64Data.length % 4);
                         let toProcess = b64Data.substring(0, validLen);
                         leftoverB64 = b64Data.substring(validLen);
