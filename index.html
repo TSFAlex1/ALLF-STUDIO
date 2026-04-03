@@ -3,2347 +3,946 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>ALLF Studio — Pro (Local + Embedded Media)</title>
+<title>ALLF STUDIO</title>
+<link rel="icon" type="image/png" href="ALLF_STUDIO_IMG.png" />
 
 <style>
-:root{
-  --accent:#72a4f2; --accent2:#4a6cd8;
-  --bg:#0b0f1a; --panel:#0f1720; --panel2:#101828;
-  --text:#e4ebff; --muted:#8ca0c8; --danger:#ff5c5c; --ok:#4ddc9b;
-}
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif;}
-header{
-  height:72px;padding:10px 14px;
-  background:linear-gradient(180deg,var(--bg),#071022);
-  display:flex;align-items:center;justify-content:space-between;
-  border-bottom:1px solid rgba(255,255,255,0.04);
-  box-shadow:0 10px 40px rgba(9,13,22,0.6);z-index:60;
-}
-h1{margin:0;font-size:18px;color:var(--accent);text-shadow:0 0 10px rgba(114,164,242,0.6)}
-.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
-.input, select, textarea{
-  background:var(--panel2);border:1px solid rgba(255,255,255,0.06);color:var(--text);
-  padding:8px;border-radius:10px;
-}
-.input{width:220px}
-.btn{
-  padding:8px 12px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-weight:800;
-  cursor:pointer;box-shadow:0 10px 30px rgba(114,164,242,0.12);transition:all .12s;user-select:none;
-}
-.btn.secondary{background:#26303a}
-.btn.danger{background:var(--danger)}
-.btn.small{padding:6px 10px;font-size:13px;border-radius:10px}
-.btn:active{transform:translateY(1px)}
-.btn:hover{transform:translateY(-2px);box-shadow:0 18px 50px rgba(114,164,242,0.18)}
-
-.container{
-  display:grid;
-  grid-template-columns:320px 1fr 360px;
-  gap:12px;
-  height:calc(100vh - 72px - 56px);
-  padding:12px;
-}
-.panel{
-  background:var(--panel);border-radius:14px;overflow:hidden;
-  box-shadow:0 10px 40px rgba(114,164,242,0.06);
-  display:flex;flex-direction:column;
-}
-.panel .head{
-  padding:12px;border-bottom:1px solid rgba(255,255,255,0.05);
-  display:flex;align-items:center;justify-content:space-between;gap:10px;
-}
-.panel .body{padding:12px;overflow:auto}
-
-.brand{color:var(--muted);font-size:12px}
-.pill{
-  font-size:12px;padding:4px 8px;border-radius:999px;
-  background:rgba(114,164,242,0.12);border:1px solid rgba(114,164,242,0.18);color:var(--accent);
+/* Modern Premium Dark Theme */
+:root {
+  --bg-base: #0E1015;
+  --bg-surface: #16181D;
+  --bg-surface-hover: #1E2128;
+  --bg-overlay: #232730;
+  --text-primary: #ECEFF4;
+  --text-secondary: #8A919E;
+  --border: #2A2E37;
+  --accent: #5E6AD2;
+  --accent-hover: #737EE0;
+  --danger: #E06C75;
+  --success: #98C379;
+  --cyan-accent: #0DE2C6;
+  --radius: 8px;
+  --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+  --file-color: var(--border); 
 }
 
-.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.col{display:flex;flex-direction:column;gap:8px}
-.sep{height:1px;background:rgba(255,255,255,0.05);margin:12px 0}
-
-.list{display:flex;flex-direction:column;gap:8px}
-.item{
-  background:rgba(255,255,255,0.02);
-  border:1px solid rgba(255,255,255,0.04);
-  border-radius:12px;padding:10px;
-  display:flex;justify-content:space-between;gap:10px;align-items:flex-start;
-}
-.item .meta{min-width:0}
-.item .title{font-weight:900;color:var(--text);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:240px}
-.item .sub{font-size:12px;color:var(--muted);margin-top:3px}
-.item .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
-
-.tabs{display:flex;gap:8px;flex-wrap:wrap}
-.tab{
-  padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.08);
-  background:rgba(255,255,255,0.03);color:var(--muted);cursor:pointer;font-weight:800;font-size:12px;
-}
-.tab.active{background:linear-gradient(90deg,var(--accent),var(--accent2));color:white;border-color:transparent}
-.tab.dirty::after{content:" *";font-weight:1000}
-
-#editor{width:100%;height:100%}
-.editorWrap{height:100%;display:flex;flex-direction:column}
-.editorTop{padding:10px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center;gap:10px}
-.editorMain{flex:1;min-height:420px}
-
-.previewWrap{display:flex;flex-direction:column;height:100%}
-.previewTop{padding:10px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center;gap:10px}
-iframe{border:none;width:100%;height:100%;background:#fff}
-.previewMain{flex:1}
-
-.small{font-size:12px;color:var(--muted)}
-kbd{background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:6px;border:1px solid rgba(255,255,255,0.08);font-size:12px}
-
-.drop{
-  border:1px dashed rgba(114,164,242,0.35);
-  background:rgba(114,164,242,0.06);
-  border-radius:14px;padding:12px;color:var(--muted);
-}
-.drop strong{color:var(--accent)}
-.drop.drag{background:rgba(114,164,242,0.10);border-color:rgba(114,164,242,0.55)}
-
-.toast{
-  position:fixed;right:24px;bottom:24px;display:none;z-index:99999;
-  background:linear-gradient(90deg,var(--accent),var(--accent2));
-  color:white;padding:12px 16px;border-radius:12px;box-shadow:0 20px 60px rgba(114,164,242,0.18);
-}
-.toast .t{font-weight:900}
-.toast .m{font-size:13px;opacity:.95;margin-top:3px}
-
-.modalBg{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);z-index:220}
-.modal{
-  width:920px;max-width:96%;
-  background:linear-gradient(180deg,#0d1320,#0b1624);
-  padding:16px;border-radius:14px;border:1px solid rgba(255,255,255,0.04);
-  box-shadow:0 40px 120px rgba(4,8,20,0.9);
-}
-.modal h3{margin:0;color:var(--accent)}
-.modal textarea{width:100%;min-height:180px}
-.modal .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.modal .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-.codebox{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:12.5px;line-height:1.45}
-.progress{
-  height:10px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden;border:1px solid rgba(255,255,255,0.06)
-}
-.progress > div{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
-.badgeOk{color:var(--ok);font-weight:900}
-.badgeWarn{color:#ffd36a;font-weight:900}
-.badgeBad{color:var(--danger);font-weight:900}
-
-.mediaPreview img, .mediaPreview video{
-  width:100%;border-radius:12px;border:1px solid rgba(255,255,255,0.06);background:#000;
-}
-.mediaPreview video{max-height:220px}
-
-footer{
-  height:56px;background:#0d1220;border-top:1px solid rgba(255,255,255,0.03);
-  display:flex;align-items:center;justify-content:space-between;padding:0 18px;
-  color:var(--muted);font-size:13px
+* { box-sizing: border-box; }
+html, body {
+  height: 100%; margin: 0; padding: 0;
+  background: var(--bg-base); color: var(--text-primary);
+  font-family: var(--font-main); overflow: hidden;
 }
 
-@media(max-width:1200px){
-  .container{grid-template-columns:1fr;grid-auto-rows:420px 1fr 360px;height:auto}
-  .editorMain{min-height:420px}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; transition: background 0.3s ease; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+
+/* TOP HEADER & MENUS */
+header {
+  height: 45px; background: var(--bg-surface); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
+  user-select: none; z-index: 1000; position: relative;
 }
+.header-left, .header-right { display: flex; align-items: center; gap: 8px; }
+
+/* Updated Logo CSS for Image */
+.logo { font-weight: 800; font-size: 15px; letter-spacing: 1px; color: var(--text-primary); display: flex; align-items: center; gap: 8px; margin-right: 10px;}
+.logo img { width: 22px; height: 22px; object-fit: contain; transition: transform 0.3s ease; }
+.logo:hover img { transform: scale(1.1); }
+
+.top-divider { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+
+/* ANIMATED DROPDOWNS */
+.menu-group { position: relative; display: inline-block; }
+.menu-btn { 
+  padding: 6px 10px; color: var(--text-secondary); cursor: pointer; 
+  border-radius: 4px; font-size: 13px; font-weight: 500; 
+  transition: all 0.2s ease;
+}
+.menu-group:hover .menu-btn { color: var(--text-primary); background: var(--bg-overlay); }
+
+.dropdown {
+  visibility: hidden; opacity: 0; transform: translateY(10px);
+  position: absolute; top: 100%; left: 0; margin-top: 4px;
+  background: rgba(22, 24, 29, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+  min-width: 190px; padding: 6px 0; z-index: 2000;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.menu-group:hover .dropdown { visibility: visible; opacity: 1; transform: translateY(0); }
+
+.dropdown-item { 
+  padding: 8px 16px; font-size: 13px; color: var(--text-secondary); 
+  cursor: pointer; transition: all 0.15s ease;
+}
+.dropdown-item:hover { background: var(--accent); color: #fff; padding-left: 20px; }
+.dropdown-item.danger:hover { background: var(--danger); color: #fff; }
+.dropdown-divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+.project-name-input {
+  background: transparent; border: 1px solid transparent; color: var(--text-primary);
+  font-family: var(--font-main); font-size: 13px; font-weight: 600; padding: 4px 8px;
+  border-radius: 4px; outline: none; transition: all 0.2s ease; width: 160px;
+}
+.project-name-input:hover { background: var(--bg-surface-hover); }
+.project-name-input:focus { background: var(--bg-base); border-color: var(--accent); }
+
+.project-select {
+  background: var(--bg-overlay); border: 1px solid var(--border); color: var(--text-primary);
+  padding: 4px 8px; border-radius: 4px; font-size: 12px; outline: none; cursor: pointer;
+  transition: all 0.2s ease;
+}
+.project-select:hover { border-color: var(--text-secondary); }
+
+/* BUTTONS */
+.btn {
+  background: var(--bg-overlay); color: var(--text-primary); border: 1px solid var(--border);
+  padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 6px; outline: none;
+}
+.btn:hover { background: var(--bg-surface-hover); border-color: var(--text-secondary); transform: translateY(-1px); }
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn.primary:hover { background: var(--accent-hover); box-shadow: 0 4px 12px rgba(94, 106, 210, 0.3); }
+.btn svg { width: 14px; height: 14px; fill: currentColor; }
+
+/* WORKSPACE */
+.workspace { display: flex; height: calc(100vh - 45px - 26px); }
+
+/* SIDEBAR */
+.sidebar {
+  width: 280px; background: var(--bg-surface); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden;
+}
+.section-header {
+  padding: 16px 16px 8px 16px; font-size: 11px; text-transform: uppercase; font-weight: 700;
+  color: var(--text-secondary); display: flex; justify-content: space-between; align-items: center;
+}
+.icon-btn {
+  background: transparent; border: none; color: var(--text-secondary); cursor: pointer;
+  padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s ease;
+}
+.icon-btn:hover { background: var(--bg-overlay); color: var(--text-primary); transform: scale(1.1); }
+
+.tree-item {
+  display: flex; align-items: center; padding: 6px 16px; cursor: pointer;
+  color: var(--text-secondary); font-size: 13px; transition: all 0.2s ease; position: relative;
+  border-right: 3px solid transparent;
+}
+.tree-item:hover { background: var(--bg-surface-hover); color: var(--text-primary); }
+.tree-item.active { background: rgba(94, 106, 210, 0.15); color: var(--text-primary); border-right: 3px solid var(--file-color); }
+.tree-item svg { width: 14px; height: 14px; margin-right: 8px; fill: currentColor; flex-shrink: 0; transition: fill 0.3s ease; }
+.tree-item .name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; outline: none; }
+.tree-item .name[contenteditable="true"] { background: var(--bg-base); color: var(--text-primary); padding: 2px 4px; border-radius: 3px; cursor: text; }
+.tree-actions { opacity: 0; gap: 4px; transition: opacity 0.2s ease; display: flex; }
+.tree-item:hover .tree-actions { opacity: 1; }
+
+/* EDITOR AREA */
+.editor-container { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; background: var(--bg-base); }
+.tabs { display: flex; background: var(--bg-surface); border-bottom: 1px solid var(--border); overflow-x: auto; align-items: center; }
+.tab {
+  padding: 10px 20px; font-size: 13px; color: var(--text-secondary); cursor: pointer;
+  border-right: 1px solid var(--border); background: var(--bg-base); display: flex; align-items: center; gap: 8px;
+  transition: all 0.2s ease; box-shadow: inset 0 0 0 transparent;
+}
+.tab:hover { background: var(--bg-surface-hover); }
+.tab.active { background: transparent; color: var(--text-primary); box-shadow: inset 0 2px 0 var(--file-color); }
+.tab-close { opacity: 0; cursor: pointer; border-radius: 50%; padding: 2px; transition: all 0.2s ease; }
+.tab:hover .tab-close { opacity: 1; }
+.tab-close:hover { background: var(--bg-overlay); color: #E06C75; transform: scale(1.2); }
+
+.editor-toolbar {
+  height: 35px; background: var(--bg-base); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 16px; justify-content: flex-end;
+  border-top: 2px solid var(--file-color); transition: border-color 0.4s ease;
+}
+
+#editor { flex: 1; width: 100%; font-family: 'Fira Code', monospace; }
+
+/* SLIDING PREVIEW PANEL */
+.preview-panel {
+  width: 0; border-left: 0 solid var(--border); background: #fff;
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden; display: flex; flex-direction: column;
+}
+.preview-panel.open { width: 45%; border-left: 1px solid var(--border); }
+.preview-header {
+  height: 40px; background: var(--bg-surface); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; padding: 0 16px; color: var(--text-primary); font-size: 13px;
+}
+iframe { border: none; width: 100%; flex: 1; background: #fff; }
+
+/* DROP ZONE */
+.drop-zone {
+  margin: 10px 16px; border: 1px dashed var(--border); border-radius: var(--radius);
+  padding: 20px 10px; text-align: center; color: var(--text-secondary); font-size: 12px;
+  cursor: pointer; transition: all 0.3s ease;
+}
+.drop-zone:hover, .drop-zone.drag { border-color: var(--accent); background: rgba(94, 106, 210, 0.05); color: var(--text-primary); transform: scale(0.98); }
+
+/* FOOTER */
+footer {
+  height: 26px; background: var(--bg-surface); border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: var(--text-secondary); letter-spacing: 0.5px;
+}
+
+/* CUSTOM MODALS & TOASTS */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  display: none; align-items: center; justify-content: center; z-index: 3000;
+  opacity: 0; transition: opacity 0.3s ease;
+}
+.modal-overlay.show { display: flex; opacity: 1; }
+
+.modal {
+  background: var(--bg-surface); border: 1px solid var(--border); width: 400px; max-width: 90%;
+  border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); overflow: hidden;
+  transform: translateY(20px) scale(0.95); opacity: 0; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.modal-overlay.show .modal { transform: translateY(0) scale(1); opacity: 1; }
+
+.modal-header { padding: 16px 20px; font-weight: 600; border-bottom: 1px solid var(--border); }
+.modal-body { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.modal-footer { padding: 16px 20px; background: var(--bg-base); display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--border); }
+.input, select.input {
+  background: var(--bg-base); border: 1px solid var(--border); color: var(--text-primary);
+  padding: 8px 12px; border-radius: 6px; font-size: 13px; outline: none; width: 100%; transition: all 0.2s ease;
+}
+.input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(94, 106, 210, 0.2); }
+
+/* CHANGE FILE TYPE MODAL CSS */
+.format-modal {
+  width: 760px; max-width: 95vw; background: #111318; border: 1px solid var(--cyan-accent);
+  border-radius: 8px; box-shadow: 0 12px 40px rgba(0,0,0,0.8);
+  display: flex; flex-direction: column; 
+  transform: translateY(20px) scale(0.95); opacity: 0; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.modal-overlay.show .format-modal { transform: translateY(0) scale(1); opacity: 1; }
+
+.fm-topbar { display: flex; align-items: center; padding: 16px 20px; border-bottom: 1px solid #1E222B; }
+.fm-search-icon { color: var(--cyan-accent); margin-right: 12px; font-size: 18px; font-weight: bold; }
+.fm-search-input { flex: 1; background: transparent; border: none; color: #fff; font-size: 14px; outline: none; transition: all 0.2s ease; }
+.fm-search-input::placeholder { color: #5A6072; }
+.fm-close-btn { background: transparent; border: none; color: #5A6072; cursor: pointer; font-size: 16px; transition: color 0.2s ease; }
+.fm-close-btn:hover { color: #fff; }
+
+.fm-body { display: flex; height: 380px; }
+.fm-sidebar { width: 200px; border-right: 1px solid #1E222B; overflow-y: auto; padding: 12px 0; }
+.fm-category {
+  padding: 12px 20px; color: #8A919E; font-size: 13px; cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+.fm-category:hover { background: #1A1D24; color: #fff; }
+.fm-category.active { color: #fff; border-left: 3px solid var(--cyan-accent); background: rgba(13,226,198,0.05); }
+
+.fm-content { flex: 1; display: flex; flex-direction: column; }
+.fm-grid {
+  flex: 1; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  grid-auto-rows: 45px; gap: 16px; overflow-y: auto; align-content: flex-start;
+}
+.fm-btn {
+  background: #181A20; border: 1px solid #2A2E37; border-radius: 6px; color: #D1D5DB;
+  font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;
+}
+.fm-btn:hover { border-color: var(--cyan-accent); background: #1C2028; color: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(13,226,198,0.1); }
+.fm-btn:active { transform: translateY(0); }
+
+.fm-hover-info { padding: 16px 24px; border-top: 1px solid #1E222B; color: #5A6072; font-size: 12px; min-height: 50px; transition: color 0.2s ease; }
+
+.fm-bottom { padding: 16px 24px; border-top: 1px solid #1E222B; display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+.fm-bottom-input {
+  flex: 1; background: #111318; border: 1px solid #2A2E37; color: #fff; padding: 10px 14px;
+  border-radius: 6px; font-size: 13px; outline: none; transition: all 0.2s ease;
+}
+.fm-bottom-input:focus { border-color: var(--cyan-accent); box-shadow: 0 0 0 2px rgba(13,226,198,0.15); }
+.fm-apply-btn {
+  background: transparent; border: 1px solid #2A2E37; color: #D1D5DB; padding: 10px 24px;
+  border-radius: 6px; font-size: 13px; cursor: pointer; transition: all 0.2s ease;
+}
+.fm-apply-btn:hover { border-color: var(--cyan-accent); color: #fff; background: rgba(13,226,198,0.05); }
+
+.toast {
+  position: fixed; bottom: 40px; right: 24px; background: rgba(35, 39, 48, 0.95); backdrop-filter: blur(8px); color: var(--text-primary);
+  padding: 12px 20px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 10px;
+  transform: translateY(100px); opacity: 0; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); z-index: 4000;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+
+.svg-icon { display: inline-block; width: 16px; height: 16px; fill: currentColor; }
 </style>
 </head>
 <body>
 
+<svg style="display:none;">
+  <symbol id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol>
+  <symbol id="icon-code" viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></symbol>
+  <symbol id="icon-file" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></symbol>
+  <symbol id="icon-image" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></symbol>
+  <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></symbol>
+  <symbol id="icon-trash" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></symbol>
+  <symbol id="icon-close" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></symbol>
+</svg>
+
 <header>
-  <div class="row" style="gap:12px">
-    <h1>ALLF Studio</h1>
-    <span class="pill" id="saveStatePill">Saved</span>
-    <span class="pill" id="sizePill">Size: 0 KB</span>
+  <div class="header-left">
+    <div class="logo"><img src="ALLF_STUDIO_IMG.png" alt="Logo"> ALLF STUDIO</div>
+    <div class="top-divider"></div>
+    
+    <div class="menu-group">
+      <div class="menu-btn">File</div>
+      <div class="dropdown">
+        <div class="dropdown-item" id="menuNewProject">New Project</div>
+        <div class="dropdown-divider"></div>
+        <div class="dropdown-item" id="menuImport">Import .allf</div>
+        <div class="dropdown-item" id="menuExport">Export .allf</div>
+      </div>
+    </div>
+
+    <div class="menu-group">
+      <div class="menu-btn">Edit</div>
+      <div class="dropdown">
+        <div class="dropdown-item" id="menuAddCode">Add New File</div>
+        <div class="dropdown-item" id="menuUploadMedia">Upload Assets</div>
+        <div class="dropdown-divider"></div>
+        <div class="dropdown-item danger" id="menuClearTab">Clear Current Tab</div>
+      </div>
+    </div>
+
+    <div class="menu-group">
+      <div class="menu-btn">Project</div>
+      <div class="dropdown">
+        <div class="dropdown-item" id="menuMeta">Settings & Metadata</div>
+        <div class="dropdown-divider"></div>
+        <div class="dropdown-item danger" id="menuDeleteProj">Delete Project</div>
+      </div>
+    </div>
+
+    <div class="menu-group">
+      <div class="menu-btn">View</div>
+      <div class="dropdown">
+        <div class="dropdown-item" id="menuTogglePreview">Toggle Live Preview</div>
+        <div class="dropdown-divider"></div>
+        <div class="dropdown-item" id="menuThemes">Editor Themes</div>
+      </div>
+    </div>
+
+    <div class="top-divider"></div>
+    <input type="text" id="projectNameInput" class="project-name-input" value="Untitled Project" title="Click to rename project">
   </div>
-
-  <div class="toolbar">
-    <select id="projectSelect" class="input" title="Saved projects"></select>
-    <button id="btnNewProject" class="btn secondary">New</button>
-    <button id="btnRenameProject" class="btn secondary">Rename</button>
-    <button id="btnDuplicateProject" class="btn secondary">Duplicate</button>
-    <button id="btnDeleteProject" class="btn danger">Delete</button>
-
-    <button id="btnExport" class="btn">Export .allf</button>
-    <button id="btnImport" class="btn secondary">Import .allf</button>
-    <input id="importInput" type="file" accept=".allf,text/plain" style="display:none" />
-
-    <button id="btnThemes" class="btn secondary">Themes</button>
+  
+  <div class="header-right">
+    <select id="projectSelect" class="project-select" title="Switch Projects"></select>
+    <button class="btn primary" id="btnLivePreview">
+      <svg><use href="#icon-play"></use></svg> Live Preview
+    </button>
   </div>
 </header>
 
-<div class="container">
-
-  <!-- LEFT: Projects + Sections + Media controls -->
-  <div class="panel">
-    <div class="head">
-      <div class="col" style="gap:4px">
-        <div style="font-weight:1000;color:var(--accent)">Sections</div>
-        <div class="small">Tabs, autosave, global search</div>
-      </div>
-      <div class="row" style="justify-content:flex-end">
-        <button id="btnAddCode" class="btn small">+ Code</button>
-        <button id="btnAddNote" class="btn small secondary">+ Note</button>
-        <button id="btnMeta" class="btn small secondary">Metadata</button>
-        <button id="btnAddMedia" class="btn small secondary">Images/Videos</button>
-        <input id="mediaInput" type="file" accept="image/*,video/*" multiple style="display:none" />
-      </div>
+<div class="workspace">
+  
+  <div class="sidebar">
+    <div class="section-header">
+      CODE & FILES
+      <button class="icon-btn" id="btnAddCode" title="New File"><svg class="svg-icon"><use href="#icon-plus"></use></svg></button>
     </div>
+    <div id="sectionsList" style="margin-bottom: 10px;"></div>
 
-    <div class="body">
-      <div class="row" style="gap:10px">
-        <input id="globalSearch" class="input" style="width:100%" placeholder="Search across sections… (title/content)" />
-        <button id="btnSearch" class="btn secondary">Search</button>
-      </div>
-      <div id="searchResults" class="list" style="margin-top:10px;display:none"></div>
-
-      <div class="sep"></div>
-
-      <div class="list" id="sectionsList"></div>
-
-      <div class="sep"></div>
-
-      <div class="drop" id="dropZone" tabindex="0">
-        <strong>Drop images/videos here</strong>
-        <div style="margin-top:6px">or click <kbd>Images/Videos</kbd>. Stored locally in your browser (IndexedDB) and embedded in exported .allf.</div>
-      </div>
-
-      <div class="sep"></div>
-
-      <div class="row" style="justify-content:space-between;gap:12px">
-        <div class="col" style="gap:3px">
-          <div class="small">Autosave: on</div>
-          <div class="small">Export embeds media as Base64</div>
-        </div>
-        <div class="brand">© ALLF STUDIO - TSFALEX</div>
-      </div>
+    <div class="section-header">
+      ASSETS & MEDIA
+      <button class="icon-btn" id="btnAddMedia" title="Upload Asset"><svg class="svg-icon"><use href="#icon-plus"></use></svg></button>
     </div>
+    <div class="drop-zone" id="dropZone">
+      Click or drag files here<br><span style="font-size:10px; opacity:0.6">(Images, Videos, Fonts)</span>
+    </div>
+    <div id="mediaList"></div>
   </div>
 
-  <!-- CENTER: Editor with tabs -->
-  <div class="panel editorWrap">
-    <div class="editorTop">
-      <div class="col" style="gap:6px;min-width:0">
-        <div class="row" style="gap:10px;flex-wrap:wrap">
-          <div style="font-weight:1000;color:var(--accent)">Editor</div>
-          <div class="tabs" id="tabs"></div>
-        </div>
-        <div class="small">Ctrl+S save • Ctrl+E export • Paste images: Ctrl+V</div>
-      </div>
-      <div class="row" style="justify-content:flex-end">
-        <button id="btnSaveSection" class="btn small">Save</button>
-        <button id="btnCloseTab" class="btn small secondary">Close Tab</button>
-        <button id="btnClear" class="btn small secondary">Clear</button>
-      </div>
+  <div class="editor-container">
+    <div class="tabs" id="tabs"></div>
+    <div class="editor-toolbar">
+      <button id="btnChangeFileType" class="btn" style="padding: 4px 8px; font-size: 11px;">Change File Type</button>
     </div>
-    <div class="editorMain" id="editor"></div>
+    <div id="editor"></div>
   </div>
 
-  <!-- RIGHT: Preview + Media list -->
-  <div class="panel previewWrap">
-    <div class="previewTop">
-      <div class="col" style="gap:4px;min-width:0">
-        <div class="row" style="gap:10px">
-          <div style="font-weight:1000;color:var(--accent)">Preview</div>
-          <span class="pill" id="previewState">Paused</span>
-        </div>
-        <div class="small">Sandboxed iframe • Choose section</div>
-      </div>
-      <div class="row" style="justify-content:flex-end">
-        <select id="previewSelect" class="input" style="width:200px" title="Choose HTML section"></select>
-        <button id="btnTogglePreview" class="btn small secondary">Toggle</button>
-        <button id="btnReloadPreview" class="btn small secondary">Reload</button>
-      </div>
+  <div class="preview-panel" id="previewPanel">
+    <div class="preview-header">
+      <span>Preview Output</span>
+      <button class="icon-btn" id="btnReloadPreview" title="Reload"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button>
     </div>
+    <iframe id="previewFrame" sandbox="allow-scripts allow-forms allow-modals"></iframe>
+  </div>
 
-    <div class="previewMain" style="display:flex;flex-direction:column">
-      <iframe id="previewFrame" sandbox="allow-scripts allow-forms allow-modals" title="Preview"></iframe>
+</div>
 
-      <div style="border-top:1px solid rgba(255,255,255,0.05);padding:12px;overflow:auto;max-height:520px">
-        <div class="row" style="justify-content:space-between">
-          <div class="col" style="gap:4px">
-            <div style="font-weight:1000;color:var(--accent)">Media</div>
-            <div class="small">Stored in IndexedDB, referenced by ID, embedded on export</div>
+<footer>2026 &copy; TSFAlex | ALLF STUDIO Version 1.3.0</footer>
+
+<input id="mediaInput" type="file" accept="*/*" multiple style="display:none" />
+<input id="importInput" type="file" accept=".allf,text/plain" style="display:none" />
+
+<div id="formatModal" class="modal-overlay">
+  <div class="format-modal">
+    <div class="fm-topbar">
+      <div class="fm-search-icon">🔍</div>
+      <input type="text" id="fmSearch" class="fm-search-input" placeholder="Search code formats (e.g. html, js, py)...">
+      <button class="fm-close-btn" id="btnFormatClose">✕</button>
+    </div>
+    <div class="fm-body">
+      <div class="fm-sidebar" id="fmCategories">
+        </div>
+      <div class="fm-content">
+        <div class="fm-grid" id="fmGrid">
           </div>
-          <div class="pill" id="mediaCounts">0 images • 0 videos</div>
-        </div>
-
-        <div class="row" style="margin-top:10px">
-          <select id="mediaFilter" class="input" style="width:160px">
-            <option value="all">All</option>
-            <option value="image">Images</option>
-            <option value="video">Videos</option>
-          </select>
-          <input id="mediaTagFilter" class="input" style="width:100%" placeholder="Filter by tag… (comma-separated on media)" />
-          <button id="btnCleanupUnused" class="btn small secondary" title="Removes media not referenced by any section (ID-based references)">Cleanup Unused</button>
-        </div>
-
-        <div id="mediaList" class="list" style="margin-top:10px"></div>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<footer>
-  <div>ALLF Studio — Pro Local</div>
-  <div>© ALLF STUDIO - TSFALEX</div>
-</footer>
-
-<!-- EXPORT MODAL -->
-<div id="exportModalBg" class="modalBg">
-  <div class="modal">
-    <div class="row" style="justify-content:space-between">
-      <h3>Export .allf</h3>
-      <div class="row">
-        <button id="btnExportClose" class="btn secondary">Close</button>
-        <button id="btnExportDownload" class="btn">Download</button>
-      </div>
-    </div>
-
-    <div class="sep"></div>
-
-    <div class="grid3">
-      <div class="col">
-        <div class="small">Filename</div>
-        <input id="exportFilename" class="input" style="width:100%" value="project.allf" />
-      </div>
-      <div class="col">
-        <div class="small">Repair import mode</div>
-        <label class="row" style="gap:8px">
-          <input id="exportRepairHint" type="checkbox" />
-          <span class="small">Include extra hints for repair import</span>
-        </label>
-      </div>
-      <div class="col">
-        <div class="small">Estimated export size</div>
-        <div id="exportSizeLabel" style="font-weight:1000"></div>
-      </div>
-    </div>
-
-    <div class="sep"></div>
-
-    <div class="grid2">
-      <div class="col">
-        <div class="small">Export Notes (optional)</div>
-        <textarea id="exportNotes" class="input codebox" style="min-height:140px" placeholder="Optional notes…"></textarea>
-      </div>
-      <div class="col">
-        <div class="small">Safety</div>
-        <div class="col" style="gap:10px">
-          <div class="row" style="justify-content:space-between">
-            <span class="small">Browser storage health</span>
-            <span id="storageHealth" class="badgeOk">OK</span>
-          </div>
-          <div class="row" style="justify-content:space-between">
-            <span class="small">Media embedding warning</span>
-            <span id="embedWarning" class="badgeOk">OK</span>
-          </div>
-          <div class="progress"><div id="storageBar"></div></div>
-          <div class="small" id="storageDetails"></div>
+        <div class="fm-hover-info" id="fmHoverInfo">
+          Hover over a format to see its details.
         </div>
       </div>
     </div>
-
-    <div class="sep"></div>
-
-    <div class="col" style="gap:8px">
-      <div class="small">Preview of embedded blocks (metadata + media manifest)</div>
-      <textarea id="exportPreview" class="input codebox" style="min-height:220px" readonly></textarea>
+    <div class="fm-bottom">
+      <input type="text" id="fmCustomInput" class="fm-bottom-input" placeholder="Custom ext (e.g. php)">
+      <button class="fm-apply-btn" id="btnFormatCustomApply">Apply Custom</button>
     </div>
   </div>
 </div>
 
-<!-- IMPORT OPTIONS MODAL -->
-<div id="importModalBg" class="modalBg">
+<div id="exportModal" class="modal-overlay">
   <div class="modal">
-    <div class="row" style="justify-content:space-between">
-      <h3>Import options</h3>
-      <div class="row">
-        <button id="btnImportCancel" class="btn secondary">Cancel</button>
-        <button id="btnImportProceed" class="btn">Import</button>
-      </div>
+    <div class="modal-header">Export Project (.allf)</div>
+    <div class="modal-body">
+      <label style="font-size: 12px; color: var(--text-secondary);">Filename</label>
+      <input id="exportFilename" class="input" value="project.allf" />
+      <div id="exportProgressText" style="font-size:12px; color:var(--accent); font-weight:600;"></div>
     </div>
-    <div class="sep"></div>
-    <div class="row" style="gap:16px;align-items:flex-start">
-      <label class="row" style="gap:8px">
-        <input id="importRepairMode" type="checkbox" />
-        <span class="small">Repair mode (tries to salvage sections/media even if formatting is imperfect)</span>
-      </label>
+    <div class="modal-footer">
+      <button class="btn btn-close-modal">Cancel</button>
+      <button class="btn primary" id="btnExportConfirm">Download</button>
     </div>
-    <div class="sep"></div>
-    <div class="small">Note: Files missing required branding block will be rejected.</div>
   </div>
 </div>
 
-<!-- THEMES MODAL -->
-<div id="themesModalBg" class="modalBg">
+<div id="metaModal" class="modal-overlay">
   <div class="modal">
-    <div class="row" style="justify-content:space-between">
-      <h3>Themes</h3>
-      <button id="btnThemesClose" class="btn secondary">Close</button>
+    <div class="modal-header">Project Settings</div>
+    <div class="modal-body">
+      <label style="font-size: 12px; color: var(--text-secondary);">Author</label>
+      <input id="metaAuthor" class="input" placeholder="Your Name" />
+      <label style="font-size: 12px; color: var(--text-secondary);">Version</label>
+      <input id="metaVersion" class="input" placeholder="1.0.0" />
     </div>
-    <div class="sep"></div>
-    <div class="grid2">
-      <div class="col">
-        <div class="small">Editor theme</div>
-        <select id="editorTheme" class="input" style="width:100%">
-          <option value="ace/theme/monokai">Monokai</option>
-          <option value="ace/theme/dracula">Dracula</option>
-          <option value="ace/theme/twilight">Twilight</option>
-          <option value="ace/theme/solarized_dark">Solarized Dark</option>
-          <option value="ace/theme/github">GitHub (light)</option>
-        </select>
-      </div>
-      <div class="col">
-        <div class="small">UI theme</div>
-        <select id="uiTheme" class="input" style="width:100%">
-          <option value="dark">Dark</option>
-          <option value="midnight">Midnight</option>
-          <option value="ocean">Ocean</option>
-          <option value="crimson">Crimson</option>
-          <option value="light">Light</option>
-        </select>
-      </div>
+    <div class="modal-footer">
+      <button class="btn btn-close-modal">Cancel</button>
+      <button class="btn primary" id="btnMetaSave">Save</button>
     </div>
   </div>
 </div>
 
-<!-- METADATA MODAL -->
-<div id="metaModalBg" class="modalBg">
+<div id="themesModal" class="modal-overlay">
   <div class="modal">
-    <div class="row" style="justify-content:space-between">
-      <h3>Project Metadata</h3>
-      <div class="row">
-        <button id="btnMetaClose" class="btn secondary">Close</button>
-        <button id="btnMetaSave" class="btn">Save</button>
-      </div>
+    <div class="modal-header">Editor Themes</div>
+    <div class="modal-body">
+      <label style="font-size: 12px; color: var(--text-secondary);">Select Theme</label>
+      <select id="editorThemeSelect" class="input">
+        <option value="ace/theme/tomorrow_night_eighties">Tomorrow Night (Dark)</option>
+        <option value="ace/theme/monokai">Monokai (Dark)</option>
+        <option value="ace/theme/dracula">Dracula (Dark)</option>
+        <option value="ace/theme/github">GitHub (Light)</option>
+      </select>
     </div>
-
-    <div class="sep"></div>
-
-    <div class="grid3">
-      <div class="col">
-        <div class="small">Title</div>
-        <input id="metaTitle" class="input" style="width:100%" />
-      </div>
-      <div class="col">
-        <div class="small">Author</div>
-        <input id="metaAuthor" class="input" style="width:100%" />
-      </div>
-      <div class="col">
-        <div class="small">Version</div>
-        <input id="metaVersion" class="input" style="width:100%" placeholder="1.0.0" />
-      </div>
-    </div>
-
-    <div class="grid2" style="margin-top:12px">
-      <div class="col">
-        <div class="small">Tags (comma separated)</div>
-        <input id="metaTags" class="input" style="width:100%" placeholder="tag1, tag2" />
-      </div>
-      <div class="col">
-        <div class="small">Updated</div>
-        <input id="metaUpdated" class="input" style="width:100%" readonly />
-      </div>
-    </div>
-
-    <div class="sep"></div>
-
-    <div class="row" style="justify-content:space-between">
-      <div class="small">Advanced JSON</div>
-      <label class="row" style="gap:8px">
-        <input id="metaAdvancedToggle" type="checkbox" />
-        <span class="small">Show raw JSON</span>
-      </label>
-    </div>
-
-    <textarea id="metaJson" class="input codebox" style="display:none;margin-top:10px" placeholder='{"author":"..."}'></textarea>
-
-    <div class="small" style="margin-top:10px;color:var(--muted)">
-      Metadata is stored locally and embedded in the .allf file.
+    <div class="modal-footer">
+      <button class="btn btn-close-modal primary">Close</button>
     </div>
   </div>
 </div>
 
-<!-- MEDIA ADD MODAL (compression options) -->
-<div id="mediaModalBg" class="modalBg">
-  <div class="modal">
-    <div class="row" style="justify-content:space-between">
-      <h3>Add Media</h3>
-      <div class="row">
-        <button id="btnMediaClose" class="btn secondary">Close</button>
-        <button id="btnMediaPick" class="btn">Choose Files</button>
-      </div>
-    </div>
-
-    <div class="sep"></div>
-
-    <div class="grid3">
-      <div class="col">
-        <div class="small">Images: max dimension</div>
-        <input id="imgMaxDim" class="input" style="width:100%" type="number" min="256" step="64" value="1920" />
-      </div>
-      <div class="col">
-        <div class="small">Images: quality (JPEG/WebP)</div>
-        <input id="imgQuality" class="input" style="width:100%" type="number" min="0.3" max="1" step="0.05" value="0.85" />
-      </div>
-      <div class="col">
-        <div class="small">Images: format</div>
-        <select id="imgFormat" class="input" style="width:100%">
-          <option value="image/webp">WebP</option>
-          <option value="image/jpeg">JPEG</option>
-          <option value="image/png">PNG (no compression)</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="sep"></div>
-
-    <div class="row" style="justify-content:space-between">
-      <div class="col" style="gap:6px">
-        <div class="small">Import progress</div>
-        <div class="progress"><div id="mediaProgressBar"></div></div>
-        <div class="small" id="mediaProgressText">Idle</div>
-      </div>
-      <div class="col" style="gap:6px;align-items:flex-end">
-        <div class="small">Video note</div>
-        <div class="small"><span class="badgeWarn">Warning:</span> videos can make exports huge.</div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- TOAST -->
 <div class="toast" id="toast">
-  <div class="t" id="toastT">Done</div>
-  <div class="m" id="toastM">Message</div>
+  <div class="toast-dot"></div>
+  <span id="toastMsg">Message</span>
 </div>
 
-<!-- ACE -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.14/ace.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.14/ext-language_tools.min.js"></script>
 
 <script>
 /* =========================================================
-   ALLF Studio — Pro Local
-   Implements ALL suggested improvements (within a single file):
-   - Project manager (list/rename/duplicate/delete)
-   - Autosave (debounced) + dirty indicator + tabs
-   - Global search
-   - Sandboxed preview with selectable section
-   - Media stored in IndexedDB (blobs), manifest in localStorage
-   - Image compression (optional) on import
-   - Paste images, drag/drop, progress
-   - Insert media snippets into editor
-   - Media tagging/filter, lazy video preview
-   - Export/import v2 with version header, checksums, media embedded as DataURLs
-   - Chunk large embedded media block into E1/E2/... blocks
-   - Repair import mode
+   ALLF STUDIO - V6 (Smooth Animations & Restricted Formats)
    ========================================================= */
 
 const BRANDING_TEXT = '© ALLF STUDIO - TSFALEX';
 const ALLF_VERSION = 2;
+const LS_INDEX_KEY = 'ALLF_PRO_INDEX_V6';
 
-const LS_INDEX_KEY = 'ALLF_STUDIO__INDEX__V2'; // list of projects + settings
-
-// DOM refs
-const projectSelect = document.getElementById('projectSelect');
-const btnNewProject = document.getElementById('btnNewProject');
-const btnRenameProject = document.getElementById('btnRenameProject');
-const btnDuplicateProject = document.getElementById('btnDuplicateProject');
-const btnDeleteProject = document.getElementById('btnDeleteProject');
-
-const btnExport = document.getElementById('btnExport');
-const btnImport = document.getElementById('btnImport');
-const importInput = document.getElementById('importInput');
-
-const btnThemes = document.getElementById('btnThemes');
-const themesModalBg = document.getElementById('themesModalBg');
-const btnThemesClose = document.getElementById('btnThemesClose');
-const editorThemeSel = document.getElementById('editorTheme');
-const uiThemeSel = document.getElementById('uiTheme');
-
-const btnAddCode = document.getElementById('btnAddCode');
-const btnAddNote = document.getElementById('btnAddNote');
-const btnMeta = document.getElementById('btnMeta');
-const btnAddMedia = document.getElementById('btnAddMedia');
-const mediaInput = document.getElementById('mediaInput');
-const dropZone = document.getElementById('dropZone');
-
-const sectionsList = document.getElementById('sectionsList');
-const tabsEl = document.getElementById('tabs');
-const btnSaveSection = document.getElementById('btnSaveSection');
-const btnCloseTab = document.getElementById('btnCloseTab');
-const btnClear = document.getElementById('btnClear');
-
-const globalSearch = document.getElementById('globalSearch');
-const btnSearch = document.getElementById('btnSearch');
-const searchResults = document.getElementById('searchResults');
-
-const previewFrame = document.getElementById('previewFrame');
-const btnTogglePreview = document.getElementById('btnTogglePreview');
-const btnReloadPreview = document.getElementById('btnReloadPreview');
-const previewSelect = document.getElementById('previewSelect');
-const previewState = document.getElementById('previewState');
-
-const mediaCounts = document.getElementById('mediaCounts');
-const mediaList = document.getElementById('mediaList');
-const mediaFilter = document.getElementById('mediaFilter');
-const mediaTagFilter = document.getElementById('mediaTagFilter');
-const btnCleanupUnused = document.getElementById('btnCleanupUnused');
-
-const exportModalBg = document.getElementById('exportModalBg');
-const btnExportClose = document.getElementById('btnExportClose');
-const btnExportDownload = document.getElementById('btnExportDownload');
-const exportFilename = document.getElementById('exportFilename');
-const exportNotes = document.getElementById('exportNotes');
-const exportPreview = document.getElementById('exportPreview');
-const exportSizeLabel = document.getElementById('exportSizeLabel');
-const exportRepairHint = document.getElementById('exportRepairHint');
-const storageHealth = document.getElementById('storageHealth');
-const embedWarning = document.getElementById('embedWarning');
-const storageBar = document.getElementById('storageBar');
-const storageDetails = document.getElementById('storageDetails');
-
-const importModalBg = document.getElementById('importModalBg');
-const btnImportCancel = document.getElementById('btnImportCancel');
-const btnImportProceed = document.getElementById('btnImportProceed');
-const importRepairMode = document.getElementById('importRepairMode');
-
-const metaModalBg = document.getElementById('metaModalBg');
-const btnMetaClose = document.getElementById('btnMetaClose');
-const btnMetaSave = document.getElementById('btnMetaSave');
-const metaTitle = document.getElementById('metaTitle');
-const metaAuthor = document.getElementById('metaAuthor');
-const metaVersion = document.getElementById('metaVersion');
-const metaTags = document.getElementById('metaTags');
-const metaUpdated = document.getElementById('metaUpdated');
-const metaAdvancedToggle = document.getElementById('metaAdvancedToggle');
-const metaJson = document.getElementById('metaJson');
-
-const mediaModalBg = document.getElementById('mediaModalBg');
-const btnMediaClose = document.getElementById('btnMediaClose');
-const btnMediaPick = document.getElementById('btnMediaPick');
-const imgMaxDim = document.getElementById('imgMaxDim');
-const imgQuality = document.getElementById('imgQuality');
-const imgFormat = document.getElementById('imgFormat');
-const mediaProgressBar = document.getElementById('mediaProgressBar');
-const mediaProgressText = document.getElementById('mediaProgressText');
-
-const saveStatePill = document.getElementById('saveStatePill');
-const sizePill = document.getElementById('sizePill');
-
-// Toast
-const toastEl = document.getElementById('toast');
-const toastT = document.getElementById('toastT');
-const toastM = document.getElementById('toastM');
-
-// =====================
-// Utils
-// =====================
-const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
-function showToast(t,m,ms=2400){
-  toastT.textContent=t; toastM.textContent=m;
-  toastEl.style.display='block'; toastEl.style.opacity='1';
-  clearTimeout(showToast._t);
-  showToast._t=setTimeout(()=>{toastEl.style.opacity='0'; setTimeout(()=>toastEl.style.display='none',260)},ms);
+// --- Utils ---
+function el(id) { return document.getElementById(id); }
+function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function newId(prefix='id') { return prefix + '_' + Math.random().toString(36).substr(2, 6); }
+function showToast(msg) {
+  const t = el('toast'); el('toastMsg').textContent = msg;
+  t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000);
 }
-function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function formatBytes(n){
-  n=Number(n)||0;
-  if(n<1024) return n+' B';
-  const kb=n/1024; if(kb<1024) return kb.toFixed(1)+' KB';
-  const mb=kb/1024; if(mb<1024) return mb.toFixed(1)+' MB';
-  const gb=mb/1024; return gb.toFixed(2)+' GB';
+function openModal(id) {
+  const m = el(id); m.style.display = 'flex'; 
+  setTimeout(() => m.classList.add('show'), 10);
 }
-function nowIso(){return new Date().toISOString()}
+function closeModal(id) {
+  const m = el(id); m.classList.remove('show');
+  setTimeout(() => m.style.display = 'none', 300);
+}
 
-// =====================
-// IndexedDB for media blobs
-// =====================
-const DB_NAME = 'ALLF_STUDIO_DB_V2';
-const DB_VERSION = 1;
-const STORE_MEDIA = 'media';
-
-function openDb(){
-  return new Promise((resolve,reject)=>{
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = ()=>{
-      const db = req.result;
-      if(!db.objectStoreNames.contains(STORE_MEDIA)){
-        const s = db.createObjectStore(STORE_MEDIA, { keyPath:'id' });
-        s.createIndex('projectId','projectId',{unique:false});
-        s.createIndex('kind','kind',{unique:false});
+// --- DB ---
+const DB_NAME = 'ALLF_PRO_FILES';
+function openDb() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = () => {
+      if(!req.result.objectStoreNames.contains('files')) {
+        req.result.createObjectStore('files', { keyPath:'id' }).createIndex('projectId','projectId');
       }
     };
-    req.onsuccess = ()=>resolve(req.result);
-    req.onerror = ()=>reject(req.error);
+    req.onsuccess = () => resolve(req.result); req.onerror = () => reject(req.error);
   });
 }
-async function idbPut(mediaObj){
+async function idbAction(type, objOrId) {
   const db = await openDb();
-  return new Promise((resolve,reject)=>{
-    const tx = db.transaction(STORE_MEDIA,'readwrite');
-    tx.objectStore(STORE_MEDIA).put(mediaObj);
-    tx.oncomplete=()=>resolve(true);
-    tx.onerror=()=>reject(tx.error);
+  return new Promise((res, rej) => {
+    const tx = db.transaction('files', type==='get'?'readonly':'readwrite');
+    const store = tx.objectStore('files');
+    let req;
+    if(type==='put') req = store.put(objOrId);
+    else if(type==='get') req = store.get(objOrId);
+    else if(type==='del') req = store.delete(objOrId);
+    if(req) req.onsuccess = () => res(req.result);
+    tx.oncomplete = () => res(true); tx.onerror = () => rej(tx.error);
   });
 }
-async function idbGet(id){
-  const db = await openDb();
-  return new Promise((resolve,reject)=>{
-    const tx=db.transaction(STORE_MEDIA,'readonly');
-    const req=tx.objectStore(STORE_MEDIA).get(id);
-    req.onsuccess=()=>resolve(req.result||null);
-    req.onerror=()=>reject(req.error);
-  });
-}
-async function idbDelete(id){
-  const db = await openDb();
-  return new Promise((resolve,reject)=>{
-    const tx=db.transaction(STORE_MEDIA,'readwrite');
-    tx.objectStore(STORE_MEDIA).delete(id);
-    tx.oncomplete=()=>resolve(true);
-    tx.onerror=()=>reject(tx.error);
-  });
-}
-async function idbListByProject(projectId){
-  const db = await openDb();
-  return new Promise((resolve,reject)=>{
-    const out=[];
-    const tx=db.transaction(STORE_MEDIA,'readonly');
-    const idx=tx.objectStore(STORE_MEDIA).index('projectId');
-    const req=idx.openCursor(IDBKeyRange.only(projectId));
-    req.onsuccess=()=>{
-      const c=req.result;
-      if(!c){ resolve(out); return; }
-      out.push(c.value);
-      c.continue();
-    };
-    req.onerror=()=>reject(req.error);
-  });
-}
-async function idbDeleteByProject(projectId){
-  const items = await idbListByProject(projectId);
-  for(const it of items) await idbDelete(it.id);
-}
 
-// =====================
-// Crypto helpers (checksums / hashes)
-// =====================
-async function sha256Hex(text){
-  const enc = new TextEncoder().encode(text);
-  const buf = await crypto.subtle.digest('SHA-256', enc);
-  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
-}
-async function sha256BlobHex(blob){
-  const ab = await blob.arrayBuffer();
-  const buf = await crypto.subtle.digest('SHA-256', ab);
-  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
-}
+// --- State ---
+let index = { projects: [], lastProjectId: null, theme: 'ace/theme/tomorrow_night_eighties' };
+let project = null;
+let previewOpen = false;
 
-// =====================
-// App State
-// =====================
-let index = loadIndex();
-let currentProjectId = index.lastProjectId || null;
+function loadStorage() {
+  try { const raw = localStorage.getItem(LS_INDEX_KEY); if(raw) index = JSON.parse(raw); } catch(e){}
+  if(!index.theme) index.theme = 'ace/theme/tomorrow_night_eighties';
+}
+function saveStorage() { localStorage.setItem(LS_INDEX_KEY, JSON.stringify(index)); }
+function pKey(id) { return 'ALLF_P_' + id; }
 
-let project = null; // loaded current project object
-/*
-project structure in localStorage:
-{
-  id, name,
-  createdAt, updatedAt,
-  meta: {...},
-  sections: [{type:'code'|'note', id:'C1'|'N1', title:'', content:''}],
-  tabs: ['C1', ...],
-  open: 'C1',
-  preview: { enabled:false, sectionId:null }
-  mediaManifest: [{id, name, kind, mime, bytes, createdAt, tags:[], hash}]
-}
-Media blobs are in IndexedDB keyed by media id with {id, projectId, blob, ...}
-*/
-
-function loadIndex(){
-  try{
-    const raw = localStorage.getItem(LS_INDEX_KEY);
-    if(!raw) return { v:2, projects:[], lastProjectId:null, settings:{editorTheme:'ace/theme/monokai', uiTheme:'dark'} };
-    const obj = JSON.parse(raw);
-    if(!obj || typeof obj!=='object') throw new Error('bad index');
-    obj.v = 2;
-    obj.projects = Array.isArray(obj.projects)?obj.projects:[];
-    obj.settings = obj.settings || {editorTheme:'ace/theme/monokai', uiTheme:'dark'};
-    return obj;
-  }catch(e){
-    return { v:2, projects:[], lastProjectId:null, settings:{editorTheme:'ace/theme/monokai', uiTheme:'dark'} };
-  }
-}
-function saveIndex(){
-  localStorage.setItem(LS_INDEX_KEY, JSON.stringify(index));
-}
-function newId(prefix='p'){
-  return prefix + Math.random().toString(16).slice(2) + Date.now().toString(16);
-}
-function projectKey(pid){ return 'ALLF_STUDIO__PROJECT__V2__' + pid; }
-
-function saveProject(){
+function saveProject() {
   if(!project) return;
-  project.updatedAt = nowIso();
-  localStorage.setItem(projectKey(project.id), JSON.stringify(project));
-  // update index entry name
+  project.name = el('projectNameInput').value || 'Untitled Project';
+  localStorage.setItem(pKey(project.id), JSON.stringify(project));
   const idx = index.projects.findIndex(p=>p.id===project.id);
-  if(idx>=0){
-    index.projects[idx].name = project.name;
-    index.projects[idx].updatedAt = project.updatedAt;
-  }
-  index.lastProjectId = project.id;
-  saveIndex();
-  setSaved(true);
-  updateSizeIndicators().catch(()=>{});
-}
-function loadProject(pid){
-  const raw = localStorage.getItem(projectKey(pid));
-  if(!raw) return null;
-  const obj = JSON.parse(raw);
-  // minimal normalize
-  obj.sections = Array.isArray(obj.sections)?obj.sections:[];
-  obj.mediaManifest = Array.isArray(obj.mediaManifest)?obj.mediaManifest:[];
-  obj.tabs = Array.isArray(obj.tabs)?obj.tabs:[];
-  obj.preview = obj.preview || { enabled:false, sectionId:null };
-  obj.meta = (obj.meta && typeof obj.meta==='object')?obj.meta:{};
-  return obj;
+  if(idx>=0) index.projects[idx].name = project.name;
+  index.lastProjectId = project.id; saveStorage();
 }
 
-function createProject(name='untitled'){
-  const id = newId('p_');
-  const now = nowIso();
-  const p = {
-    id,
-    name,
-    createdAt: now,
-    updatedAt: now,
-    meta: { title:name, author:'', version:'1.0.0', tags:[], createdAt: now, updatedAt: now },
-    sections: [{type:'code', id:'C1', title:'', content:''}],
-    tabs: ['C1'],
-    open: 'C1',
-    preview: { enabled:false, sectionId:null },
-    mediaManifest: []
+function loadProject(id) {
+  const raw = localStorage.getItem(pKey(id));
+  if(!raw) return createProject();
+  project = JSON.parse(raw);
+  el('projectNameInput').value = project.name;
+  renderAll();
+}
+
+function createProject(name='Untitled Project') {
+  const id = newId('p');
+  project = {
+    id, name, meta: { author:'', version:'1.0.0' },
+    sections: [{type:'code', id:'C1', title:'index.html', content:'<!DOCTYPE html>\n<html>\n<body>\n  <h1>ALLF STUDIO</h1>\n</body>\n</html>'}],
+    tabs: ['C1'], open: 'C1', media: []
   };
-  index.projects.push({id, name, updatedAt: now});
-  index.lastProjectId = id;
-  saveIndex();
-  localStorage.setItem(projectKey(id), JSON.stringify(p));
-  return id;
+  index.projects.push({id, name}); saveStorage(); saveProject();
+  el('projectNameInput').value = name; renderAll(); return id;
 }
 
-// =====================
-// Editor (Ace) + Tabs + Dirty tracking
-// =====================
-const editor = ace.edit("editor", {
-  mode:'ace/mode/text',
-  theme:index.settings.editorTheme || 'ace/theme/monokai',
-  fontSize:14,
-  wrap:true,
-  enableBasicAutocompletion:true,
-  enableLiveAutocompletion:true
-});
-editor.renderer.setPadding(10);
-
-let dirtyMap = new Map(); // sectionId -> boolean
-let autosaveTimer = null;
-let saveState = { saved:true, lastSaveAt:null };
-
-function setSaved(saved){
-  saveState.saved = saved;
-  saveStatePill.textContent = saved ? 'Saved' : 'Unsaved';
-  saveStatePill.style.background = saved ? 'rgba(77,220,155,0.15)' : 'rgba(255,211,106,0.16)';
-  saveStatePill.style.border = saved ? '1px solid rgba(77,220,155,0.22)' : '1px solid rgba(255,211,106,0.22)';
-  saveStatePill.style.color = saved ? 'var(--ok)' : '#ffd36a';
+// --- Editor Colors Map ---
+function getExtColor(filename) {
+  const ext = (filename || '').split('.').pop().toLowerCase();
+  const colors = {
+    'html': '#E34F26', 'css': '#1572B6', 'js': '#F7DF1E', 'ts': '#3178C6', 
+    'json': '#8A919E', 'py': '#3776AB', 'md': '#FFFFFF', 'txt': '#5E6AD2',
+    'php': '#777BB4', 'java': '#ED8B00', 'cpp': '#00599C', 'xml': '#00608C'
+  };
+  return colors[ext] || 'var(--border)';
 }
 
-function getSection(id){
-  return project.sections.find(s=>s.id===id) || null;
-}
-function nextCodeId(){
-  const used=new Set(project.sections.filter(s=>s.type==='code').map(s=>parseInt((s.id||'C0').slice(1),10)).filter(n=>Number.isFinite(n)));
-  let i=1; while(used.has(i)) i++;
-  return 'C'+i;
-}
-function nextNoteId(){
-  const used=new Set(project.sections.filter(s=>s.type==='note').map(s=>parseInt((s.id||'N0').slice(1),10)).filter(n=>Number.isFinite(n)));
-  let i=1; while(used.has(i)) i++;
-  return 'N'+i;
-}
-
-function detectModeFromTitleOrContent(sec){
-  const t=(sec.title||'').toLowerCase();
-  if(t.includes('html')) return 'ace/mode/html';
-  if(t.includes('css')) return 'ace/mode/css';
-  if(t.includes('js')||t.includes('javascript')) return 'ace/mode/javascript';
-  if(t.includes('json')) return 'ace/mode/json';
-  if(t.includes('py')) return 'ace/mode/python';
-  if(t.includes('xml')||t.includes('svg')) return 'ace/mode/xml';
-  if(t.includes('md')) return 'ace/mode/markdown';
-
-  const v=(sec.content||'').trim().slice(0,200).toLowerCase();
-  if(v.startsWith('<!doctype')||v.startsWith('<html')||v.includes('<html')) return 'ace/mode/html';
-  if(v.includes('function')&&v.includes('{')) return 'ace/mode/javascript';
-  if(v.startsWith('{')&&v.includes('"')) return 'ace/mode/json';
-  if(v.startsWith('#')||v.includes('def ')) return 'ace/mode/python';
-  return 'ace/mode/text';
-}
-
-function openTab(sectionId){
-  if(!project.tabs.includes(sectionId)) project.tabs.push(sectionId);
-  project.open = sectionId;
-  renderTabs();
-  loadIntoEditor(sectionId);
-  saveProject();
-}
-
-function closeTab(sectionId){
-  project.tabs = project.tabs.filter(t=>t!==sectionId);
-  if(project.open === sectionId){
-    project.open = project.tabs[0] || null;
-    if(project.open) loadIntoEditor(project.open);
-    else editor.setValue('', -1);
-  }
-  renderTabs();
-  saveProject();
-}
-
-function markDirty(sectionId, isDirty){
-  dirtyMap.set(sectionId, !!isDirty);
-  renderTabs();
-}
-
-function loadIntoEditor(sectionId){
-  const sec = getSection(sectionId);
-  if(!sec) return;
-  editor.setValue(sec.content || '', -1);
-  editor.session.setMode(detectModeFromTitleOrContent(sec));
-  markDirty(sectionId, false);
-  setSaved(true);
-}
-
-function saveOpenSection(){
-  const sid = project.open;
-  if(!sid) return;
-  const sec = getSection(sid);
-  if(!sec) return;
-  sec.content = editor.getValue();
-  // optional rename
-  if(confirm('Change title for '+sid+'? (Cancel keeps)')){
-    const nt = prompt('Enter title (blank allowed):', sec.title || '');
-    if(nt !== null) sec.title = nt;
-  }
-  markDirty(sid, false);
-  saveProject();
-  showToast('Saved', sid + ' updated');
-  refreshPreviewSelect();
-  refreshPreview();
-}
-
-function autosaveDebounced(){
-  clearTimeout(autosaveTimer);
-  autosaveTimer = setTimeout(()=>{
-    const sid = project.open;
-    if(!sid) return;
-    const sec = getSection(sid);
-    if(!sec) return;
-    // autosave content only, not title prompts
-    sec.content = editor.getValue();
-    markDirty(sid, true); // still dirty until explicit save? (we treat autosave as saved content)
-    // For UX: autosave should clear dirty
-    markDirty(sid, false);
+// --- Editor Setup ---
+const editor = ace.edit("editor", { theme: index.theme, mode: 'ace/mode/html', fontSize: 14 });
+let typingTimer;
+editor.session.on('change', () => {
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(() => {
+    const sec = project.sections.find(s=>s.id===project.open);
+    if(sec) sec.content = editor.getValue();
     saveProject();
+    if(previewOpen) refreshPreview();
   }, 600);
-}
-
-editor.session.on('change', ()=>{
-  if(!project || !project.open) return;
-  markDirty(project.open, true);
-  setSaved(false);
-  autosaveDebounced();
 });
 
-// =====================
-// Preview
-// =====================
-function refreshPreviewSelect(){
-  previewSelect.innerHTML = '';
-  const options = project.sections
-    .filter(s=>s.type==='code')
-    .map(s=>({id:s.id, label:`${s.id}${s.title?(' — '+s.title):''}`}));
-
-  for(const o of options){
-    const opt=document.createElement('option');
-    opt.value=o.id;
-    opt.textContent=o.label;
-    previewSelect.appendChild(opt);
-  }
-
-  const chosen = project.preview.sectionId && options.some(o=>o.id===project.preview.sectionId)
-    ? project.preview.sectionId
-    : (options[0]?.id || null);
-
-  project.preview.sectionId = chosen;
-  if(chosen) previewSelect.value = chosen;
-}
-
-function refreshPreview(){
-  if(!project.preview.enabled){
-    previewState.textContent = 'Paused';
-    previewFrame.srcdoc = '<!doctype html><html><body style="font-family:system-ui;background:#111;color:#fff;padding:20px"><h3 style="color:#72a4f2">Preview paused</h3><p style="opacity:.8">Toggle to enable.</p></body></html>';
-    return;
-  }
-  previewState.textContent = 'Live';
-  const sid = project.preview.sectionId;
-  const sec = sid ? getSection(sid) : null;
-  const html = sec ? (sec.content||'') : '';
-  // allow easy access to embedded media via helper:
-  // create a tiny script that exposes window.ALLF_MEDIA_IDS for convenience
-  const helper = `
-<script>
-window.ALLF_MEDIA_IDS = ${JSON.stringify(project.mediaManifest.map(m=>m.id))};
-<\/script>
-`;
-  previewFrame.srcdoc = (html || '') + helper;
-}
-
-btnTogglePreview.addEventListener('click', ()=>{
-  project.preview.enabled = !project.preview.enabled;
-  saveProject();
-  refreshPreview();
-});
-btnReloadPreview.addEventListener('click', refreshPreview);
-previewSelect.addEventListener('change', ()=>{
-  project.preview.sectionId = previewSelect.value;
-  saveProject();
-  refreshPreview();
-});
-
-// =====================
-// Global search
-// =====================
-function runSearch(){
-  const q = (globalSearch.value||'').trim().toLowerCase();
-  if(!q){ searchResults.style.display='none'; searchResults.innerHTML=''; return; }
-
-  const hits = [];
-  for(const s of project.sections){
-    const hay = ((s.title||'')+'\n'+(s.content||'')).toLowerCase();
-    const idx = hay.indexOf(q);
-    if(idx>=0){
-      const snippet = (s.content||'').slice(Math.max(0, idx-40), idx+80).replace(/\s+/g,' ').trim();
-      hits.push({id:s.id, type:s.type, title:s.title||'', snippet});
-    }
-  }
-  searchResults.innerHTML='';
-  searchResults.style.display='flex';
-  if(hits.length===0){
-    const d=document.createElement('div');
-    d.className='item';
-    d.innerHTML = `<div class="meta"><div class="title">No results</div><div class="sub">Try a different query.</div></div>`;
-    searchResults.appendChild(d);
-    return;
-  }
-  for(const h of hits.slice(0,50)){
-    const el=document.createElement('div');
-    el.className='item';
-    el.innerHTML = `
-      <div class="meta" style="min-width:0">
-        <div class="title">${escapeHtml(h.id)} <span class="pill" style="margin-left:8px">${escapeHtml(h.type.toUpperCase())}</span></div>
-        <div class="sub">${escapeHtml(h.title || '(no title)')}</div>
-        <div class="sub" style="opacity:.9">${escapeHtml(h.snippet)}</div>
-      </div>
-      <div class="actions">
-        <button class="btn small">Open</button>
-      </div>
-    `;
-    el.querySelector('button').addEventListener('click', ()=>{
-      openTab(h.id);
-      searchResults.style.display='none';
-    });
-    searchResults.appendChild(el);
-  }
-}
-btnSearch.addEventListener('click', runSearch);
-globalSearch.addEventListener('keydown', (e)=>{ if(e.key==='Enter') runSearch(); });
-
-// =====================
-// Sections list + Tabs render
-// =====================
-function renderSectionsList(){
-  sectionsList.innerHTML='';
-  for(const s of project.sections){
-    const el=document.createElement('div');
-    el.className='item';
-
-    const title = s.title ? s.title : (s.type==='code' ? '(no title)' : '(note)');
-    el.innerHTML = `
-      <div class="meta" style="min-width:0">
-        <div class="title">${escapeHtml(s.id)} <span class="pill" style="margin-left:8px">${escapeHtml(s.type.toUpperCase())}</span></div>
-        <div class="sub">${escapeHtml(title)}</div>
-      </div>
-      <div class="actions">
-        <button class="btn small">Open</button>
-        <button class="btn small secondary">Rename</button>
-        <button class="btn small danger">Delete</button>
-      </div>
-    `;
-    const [bOpen,bRen,bDel] = el.querySelectorAll('button');
-    bOpen.addEventListener('click', ()=>openTab(s.id));
-    bRen.addEventListener('click', ()=>{
-      const nt = prompt('Title:', s.title||'');
-      if(nt===null) return;
-      s.title = nt;
-      saveProject();
-      renderSectionsList();
-      renderTabs();
-      refreshPreviewSelect();
-    });
-    bDel.addEventListener('click', ()=>{
-      if(!confirm('Delete '+s.id+'?')) return;
-      // remove
-      project.sections = project.sections.filter(x=>x.id!==s.id);
-      // close tab if needed
-      if(project.tabs.includes(s.id)) closeTab(s.id);
-      // ensure at least one section
-      if(project.sections.length===0){
-        project.sections.push({type:'code', id:'C1', title:'', content:''});
-        project.tabs=['C1']; project.open='C1';
-        loadIntoEditor('C1');
-      }
-      saveProject();
-      renderSectionsList();
-      refreshPreviewSelect();
-      refreshPreview();
-    });
-    sectionsList.appendChild(el);
-  }
-}
-
-function renderTabs(){
-  tabsEl.innerHTML='';
-  for(const tid of project.tabs){
-    const sec = getSection(tid);
-    if(!sec) continue;
-    const tab=document.createElement('div');
-    tab.className='tab' + (project.open===tid?' active':'') + (dirtyMap.get(tid)?' dirty':'');
-    tab.textContent = tid;
-    tab.title = sec.title || '';
-    tab.addEventListener('click', ()=>{ project.open=tid; saveProject(); loadIntoEditor(tid); });
-    tabsEl.appendChild(tab);
-  }
-}
-
-// =====================
-// Metadata modal (form + advanced JSON)
-// =====================
-function loadMetaIntoModal(){
-  const m = project.meta || {};
-  metaTitle.value = m.title || project.name || '';
-  metaAuthor.value = m.author || '';
-  metaVersion.value = m.version || '1.0.0';
-  metaTags.value = Array.isArray(m.tags) ? m.tags.join(', ') : '';
-  metaUpdated.value = m.updatedAt || project.updatedAt || nowIso();
-
-  metaJson.value = JSON.stringify(m, null, 2);
-  metaJson.style.display = metaAdvancedToggle.checked ? 'block' : 'none';
-}
-function saveMetaFromModal(){
-  let m = project.meta || {};
-  m.updatedAt = nowIso();
-
-  if(metaAdvancedToggle.checked){
-    try{
-      const parsed = JSON.parse(metaJson.value || '{}');
-      if(!parsed || typeof parsed!=='object') throw new Error('bad json');
-      m = parsed;
-      if(!m.updatedAt) m.updatedAt = nowIso();
-    }catch(e){
-      showToast('Invalid JSON','Fix metadata JSON.');
-      return false;
-    }
-  }else{
-    m.title = metaTitle.value || project.name;
-    m.author = metaAuthor.value || '';
-    m.version = metaVersion.value || '1.0.0';
-    m.tags = (metaTags.value||'').split(',').map(s=>s.trim()).filter(Boolean);
-    m.updatedAt = nowIso();
-    if(!m.createdAt) m.createdAt = project.createdAt || nowIso();
-  }
-  project.meta = m;
-  project.updatedAt = nowIso();
-  saveProject();
-  showToast('Saved','Metadata updated');
-  return true;
-}
-btnMeta.addEventListener('click', ()=>{
-  metaModalBg.style.display='flex';
-  loadMetaIntoModal();
-});
-btnMetaClose.addEventListener('click', ()=>metaModalBg.style.display='none');
-metaAdvancedToggle.addEventListener('change', ()=>{
-  metaJson.style.display = metaAdvancedToggle.checked ? 'block' : 'none';
-  if(metaAdvancedToggle.checked) metaJson.value = JSON.stringify(project.meta||{}, null, 2);
-});
-btnMetaSave.addEventListener('click', ()=>{
-  if(saveMetaFromModal()) metaModalBg.style.display='none';
-});
-
-// =====================
-// Themes
-// =====================
-function applyUiTheme(key){
-  const root=document.documentElement;
-  switch(key){
-    case 'light':
-      root.style.setProperty('--bg','#f6f8fb');
-      root.style.setProperty('--panel','#ffffff');
-      root.style.setProperty('--panel2','#f0f4f8');
-      root.style.setProperty('--text','#071427');
-      root.style.setProperty('--muted','#5f6f90');
-      root.style.setProperty('--accent','#2b6ef5');
-      root.style.setProperty('--accent2','#4a6cd8');
-      break;
-    case 'midnight':
-      root.style.setProperty('--bg','#061028');
-      root.style.setProperty('--panel','#071427');
-      root.style.setProperty('--panel2','#0b1b2b');
-      root.style.setProperty('--text','#e6f0ff');
-      root.style.setProperty('--muted','#8aa6d8');
-      root.style.setProperty('--accent','#4fb0ff');
-      root.style.setProperty('--accent2','#2b58f5');
-      break;
-    case 'ocean':
-      root.style.setProperty('--bg','#001d2e');
-      root.style.setProperty('--panel','#032635');
-      root.style.setProperty('--panel2','#08323f');
-      root.style.setProperty('--text','#e6fff6');
-      root.style.setProperty('--muted','#7fd6d1');
-      root.style.setProperty('--accent','#47d6c0');
-      root.style.setProperty('--accent2','#2fb6a8');
-      break;
-    case 'crimson':
-      root.style.setProperty('--bg','#1a0710');
-      root.style.setProperty('--panel','#2a0a12');
-      root.style.setProperty('--panel2','#331219');
-      root.style.setProperty('--text','#ffeef2');
-      root.style.setProperty('--muted','#f0a6b8');
-      root.style.setProperty('--accent','#ff3b6b');
-      root.style.setProperty('--accent2','#d63b6b');
-      break;
-    default:
-      root.style.setProperty('--bg','#0b0f1a');
-      root.style.setProperty('--panel','#0f1720');
-      root.style.setProperty('--panel2','#101828');
-      root.style.setProperty('--text','#e4ebff');
-      root.style.setProperty('--muted','#8ca0c8');
-      root.style.setProperty('--accent','#72a4f2');
-      root.style.setProperty('--accent2','#4a6cd8');
-      break;
-  }
-}
-btnThemes.addEventListener('click', ()=>{
-  themesModalBg.style.display='flex';
-  editorThemeSel.value = index.settings.editorTheme || 'ace/theme/monokai';
-  uiThemeSel.value = index.settings.uiTheme || 'dark';
-});
-btnThemesClose.addEventListener('click', ()=>themesModalBg.style.display='none');
-editorThemeSel.addEventListener('change', ()=>{
-  index.settings.editorTheme = editorThemeSel.value;
-  saveIndex();
-  editor.setTheme(editorThemeSel.value);
-});
-uiThemeSel.addEventListener('change', ()=>{
-  index.settings.uiTheme = uiThemeSel.value;
-  saveIndex();
-  applyUiTheme(uiThemeSel.value);
-});
-
-// =====================
-// Media: add, compress images, store blobs in IndexedDB
-// =====================
-function setMediaProgress(pct, text){
-  mediaProgressBar.style.width = Math.max(0, Math.min(100, pct)) + '%';
-  mediaProgressText.textContent = text || '...';
-}
-function openMediaModal(){
-  mediaModalBg.style.display='flex';
-  setMediaProgress(0,'Idle');
-}
-btnAddMedia.addEventListener('click', openMediaModal);
-btnMediaClose.addEventListener('click', ()=>mediaModalBg.style.display='none');
-btnMediaPick.addEventListener('click', ()=>{ mediaInput.value=''; mediaInput.click(); });
-
-mediaInput.addEventListener('change', async (e)=>{
-  const files = Array.from(e.target.files || []);
-  if(files.length===0) return;
-  try{
-    await addMediaFiles(files);
-  }catch(err){
-    console.error(err);
-    showToast('Error','Failed to add media');
-  }
-});
-
-function normalizeTags(str){
-  return (str||'').split(',').map(s=>s.trim()).filter(Boolean);
-}
-
-async function compressImageBlob(file, maxDim, quality, mimeOut){
-  const imgUrl = URL.createObjectURL(file);
-  try{
-    const img = await new Promise((resolve,reject)=>{
-      const i = new Image();
-      i.onload=()=>resolve(i);
-      i.onerror=()=>reject(new Error('image load fail'));
-      i.src=imgUrl;
-    });
-    let w=img.naturalWidth, h=img.naturalHeight;
-    const scale = Math.min(1, maxDim / Math.max(w,h));
-    const nw = Math.max(1, Math.round(w*scale));
-    const nh = Math.max(1, Math.round(h*scale));
-
-    const canvas=document.createElement('canvas');
-    canvas.width=nw; canvas.height=nh;
-    const ctx=canvas.getContext('2d', {alpha:true});
-    ctx.drawImage(img, 0,0,nw,nh);
-
-    if(mimeOut==='image/png'){
-      const blob = await new Promise(r=>canvas.toBlob(r,'image/png'));
-      return blob;
-    }else{
-      const q = Math.max(0.3, Math.min(1, Number(quality)||0.85));
-      const blob = await new Promise(r=>canvas.toBlob(r, mimeOut, q));
-      return blob;
-    }
-  } finally {
-    try{ URL.revokeObjectURL(imgUrl);}catch(e){}
-  }
-}
-
-async function blobToDataUrl(blob){
-  return new Promise((resolve,reject)=>{
-    const r=new FileReader();
-    r.onerror=()=>reject(new Error('read fail'));
-    r.onload=()=>resolve(String(r.result||''));
-    r.readAsDataURL(blob);
+// --- UI Logic ---
+function updateProjectDropdown() {
+  const sel = el('projectSelect'); sel.innerHTML = '';
+  index.projects.forEach(p => {
+    const opt = document.createElement('option'); opt.value = p.id; opt.textContent = p.name;
+    sel.appendChild(opt);
   });
+  sel.value = project.id;
 }
-async function dataUrlToBlob(dataUrl){
-  // fetch(dataUrl) works for data urls
-  const res = await fetch(dataUrl);
-  return await res.blob();
-}
-
-async function addMediaFiles(files){
-  mediaModalBg.style.display='flex';
-  const maxDim = Math.max(256, Number(imgMaxDim.value)||1920);
-  const quality = Math.max(0.3, Math.min(1, Number(imgQuality.value)||0.85));
-  const outMime = imgFormat.value || 'image/webp';
-
-  const supported = files.filter(f => (f.type||'').startsWith('image/') || (f.type||'').startsWith('video/'));
-  if(supported.length===0){
-    showToast('No media','Select images/videos only');
-    return;
-  }
-
-  setMediaProgress(0, 'Starting…');
-  let done=0;
-
-  for(const f of supported){
-    const isImg = (f.type||'').startsWith('image/');
-    const isVid = (f.type||'').startsWith('video/');
-    let blob = f;
-
-    if(isImg){
-      // compress unless PNG chosen and user wants no compression (still scales if maxDim smaller)
-      const mime = outMime;
-      blob = await compressImageBlob(f, maxDim, quality, mime);
-    } else if(isVid){
-      // no transcoding, keep as-is
-      blob = f;
-    }
-
-    const id = newId('m_');
-    const hash = await sha256BlobHex(blob);
-
-    // store in IndexedDB
-    await idbPut({
-      id,
-      projectId: project.id,
-      kind: isVid ? 'video' : 'image',
-      name: f.name || 'file',
-      mime: blob.type || f.type || '',
-      bytes: blob.size || f.size || 0,
-      createdAt: nowIso(),
-      tags: [],
-      hash,
-      blob
-    });
-
-    // update manifest in project
-    project.mediaManifest.push({
-      id,
-      name: f.name || 'file',
-      kind: isVid ? 'video' : 'image',
-      mime: blob.type || f.type || '',
-      bytes: blob.size || f.size || 0,
-      createdAt: nowIso(),
-      tags: [],
-      hash
-    });
-
-    done++;
-    setMediaProgress(Math.round(done/supported.length*100), `Added ${done}/${supported.length}`);
-    saveProject();
-    renderMedia();
-  }
-
-  setMediaProgress(100, 'Done');
-  showToast('Added', `${done} file(s) added`);
-  await sleep(400);
-  mediaModalBg.style.display='none';
-}
-
-// Paste images directly
-document.addEventListener('paste', async (e)=>{
-  if(!project) return;
-  const items = Array.from(e.clipboardData?.items || []);
-  const files = items.filter(i=>i.kind==='file').map(i=>i.getAsFile()).filter(Boolean);
-  if(files.length===0) return;
-  const hasImgOrVid = files.some(f => (f.type||'').startsWith('image/') || (f.type||'').startsWith('video/'));
-  if(!hasImgOrVid) return;
-  e.preventDefault();
-  await addMediaFiles(files);
-});
-
-// Drag/drop
-;['dragenter','dragover'].forEach(evt=>{
-  dropZone.addEventListener(evt,(e)=>{
-    e.preventDefault(); e.stopPropagation();
-    dropZone.classList.add('drag');
-  });
-});
-;['dragleave','drop'].forEach(evt=>{
-  dropZone.addEventListener(evt,(e)=>{
-    e.preventDefault(); e.stopPropagation();
-    dropZone.classList.remove('drag');
-  });
-});
-dropZone.addEventListener('drop', async (e)=>{
-  const files = Array.from(e.dataTransfer?.files || []);
-  if(files.length===0) return;
-  await addMediaFiles(files);
-});
-
-// Media rendering (lazy video preview, tag filter, insert snippet, rename, delete)
-function updateMediaCounts(){
-  const imgs = project.mediaManifest.filter(m=>m.kind==='image').length;
-  const vids = project.mediaManifest.filter(m=>m.kind==='video').length;
-  mediaCounts.textContent = `${imgs} images • ${vids} videos`;
-}
-function matchesTagFilter(m){
-  const f = (mediaTagFilter.value||'').trim().toLowerCase();
-  if(!f) return true;
-  const wanted = f.split(',').map(s=>s.trim()).filter(Boolean);
-  const mtags = (m.tags||[]).map(t=>String(t).toLowerCase());
-  return wanted.every(w=>mtags.includes(w));
-}
-function renderMedia(){
-  updateMediaCounts();
-  mediaList.innerHTML = '';
-
-  const kind = mediaFilter.value;
-  const items = project.mediaManifest
-    .filter(m => kind==='all' ? true : m.kind===kind)
-    .filter(matchesTagFilter)
-    .sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
-
-  if(items.length===0){
-    const d=document.createElement('div');
-    d.className='item';
-    d.innerHTML = `<div class="meta"><div class="title">No media</div><div class="sub">Add images/videos or change filters.</div></div>`;
-    mediaList.appendChild(d);
-    return;
-  }
-
-  for(const m of items){
-    const el=document.createElement('div');
-    el.className='item';
-    el.innerHTML = `
-      <div class="meta" style="min-width:0;flex:1">
-        <div class="title">${escapeHtml(m.name)} <span class="pill" style="margin-left:8px">${escapeHtml(m.kind.toUpperCase())}</span></div>
-        <div class="sub">${escapeHtml(m.id)} • ${escapeHtml(m.mime||'')} • ${formatBytes(m.bytes||0)}</div>
-        <div class="sub">Tags: ${escapeHtml((m.tags||[]).join(', ') || '(none)')}</div>
-        <div class="mediaPreview" data-mid="${escapeHtml(m.id)}" style="margin-top:10px"></div>
-      </div>
-      <div class="actions">
-        <button class="btn small secondary" title="Insert snippet into editor">Insert</button>
-        <button class="btn small secondary" title="Rename file">Rename</button>
-        <button class="btn small secondary" title="Edit tags">Tags</button>
-        <button class="btn small secondary" title="Copy ID">Copy ID</button>
-        <button class="btn small danger" title="Remove media">Delete</button>
-      </div>
-    `;
-
-    const [bInsert,bRename,bTags,bCopy,bDelete] = el.querySelectorAll('button');
-    bInsert.addEventListener('click', ()=>{
-      const sec = project.open ? getSection(project.open) : null;
-      if(!sec){ showToast('No tab','Open a section first'); return; }
-      const isHtml = detectModeFromTitleOrContent(sec).includes('html');
-      const isMd = detectModeFromTitleOrContent(sec).includes('markdown');
-      // reference style: ALLF_MEDIA(id) placeholder, resolved by export or manually replaced
-      let snippet = '';
-      if(m.kind==='image'){
-        if(isMd) snippet = `![${m.name}](ALLF_MEDIA:${m.id})`;
-        else if(isHtml) snippet = `<img alt="${escapeHtml(m.name)}" src="ALLF_MEDIA:${m.id}" />`;
-        else snippet = `ALLF_MEDIA:${m.id}`;
-      }else{
-        if(isMd) snippet = `[${m.name}](ALLF_MEDIA:${m.id})`;
-        else if(isHtml) snippet = `<video controls src="ALLF_MEDIA:${m.id}"></video>`;
-        else snippet = `ALLF_MEDIA:${m.id}`;
-      }
-      editor.insert(snippet);
-      autosaveDebounced();
-      showToast('Inserted', 'Snippet added');
-    });
-
-    bRename.addEventListener('click', ()=>{
-      const nn = prompt('New name:', m.name || '');
-      if(nn===null) return;
-      m.name = nn;
-      const idx = project.mediaManifest.findIndex(x=>x.id===m.id);
-      if(idx>=0) project.mediaManifest[idx].name = nn;
-      saveProject();
-      renderMedia();
-    });
-
-    bTags.addEventListener('click', ()=>{
-      const nt = prompt('Tags (comma separated):', (m.tags||[]).join(', '));
-      if(nt===null) return;
-      m.tags = normalizeTags(nt);
-      const idx = project.mediaManifest.findIndex(x=>x.id===m.id);
-      if(idx>=0) project.mediaManifest[idx].tags = m.tags;
-      saveProject();
-      renderMedia();
-    });
-
-    bCopy.addEventListener('click', async ()=>{
-      try{ await navigator.clipboard.writeText(m.id); showToast('Copied','Media ID copied'); }
-      catch(e){ showToast('Copy blocked','Clipboard blocked'); }
-    });
-
-    bDelete.addEventListener('click', async ()=>{
-      if(!confirm('Delete media '+m.name+'?')) return;
-      await idbDelete(m.id);
-      project.mediaManifest = project.mediaManifest.filter(x=>x.id!==m.id);
-      saveProject();
-      renderMedia();
-      showToast('Deleted','Media removed');
-    });
-
-    // Lazy preview: image loads quickly; video preview only shows a play button until clicked
-    const previewBox = el.querySelector('.mediaPreview');
-    (async ()=>{
-      try{
-        const stored = await idbGet(m.id);
-        if(!stored) return;
-        if(m.kind==='image'){
-          const url = URL.createObjectURL(stored.blob);
-          previewBox.innerHTML = `<img src="${url}" alt="">`;
-          // revoke later
-          setTimeout(()=>{ try{URL.revokeObjectURL(url);}catch(e){} }, 10000);
-        }else{
-          previewBox.innerHTML = `
-            <div class="row" style="gap:10px">
-              <button class="btn small">Load video preview</button>
-              <span class="small">Lazy-loaded</span>
-            </div>
-          `;
-          previewBox.querySelector('button').addEventListener('click', ()=>{
-            const url = URL.createObjectURL(stored.blob);
-            previewBox.innerHTML = `<video controls src="${url}"></video>`;
-            setTimeout(()=>{ try{URL.revokeObjectURL(url);}catch(e){} }, 15000);
-          });
-        }
-      }catch(e){}
-    })();
-
-    mediaList.appendChild(el);
-  }
-}
-mediaFilter.addEventListener('change', renderMedia);
-mediaTagFilter.addEventListener('input', ()=>{ clearTimeout(renderMedia._t); renderMedia._t=setTimeout(renderMedia, 150); });
-
-// Cleanup unused (only if referenced with ALLF_MEDIA:ID in sections)
-btnCleanupUnused.addEventListener('click', async ()=>{
-  const used = new Set();
-  for(const s of project.sections){
-    const txt = (s.content||'');
-    const matches = txt.matchAll(/ALLF_MEDIA:([a-zA-Z0-9_]+)\b/g);
-    for(const m of matches) used.add(m[1]);
-  }
-  const unused = project.mediaManifest.filter(m=>!used.has(m.id));
-  if(unused.length===0){ showToast('Cleanup','No unused media found'); return; }
-  if(!confirm(`Delete ${unused.length} unused media item(s)?`)) return;
-  for(const m of unused){
-    await idbDelete(m.id);
-  }
-  project.mediaManifest = project.mediaManifest.filter(m=>used.has(m.id));
-  saveProject();
-  renderMedia();
-  showToast('Cleanup', `${unused.length} removed`);
-});
-
-// =====================
-// Export / Import ALLF v2 (with checksums + chunked media)
-// =====================
-function rmBlock(){
-return `RM// Read Me
-ALLF v${ALLF_VERSION} supports code, notes, metadata, and embedded media.
-Media is stored locally in IndexedDB while editing and embedded as Base64 Data URLs during export.
-Required branding block must match exactly: ${BRANDING_TEXT}
-RM\\\\`;
-}
-
-function splitChunks(str, maxChars){
-  const chunks=[];
-  for(let i=0;i<str.length;i+=maxChars) chunks.push(str.slice(i,i+maxChars));
-  return chunks;
-}
-
-async function buildExportText(){
-  // Build code/notes blocks
-  const out=[];
-  out.push(`ALLF_VERSION// ${ALLF_VERSION}`);
-  out.push(`PROJECT// ${project.name}`);
-  out.push(`UPDATED// ${project.updatedAt}`);
-  out.push('');
-
-  // Code blocks: only code sections, keep ids as-is
-  const codes = project.sections.filter(s=>s.type==='code');
-  if(codes.length===0){
-    out.push('C1//');
-    out.push('');
-    out.push('C1\\\\');
-    out.push('SPACE//');
-  }else{
-    for(const c of codes){
-      out.push(`${c.id}// ${(c.title||'').trim()}`.trim());
-      out.push(c.content||'');
-      out.push(`${c.id}\\\\`);
-      out.push('SPACE//');
-    }
-  }
-
-  // Notes blocks
-  const notes = project.sections.filter(s=>s.type==='note');
-  if(notes.length===0){
-    out.push('N//');
-    out.push(exportNotes.value || '');
-    out.push('N\\\\');
-  }else{
-    for(const n of notes){
-      out.push(`N// ${(n.title||'').trim()}`.trim());
-      out.push(n.content||'');
-      out.push('N\\\\');
-    }
-    const extra = (exportNotes.value||'').trim();
-    if(extra){
-      out.push('N// Export Notes');
-      out.push(extra);
-      out.push('N\\\\');
-    }
-  }
-
-  // Metadata (M//)
-  const metaObj = project.meta || {};
-  metaObj.updatedAt = nowIso();
-  const metaJsonText = JSON.stringify(metaObj, null, 2);
-  const metaHash = await sha256Hex(metaJsonText);
-  out.push(`M// metadata (json)`);
-  out.push(`M_HASH// ${metaHash}`);
-  out.push(metaJsonText);
-  out.push('M\\\\');
-
-  // Embedded media (E blocks) with dedupe by hash
-  // Deduplicate by hash: keep first id per hash, but preserve manifest references
-  const byHash = new Map();
-  const emb = [];
-  for(const m of project.mediaManifest){
-    if(byHash.has(m.hash)) continue;
-    byHash.set(m.hash, m.id);
-    const stored = await idbGet(m.id);
-    if(!stored) continue;
-    const dataUrl = await blobToDataUrl(stored.blob);
-    emb.push({
-      id: m.id,
-      name: m.name,
-      kind: m.kind,
-      mime: m.mime,
-      bytes: m.bytes,
-      createdAt: m.createdAt,
-      tags: m.tags||[],
-      hash: m.hash,
-      dataUrl
-    });
-  }
-  // Media manifest (without dataUrl) + mapping for dedupe
-  const manifest = project.mediaManifest.map(m=>({
-    id:m.id, name:m.name, kind:m.kind, mime:m.mime, bytes:m.bytes, createdAt:m.createdAt, tags:m.tags||[], hash:m.hash,
-    storedAs: byHash.get(m.hash) || m.id
-  }));
-
-  const manifestText = JSON.stringify(manifest, null, 2);
-  const embText = JSON.stringify(emb, null, 2);
-
-  const manHash = await sha256Hex(manifestText);
-  const embHash = await sha256Hex(embText);
-
-  out.push('EM// media manifest (json)');
-  out.push(`EM_HASH// ${manHash}`);
-  out.push(manifestText);
-  out.push('EM\\\\');
-
-  // Chunk the big embedded media list
-  const chunkMax = 450000; // ~450KB chars per block (safer for editors)
-  const chunks = splitChunks(embText, chunkMax);
-  for(let i=0;i<chunks.length;i++){
-    const n=i+1;
-    out.push(`E${n}// embedded media chunk ${n}/${chunks.length}`);
-    if(i===0) out.push(`E_HASH// ${embHash}`);
-    out.push(chunks[i]);
-    out.push(`E${n}\\\\`);
-  }
-
-  if(exportRepairHint.checked){
-    out.push('H// repair hints');
-    out.push('HINT// If import fails, enable repair mode. Chunks are E1..En, each ends with Ex\\.');
-    out.push('H\\\\');
-  }
-
-  out.push(rmBlock());
-
-  // Branding
-  out.push('B//');
-  out.push(BRANDING_TEXT);
-  out.push('B\\\\');
-
-  // End
-  out.push('END//');
-
-  // Also: block checksum for whole file
-  const whole = out.join('\n');
-  const wholeHash = await sha256Hex(whole);
-  return { text: whole + `\nFILE_HASH// ${wholeHash}\n`, fileHash: wholeHash, manifestCount: manifest.length, embedCount: emb.length };
-}
-
-function parseAllfStrict(text){
-  // Returns object or null.
-  const lines = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
-  const codes=[], notes=[];
-  let meta=null, metaHash=null;
-  let manifest=null, manifestHash=null;
-  let embedChunks=[], embedHash=null;
-  let branding=null;
-  let version=null;
-  let projectName=null;
-
-  let i=0;
-  while(i<lines.length){
-    const line = lines[i];
-
-    const ver = line.match(/^ALLF_VERSION\/\/\s*(\d+)/);
-    if(ver){ version = parseInt(ver[1],10); i++; continue; }
-    const pn = line.match(/^PROJECT\/\/\s*(.*)$/);
-    if(pn){ projectName = pn[1].trim(); i++; continue; }
-
-    const codeStart = line.match(/^C(\d+)\/\/\s*(.*)$/);
-    if(codeStart){
-      const idx=codeStart[1];
-      const title=(codeStart[2]||'').trim();
-      i++;
-      const buf=[];
-      while(i<lines.length){
-        const l=lines[i];
-        if(l === `C${idx}\\\\`){ i++; break; }
-        buf.push(l); i++;
-      }
-      if(lines[i] && lines[i].trim()==='SPACE//') i++;
-      codes.push({id:`C${idx}`, title, content:buf.join('\n')});
-      continue;
-    }
-
-    const noteStart = line.match(/^N\/\/\s*(.*)$/);
-    if(noteStart){
-      const title=(noteStart[1]||'').trim();
-      i++;
-      const buf=[];
-      while(i<lines.length){
-        const l=lines[i];
-        if(l.trim()==='N\\\\'){ i++; break; }
-        buf.push(l); i++;
-      }
-      notes.push({title, content:buf.join('\n')});
-      continue;
-    }
-
-    if(line.startsWith('M//')){
-      i++;
-      const buf=[];
-      while(i<lines.length){
-        const l=lines[i];
-        const mh = l.match(/^M_HASH\/\/\s*(.*)$/);
-        if(mh){ metaHash = mh[1].trim(); i++; continue; }
-        if(l.trim()==='M\\\\'){ i++; break; }
-        buf.push(l); i++;
-      }
-      try{ meta = JSON.parse(buf.join('\n').trim() || '{}'); }catch(e){ meta = null; }
-      continue;
-    }
-
-    if(line.startsWith('EM//')){
-      i++;
-      const buf=[];
-      while(i<lines.length){
-        const l=lines[i];
-        const hh = l.match(/^EM_HASH\/\/\s*(.*)$/);
-        if(hh){ manifestHash = hh[1].trim(); i++; continue; }
-        if(l.trim()==='EM\\\\'){ i++; break; }
-        buf.push(l); i++;
-      }
-      try{ manifest = JSON.parse(buf.join('\n').trim() || '[]'); }catch(e){ manifest = null; }
-      continue;
-    }
-
-    const eStart = line.match(/^E(\d+)\/\/\s*(.*)$/);
-    if(eStart){
-      i++;
-      const buf=[];
-      while(i<lines.length){
-        const l=lines[i];
-        const eh = l.match(/^E_HASH\/\/\s*(.*)$/);
-        if(eh){ embedHash = eh[1].trim(); i++; continue; }
-        if(l.trim()===`E${eStart[1]}\\\\`){ i++; break; }
-        buf.push(l); i++;
-      }
-      embedChunks.push(buf.join('\n'));
-      continue;
-    }
-
-    if(line.startsWith('B//')){
-      i++;
-      const buf=[];
-      while(i<lines.length){
-        const l=lines[i];
-        if(l.trim()==='B\\\\'){ i++; break; }
-        buf.push(l); i++;
-      }
-      branding = buf.join('\n').trim();
-      continue;
-    }
-
-    if(line.trim()==='END//') break;
-    i++;
-  }
-
-  if(!branding || branding.trim() !== BRANDING_TEXT) return null;
-  const embedText = embedChunks.join('');
-  let embedded = null;
-  try{ embedded = JSON.parse(embedText.trim() || '[]'); }catch(e){ embedded = null; }
-
-  return { version, projectName, codes, notes, meta, metaHash, manifest, manifestHash, embedded, embedHash };
-}
-
-function parseAllfRepair(text){
-  // Relaxed parsing: attempt to recover blocks via regex.
-  // Still enforces branding.
-  const brandingMatch = text.match(/B\/\/\s*([\s\S]*?)\nB\\\\/);
-  if(!brandingMatch || brandingMatch[1].trim() !== BRANDING_TEXT) return null;
-
-  const verMatch = text.match(/ALLF_VERSION\/\/\s*(\d+)/);
-  const version = verMatch ? parseInt(verMatch[1],10) : null;
-  const pnMatch = text.match(/PROJECT\/\/\s*(.*)/);
-  const projectName = pnMatch ? pnMatch[1].trim() : null;
-
-  const codes=[];
-  const codeRe = /C(\d+)\/\/([^\n]*)\n([\s\S]*?)\nC\1\\\\/g;
-  let m;
-  while((m=codeRe.exec(text))){
-    codes.push({id:'C'+m[1], title:(m[2]||'').trim(), content:(m[3]||'')});
-  }
-  const notes=[];
-  const noteRe = /N\/\/([^\n]*)\n([\s\S]*?)\nN\\\\/g;
-  while((m=noteRe.exec(text))){
-    notes.push({title:(m[1]||'').trim(), content:(m[2]||'')});
-  }
-
-  let meta=null, manifest=null, embedded=null;
-  const metaMatch = text.match(/M\/\/[^\n]*\n(?:M_HASH\/\/[^\n]*\n)?([\s\S]*?)\nM\\\\/);
-  if(metaMatch){ try{ meta=JSON.parse(metaMatch[1].trim()||'{}'); }catch(e){ meta=null; } }
-
-  const manMatch = text.match(/EM\/\/[^\n]*\n(?:EM_HASH\/\/[^\n]*\n)?([\s\S]*?)\nEM\\\\/);
-  if(manMatch){ try{ manifest=JSON.parse(manMatch[1].trim()||'[]'); }catch(e){ manifest=null; } }
-
-  // gather all E blocks
-  const eChunks=[];
-  const eRe = /E(\d+)\/\/[^\n]*\n(?:E_HASH\/\/[^\n]*\n)?([\s\S]*?)\nE\1\\\\/g;
-  while((m=eRe.exec(text))){
-    eChunks.push(m[2]||'');
-  }
-  if(eChunks.length){
-    try{ embedded=JSON.parse(eChunks.join('').trim()||'[]'); }catch(e){ embedded=null; }
-  }
-
-  return { version, projectName, codes, notes, meta, manifest, embedded };
-}
-
-async function applyImportedAllf(parsed){
-  // Create new project from imported or overwrite current
-  const name = parsed.projectName || 'imported';
-  const newPid = createProject(name);
-  currentProjectId = newPid;
-  project = loadProject(newPid);
-
-  // sections
-  project.sections = [];
-  for(const c of (parsed.codes||[])){
-    project.sections.push({type:'code', id:c.id, title:c.title||'', content:c.content||''});
-  }
-  for(const n of (parsed.notes||[])){
-    // maintain numbering reuse
-    const nid = nextNoteId();
-    project.sections.push({type:'note', id:nid, title:n.title||'', content:n.content||''});
-  }
-  if(project.sections.length===0){
-    project.sections.push({type:'code', id:'C1', title:'', content:''});
-  }
-
-  // meta
-  project.meta = (parsed.meta && typeof parsed.meta==='object') ? parsed.meta : project.meta;
-
-  // media: embedded[] contains dataUrl items; manifest may contain storedAs mapping
-  project.mediaManifest = [];
-  await idbDeleteByProject(project.id);
-
-  const embedded = Array.isArray(parsed.embedded) ? parsed.embedded : [];
-  // store embedded items as blobs
-  for(const it of embedded){
-    if(!it || !it.id || !it.dataUrl) continue;
-    const blob = await dataUrlToBlob(it.dataUrl);
-    const hash = it.hash || await sha256BlobHex(blob);
-    await idbPut({
-      id: it.id,
-      projectId: project.id,
-      kind: it.kind || ((blob.type||'').startsWith('video/')?'video':'image'),
-      name: it.name || 'file',
-      mime: it.mime || blob.type || '',
-      bytes: blob.size || 0,
-      createdAt: it.createdAt || nowIso(),
-      tags: Array.isArray(it.tags)?it.tags:[],
-      hash,
-      blob
-    });
-  }
-
-  // rebuild manifest:
-  const man = Array.isArray(parsed.manifest) ? parsed.manifest : null;
-  if(man){
-    project.mediaManifest = man.map(x=>({
-      id:x.id, name:x.name||'file', kind:x.kind||'image', mime:x.mime||'', bytes:x.bytes||0,
-      createdAt:x.createdAt||nowIso(), tags:Array.isArray(x.tags)?x.tags:[], hash:x.hash||''
-    }));
-  } else {
-    // if no manifest, derive from embedded
-    project.mediaManifest = embedded
-      .filter(x=>x && x.id)
-      .map(x=>({id:x.id,name:x.name||'file',kind:x.kind||'image',mime:x.mime||'',bytes:x.bytes||0,createdAt:x.createdAt||nowIso(),tags:Array.isArray(x.tags)?x.tags:[],hash:x.hash||''}));
-  }
-
-  // tabs/open
-  project.tabs = [project.sections[0].id];
-  project.open = project.sections[0].id;
-  project.preview = { enabled:false, sectionId:null };
-
-  saveProject();
-  renderAll();
-  showToast('Imported','Project created from .allf');
-}
-
-async function openExportModal(){
-  exportModalBg.style.display='flex';
-  const base = (project.name||'project').replace(/[^\w\-]+/g,'_') || 'project';
-  exportFilename.value = base + '.allf';
-
-  // Build small preview (meta + manifest summary) without loading all blobs
-  const manSummary = {
-    items: project.mediaManifest.length,
-    images: project.mediaManifest.filter(m=>m.kind==='image').length,
-    videos: project.mediaManifest.filter(m=>m.kind==='video').length,
-    totalBytes: project.mediaManifest.reduce((a,m)=>a+(Number(m.bytes)||0),0)
-  };
-  exportPreview.value = JSON.stringify({ meta: project.meta||{}, mediaSummary: manSummary }, null, 2);
-
-  // Storage health estimation: localStorage size + idb manifest size
-  await updateStorageHealth();
-  await updateExportSizeEstimate();
-}
-btnExport.addEventListener('click', openExportModal);
-btnExportClose.addEventListener('click', ()=>exportModalBg.style.display='none');
-
-async function updateStorageHealth(){
-  // approximate localStorage usage
-  let totalChars = 0;
-  for(let i=0;i<localStorage.length;i++){
-    const k = localStorage.key(i);
-    const v = localStorage.getItem(k);
-    totalChars += (k?.length||0) + (v?.length||0);
-  }
-  const approxBytes = totalChars * 2; // UTF-16
-  const pct = Math.min(100, (approxBytes / (5*1024*1024)) * 100); // assume 5MB typical quota for LS
-  storageBar.style.width = pct + '%';
-  storageDetails.textContent = `localStorage approx: ${formatBytes(approxBytes)} (quota varies by browser)`;
-
-  if(pct < 60){
-    storageHealth.textContent = 'OK';
-    storageHealth.className = 'badgeOk';
-  } else if(pct < 90){
-    storageHealth.textContent = 'Warning';
-    storageHealth.className = 'badgeWarn';
-  } else {
-    storageHealth.textContent = 'High';
-    storageHealth.className = 'badgeBad';
-  }
-
-  const totalMedia = project.mediaManifest.reduce((a,m)=>a+(Number(m.bytes)||0),0);
-  if(totalMedia > 50*1024*1024){
-    embedWarning.textContent = 'Huge (videos?)';
-    embedWarning.className = 'badgeBad';
-  } else if(totalMedia > 10*1024*1024){
-    embedWarning.textContent = 'Large';
-    embedWarning.className = 'badgeWarn';
-  } else {
-    embedWarning.textContent = 'OK';
-    embedWarning.className = 'badgeOk';
-  }
-}
-
-async function updateExportSizeEstimate(){
-  // base64 inflation ~ 4/3, plus JSON overhead
-  const mediaBytes = project.mediaManifest.reduce((a,m)=>a+(Number(m.bytes)||0),0);
-  const base64Approx = Math.round(mediaBytes * 4/3);
-  const sectionChars = project.sections.reduce((a,s)=>a+((s.content||'').length + (s.title||'').length + 50),0);
-  const approx = base64Approx + sectionChars + 20000;
-  exportSizeLabel.textContent = formatBytes(approx);
-}
-
-btnExportDownload.addEventListener('click', async ()=>{
-  try{
-    btnExportDownload.disabled = true;
-    btnExportDownload.textContent = 'Building…';
-    const { text } = await buildExportText();
-    const fn = (exportFilename.value||'project.allf').trim() || 'project.allf';
-    downloadText(fn, text);
-    exportModalBg.style.display='none';
-    showToast('Exported', fn);
-  }catch(e){
-    console.error(e);
-    showToast('Export failed','See console');
-  }finally{
-    btnExportDownload.disabled = false;
-    btnExportDownload.textContent = 'Download';
-  }
-});
-
-function downloadText(filename, content){
-  const blob = new Blob([content], {type:'text/plain;charset=utf-8'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=filename;
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(()=>{ try{URL.revokeObjectURL(a.href)}catch(e){} a.remove(); }, 800);
-}
-
-// Import flow
-let _importText = null;
-btnImport.addEventListener('click', ()=>{ importInput.value=''; importInput.click(); });
-importInput.addEventListener('change', async (e)=>{
-  const f = e.target.files?.[0];
-  if(!f) return;
-  _importText = await f.text();
-  importModalBg.style.display='flex';
-});
-btnImportCancel.addEventListener('click', ()=>{
-  importModalBg.style.display='none';
-  _importText = null;
-});
-btnImportProceed.addEventListener('click', async ()=>{
-  if(!_importText) return;
-  importModalBg.style.display='none';
-  const repair = importRepairMode.checked;
-  const parsed = repair ? parseAllfRepair(_importText) : parseAllfStrict(_importText);
-  _importText = null;
-  if(!parsed){
-    alert('Import failed: invalid format or missing required branding block.');
-    return;
-  }
-  await applyImportedAllf(parsed);
-});
-
-// =====================
-// Projects manager UI
-// =====================
-function renderProjectsSelect(){
-  // normalize index projects list (remove missing)
-  index.projects = index.projects.filter(p=>localStorage.getItem(projectKey(p.id)) !== null);
-  saveIndex();
-
-  projectSelect.innerHTML='';
-  for(const p of index.projects.sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')))){
-    const opt=document.createElement('option');
-    opt.value=p.id;
-    opt.textContent = p.name;
-    projectSelect.appendChild(opt);
-  }
-  if(!currentProjectId){
-    currentProjectId = index.lastProjectId || (index.projects[0]?.id || null);
-  }
-  if(currentProjectId && index.projects.some(p=>p.id===currentProjectId)){
-    projectSelect.value = currentProjectId;
-  }
-}
-
-async function switchProject(pid){
-  const p = loadProject(pid);
-  if(!p){
-    showToast('Missing','Project not found');
-    return;
-  }
-  currentProjectId = pid;
-  project = p;
-  dirtyMap.clear();
-
-  renderAll();
-  index.lastProjectId = pid;
-  saveIndex();
-
-  // ensure media blobs are aligned: nothing required
-  showToast('Loaded', project.name);
-}
-
-btnNewProject.addEventListener('click', async ()=>{
-  const name = prompt('New project name:', 'untitled');
-  if(name===null) return;
-  const pid = createProject(name.trim() || 'untitled');
-  renderProjectsSelect();
-  await switchProject(pid);
-});
-
-btnRenameProject.addEventListener('click', ()=>{
-  if(!project) return;
-  const nn = prompt('Rename project:', project.name);
-  if(nn===null) return;
-  project.name = nn.trim() || project.name;
-  if(project.meta && typeof project.meta==='object'){
-    project.meta.title = project.name;
-    project.meta.updatedAt = nowIso();
-  }
-  saveProject();
-  renderProjectsSelect();
-  showToast('Renamed', project.name);
-});
-
-btnDuplicateProject.addEventListener('click', async ()=>{
-  if(!project) return;
-  const nn = prompt('Duplicate project name:', project.name + ' copy');
-  if(nn===null) return;
-
-  const newPid = createProject(nn.trim() || (project.name+' copy'));
-  const newP = loadProject(newPid);
-
-  // copy sections/meta/settings
-  newP.sections = JSON.parse(JSON.stringify(project.sections));
-  newP.meta = JSON.parse(JSON.stringify(project.meta||{}));
-  newP.tabs = [newP.sections[0]?.id || 'C1'];
-  newP.open = newP.tabs[0];
-  newP.preview = { enabled:false, sectionId:null };
-
-  // copy media blobs + manifest (duplicate ids to avoid collisions)
-  const oldMedia = await idbListByProject(project.id);
-  newP.mediaManifest = [];
-
-  for(const old of oldMedia){
-    const newMid = newId('m_');
-    await idbPut({
-      id: newMid,
-      projectId: newP.id,
-      kind: old.kind,
-      name: old.name,
-      mime: old.mime,
-      bytes: old.bytes,
-      createdAt: nowIso(),
-      tags: Array.isArray(old.tags)?old.tags:[],
-      hash: old.hash,
-      blob: old.blob
-    });
-    newP.mediaManifest.push({
-      id:newMid, name:old.name, kind:old.kind, mime:old.mime, bytes:old.bytes,
-      createdAt: nowIso(), tags:Array.isArray(old.tags)?old.tags:[], hash:old.hash
-    });
-  }
-
-  localStorage.setItem(projectKey(newP.id), JSON.stringify(newP));
-  index.projects.find(p=>p.id===newP.id).updatedAt = newP.updatedAt;
-  saveIndex();
-
-  renderProjectsSelect();
-  await switchProject(newP.id);
-  showToast('Duplicated', newP.name);
-});
-
-btnDeleteProject.addEventListener('click', async ()=>{
-  if(!project) return;
-  if(!confirm(`Delete project "${project.name}"?\nThis deletes local sections/metadata and also removes its media from IndexedDB.`)) return;
-
-  await idbDeleteByProject(project.id);
-  localStorage.removeItem(projectKey(project.id));
-  index.projects = index.projects.filter(p=>p.id!==project.id);
-  index.lastProjectId = index.projects[0]?.id || null;
-  saveIndex();
-
-  project = null;
-  currentProjectId = index.lastProjectId;
-
-  renderProjectsSelect();
-  if(currentProjectId) await switchProject(currentProjectId);
-  else {
-    const pid = createProject('untitled');
-    renderProjectsSelect();
-    await switchProject(pid);
-  }
-  showToast('Deleted','Project removed');
-});
-
-projectSelect.addEventListener('change', async ()=>{
-  await switchProject(projectSelect.value);
-});
-
-// =====================
-// Add sections
-// =====================
-btnAddCode.addEventListener('click', ()=>{
-  const id = nextCodeId();
-  project.sections.push({type:'code', id, title:'', content:''});
-  openTab(id);
-  renderSectionsList();
-  refreshPreviewSelect();
-  saveProject();
-});
-btnAddNote.addEventListener('click', ()=>{
-  const id = nextNoteId();
-  project.sections.push({type:'note', id, title:'', content:''});
-  openTab(id);
-  renderSectionsList();
-  saveProject();
-});
-
-// Save/close/clear
-btnSaveSection.addEventListener('click', saveOpenSection);
-btnCloseTab.addEventListener('click', ()=>{
-  if(!project.open) return;
-  closeTab(project.open);
-});
-btnClear.addEventListener('click', ()=>{
-  if(!confirm('Clear editor content?')) return;
-  editor.setValue('', -1);
-  autosaveDebounced();
-});
-
-// Shortcuts
-document.addEventListener('keydown', (e)=>{
-  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='s'){
-    e.preventDefault();
-    // save without prompt if holding shift? Keep simple: full save
-    saveOpenSection();
-  }
-  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='e'){
-    e.preventDefault();
-    openExportModal();
-  }
-  if(e.key==='Escape'){
-    exportModalBg.style.display='none';
-    importModalBg.style.display='none';
-    themesModalBg.style.display='none';
-    metaModalBg.style.display='none';
-    mediaModalBg.style.display='none';
-  }
-});
-
-// =====================
-// Size indicators
-// =====================
-async function updateSizeIndicators(){
-  if(!project){ sizePill.textContent='Size: 0 KB'; return; }
-  const ls = localStorage.getItem(projectKey(project.id)) || '';
-  // approximate export size
-  const mediaBytes = project.mediaManifest.reduce((a,m)=>a+(Number(m.bytes)||0),0);
-  const exportApprox = Math.round(mediaBytes*4/3) + (ls.length*2);
-  sizePill.textContent = `Size: ${formatBytes(ls.length*2)} • Export≈ ${formatBytes(exportApprox)}`;
-}
-function renderAll(){
-  renderProjectsSelect();
-  projectSelect.value = project.id;
-  renderSectionsList();
+el('projectSelect').onchange = (e) => loadProject(e.target.value);
+
+function renderAll() {
+  updateProjectDropdown();
+  renderSidebar();
   renderTabs();
-  renderMedia();
-  refreshPreviewSelect();
-  refreshPreview();
-
-  // load open section
-  if(project.open && getSection(project.open)) loadIntoEditor(project.open);
-  else if(project.sections[0]) { project.open = project.sections[0].id; project.tabs=[project.open]; saveProject(); loadIntoEditor(project.open); }
-
-  updateSizeIndicators().catch(()=>{});
+  loadEditorContent();
+  if(previewOpen) refreshPreview();
 }
 
-// =====================
-// Init
-// =====================
-(async function init(){
-  applyUiTheme(index.settings.uiTheme || 'dark');
+function enableRename(elNode, sectionObj, callback) {
+  elNode.ondblclick = () => {
+    elNode.contentEditable = true; elNode.focus();
+    document.execCommand('selectAll', false, null);
+    const finish = () => {
+      elNode.contentEditable = false;
+      sectionObj.title = elNode.textContent.trim() || 'untitled.txt';
+      saveProject(); callback();
+    };
+    elNode.onblur = finish;
+    elNode.onkeydown = e => { if(e.key==='Enter') { e.preventDefault(); elNode.blur(); }};
+  };
+}
 
-  if(index.projects.length===0){
-    const pid = createProject('untitled');
-    currentProjectId = pid;
-  } else {
-    currentProjectId = index.lastProjectId || index.projects[0].id;
+function renderSidebar() {
+  const list = el('sectionsList'); list.innerHTML = '';
+  project.sections.forEach(s => {
+    const div = document.createElement('div');
+    const color = getExtColor(s.title);
+    div.className = 'tree-item' + (project.open===s.id?' active':'');
+    div.style.setProperty('--file-color', color);
+    div.innerHTML = `<svg style="fill:${color}"><use href="#icon-code"></use></svg><div class="name" title="Double click to rename">${escapeHtml(s.title)}</div>
+      <div class="tree-actions"><button class="icon-btn del"><svg><use href="#icon-trash"></use></svg></button></div>`;
+    
+    div.onclick = (e) => { if(!e.target.closest('button') && !e.target.closest('[contenteditable]')) { project.open=s.id; if(!project.tabs.includes(s.id)) project.tabs.push(s.id); saveProject(); renderTabs(); loadEditorContent(); renderSidebar(); }};
+    div.querySelector('.del').onclick = () => {
+      if(project.sections.length === 1) return showToast("Cannot delete last file.");
+      project.sections = project.sections.filter(x=>x.id!==s.id);
+      project.tabs = project.tabs.filter(x=>x!==s.id);
+      if(project.open===s.id) project.open = project.tabs[0] || project.sections[0].id;
+      saveProject(); renderAll();
+    };
+    enableRename(div.querySelector('.name'), s, () => { renderSidebar(); renderTabs(); loadEditorContent(); });
+    list.appendChild(div);
+  });
+
+  const mList = el('mediaList'); mList.innerHTML = '';
+  project.media.forEach(m => {
+    const div = document.createElement('div'); div.className = 'tree-item';
+    const icon = m.type.startsWith('image') ? '#icon-image' : '#icon-file';
+    div.innerHTML = `<svg><use href="${icon}"></use></svg><div class="name" title="Double click to rename">${escapeHtml(m.title)}</div>
+      <div class="tree-actions">
+        <button class="icon-btn insert" title="Insert into code"><svg><use href="#icon-plus"></use></svg></button>
+        <button class="icon-btn del" title="Delete"><svg><use href="#icon-trash"></use></svg></button>
+      </div>`;
+    div.querySelector('.insert').onclick = () => {
+      let tag = `ALLF_MEDIA:${m.id}`;
+      if(m.type.startsWith('image')) tag = `<img src="${tag}" alt="${m.title}">`;
+      else if(m.type.startsWith('video')) tag = `<video src="${tag}" controls></video>`;
+      editor.insert(tag);
+    };
+    div.querySelector('.del').onclick = async () => {
+      await idbAction('del', m.id); project.media = project.media.filter(x=>x.id!==m.id); saveProject(); renderSidebar();
+    };
+    enableRename(div.querySelector('.name'), m, renderSidebar);
+    mList.appendChild(div);
+  });
+}
+
+function renderTabs() {
+  const t = el('tabs'); t.innerHTML = '';
+  project.tabs.forEach(id => {
+    const s = project.sections.find(x=>x.id===id); if(!s) return;
+    const color = getExtColor(s.title);
+    const div = document.createElement('div'); div.className = 'tab' + (project.open===id?' active':'');
+    div.style.setProperty('--file-color', color);
+    div.innerHTML = `<span>${escapeHtml(s.title)}</span><svg class="svg-icon tab-close"><use href="#icon-close"></use></svg>`;
+    div.onclick = (e) => {
+      if(e.target.closest('.tab-close')) {
+        project.tabs = project.tabs.filter(x=>x!==id);
+        if(project.open===id) project.open = project.tabs[0] || null;
+        saveProject(); renderTabs(); loadEditorContent(); renderSidebar();
+      } else {
+        project.open = id; saveProject(); renderTabs(); loadEditorContent(); renderSidebar();
+      }
+    };
+    t.appendChild(div);
+  });
+}
+
+function loadEditorContent() {
+  const s = project.sections.find(x=>x.id===project.open);
+  if(!s) { 
+    editor.setValue('', -1); 
+    document.documentElement.style.setProperty('--file-color', 'var(--border)'); 
+    return; 
+  }
+  
+  // Set Color Theme for Editor
+  const color = getExtColor(s.title);
+  document.documentElement.style.setProperty('--file-color', color);
+
+  if(editor.getValue() !== s.content) editor.setValue(s.content||'', -1);
+  const title = s.title.toLowerCase();
+  let mode = 'ace/mode/text';
+  if(title.includes('.js')||title.includes('.ts')) mode = 'ace/mode/javascript';
+  else if(title.includes('.css')) mode = 'ace/mode/css';
+  else if(title.includes('.json')) mode = 'ace/mode/json';
+  else if(title.includes('.html')) mode = 'ace/mode/html';
+  else if(title.includes('.py')) mode = 'ace/mode/python';
+  else if(title.includes('.xml')) mode = 'ace/mode/xml';
+  else if(title.includes('.md')) mode = 'ace/mode/markdown';
+  else if(title.includes('.php')) mode = 'ace/mode/php';
+  editor.session.setMode(mode);
+}
+
+// --- Preview ---
+function togglePreview() {
+  previewOpen = !previewOpen;
+  el('previewPanel').classList.toggle('open', previewOpen);
+  setTimeout(() => editor.resize(), 300); 
+  if(previewOpen) refreshPreview();
+}
+el('btnLivePreview').onclick = togglePreview;
+el('menuTogglePreview').onclick = togglePreview;
+el('btnReloadPreview').onclick = refreshPreview;
+
+function refreshPreview() {
+  const s = project.sections.find(x=>x.id===project.open);
+  if(s) {
+    const helper = `<script>window.ALLF_FILES=${JSON.stringify(project.media.map(m=>m.id))};<\/script>`;
+    el('previewFrame').srcdoc = s.content + helper;
+  }
+}
+
+// --- Menu Actions ---
+el('projectNameInput').onchange = () => { saveProject(); updateProjectDropdown(); };
+el('menuNewProject').onclick = () => createProject("New Project");
+
+function addNewCodeFile() {
+  const baseName = prompt("Enter file name (without extension):", "new_file");
+  if(baseName !== null) {
+    let finalName = baseName.trim();
+    if(!finalName.includes('.')) finalName += '.txt'; // Text by default
+    
+    const id = newId('C'); project.sections.push({type:'code', id, title: finalName, content:''});
+    project.open = id; project.tabs.push(id); saveProject(); renderAll();
+  }
+}
+el('btnAddCode').onclick = el('menuAddCode').onclick = addNewCodeFile;
+
+el('menuClearTab').onclick = () => {
+  if(confirm('Clear current tab content?')) { editor.setValue('', -1); }
+};
+el('menuDeleteProj').onclick = async () => {
+  if(confirm('Delete project entirely?')) {
+    const db = await openDb();
+    const tx = db.transaction('files','readwrite');
+    const cur = tx.objectStore('files').index('projectId').openCursor(IDBKeyRange.only(project.id));
+    cur.onsuccess = e => { const c = e.target.result; if(c) { c.delete(); c.continue(); }};
+    localStorage.removeItem(pKey(project.id));
+    index.projects = index.projects.filter(x=>x.id!==project.id);
+    index.lastProjectId = index.projects[0]?.id || null; saveStorage();
+    window.location.reload();
+  }
+};
+
+// --- RESTRICTED FILE FORMAT MODAL ---
+const FORMATS = {
+  "Web & Code": [ 
+    {ext:"html", desc:"HyperText Markup"}, {ext:"css", desc:"Cascading Style Sheets"}, 
+    {ext:"js", desc:"JavaScript"}, {ext:"ts", desc:"TypeScript"},
+    {ext:"php", desc:"PHP Script"}, {ext:"py", desc:"Python Script"}, 
+    {ext:"java", desc:"Java Source"}, {ext:"cpp", desc:"C++ Source Code"}
+  ],
+  "Document": [ 
+    {ext:"txt", desc:"Plain Text File"}, {ext:"md", desc:"Markdown File"}, 
+    {ext:"csv", desc:"Comma Separated Values"} 
+  ],
+  "Data & Config": [ 
+    {ext:"json", desc:"JSON Data"}, {ext:"xml", desc:"XML Data"}, 
+    {ext:"yaml", desc:"YAML Config"}, {ext:"ini", desc:"INI Config"} 
+  ],
+  "TSFAlex": [ 
+    {ext:"cepp", desc:"Custom Engine Project File"}, {ext:"allf", desc:"ALLF Studio Configuration"} 
+  ]
+};
+
+let activeCategory = "Web & Code";
+
+function openFormatModal() {
+  if(!project.open) return showToast("Open a file first to change its type.");
+  openModal('formatModal');
+  renderFormatSidebar();
+  renderFormatGrid();
+}
+el('btnChangeFileType').onclick = openFormatModal;
+el('btnFormatClose').onclick = () => closeModal('formatModal');
+
+function renderFormatSidebar() {
+  const sb = el('fmCategories'); sb.innerHTML = '';
+  Object.keys(FORMATS).forEach(cat => {
+    const div = document.createElement('div');
+    div.className = 'fm-category' + (activeCategory===cat ? ' active' : '');
+    div.innerHTML = `<span>${cat}</span> <span>›</span>`;
+    div.onclick = () => { activeCategory = cat; renderFormatSidebar(); renderFormatGrid(); };
+    sb.appendChild(div);
+  });
+}
+
+function renderFormatGrid() {
+  const grid = el('fmGrid'); grid.innerHTML = '';
+  const query = el('fmSearch').value.toLowerCase();
+  
+  let items = FORMATS[activeCategory] || [];
+  if(query) {
+    items = [];
+    Object.values(FORMATS).forEach(arr => {
+      arr.forEach(i => { if(i.ext.includes(query) || i.desc.toLowerCase().includes(query)) items.push(i); });
+    });
   }
 
-  renderProjectsSelect();
-  project = loadProject(currentProjectId) || loadProject(index.projects[0]?.id) || null;
-  if(!project){
-    const pid = createProject('untitled');
-    project = loadProject(pid);
-    currentProjectId = pid;
+  items.forEach(item => {
+    const btn = document.createElement('button');
+    btn.className = 'fm-btn';
+    btn.textContent = item.ext.toUpperCase();
+    btn.onmouseover = () => el('fmHoverInfo').textContent = `${item.ext.toUpperCase()}: ${item.desc}`;
+    btn.onmouseout = () => el('fmHoverInfo').textContent = 'Hover over a format to see its details.';
+    btn.onclick = () => applyExtension(item.ext);
+    grid.appendChild(btn);
+  });
+}
+
+el('fmSearch').oninput = renderFormatGrid;
+
+function applyExtension(newExt) {
+  const sec = project.sections.find(s=>s.id===project.open);
+  if(sec) {
+    let base = sec.title;
+    if(base.includes('.')) base = base.substring(0, base.lastIndexOf('.'));
+    newExt = newExt.replace('.', '');
+    sec.title = `${base}.${newExt}`;
+    saveProject(); renderAll();
+    closeModal('formatModal');
+    showToast(`File type changed to .${newExt}`);
   }
+}
+el('btnFormatCustomApply').onclick = () => {
+  const val = el('fmCustomInput').value.trim();
+  if(val) applyExtension(val);
+};
 
-  editor.setTheme(index.settings.editorTheme || 'ace/theme/monokai');
+// --- Modals General ---
+document.querySelectorAll('.btn-close-modal').forEach(b => {
+  b.onclick = () => closeModal(b.closest('.modal-overlay').id);
+});
 
-  // initial render
-  await switchProject(project.id);
+el('menuMeta').onclick = () => {
+  el('metaAuthor').value = project.meta.author; el('metaVersion').value = project.meta.version;
+  openModal('metaModal');
+};
+el('btnMetaSave').onclick = () => {
+  project.meta.author = el('metaAuthor').value; project.meta.version = el('metaVersion').value;
+  saveProject(); closeModal('metaModal'); showToast('Settings saved');
+};
+el('menuThemes').onclick = () => {
+  el('editorThemeSelect').value = index.theme; openModal('themesModal');
+};
+el('editorThemeSelect').onchange = (e) => {
+  index.theme = e.target.value; saveStorage(); editor.setTheme(index.theme);
+};
 
-  showToast('Ready','Local projects + IndexedDB media enabled');
-})();
+// --- Export / Import ---
+el('menuExport').onclick = () => {
+  el('exportFilename').value = project.name.replace(/\s+/g,'_') + '.allf';
+  el('exportProgressText').textContent = ''; openModal('exportModal');
+};
+function bufferToBase64(buffer) {
+  let binary = ''; const bytes = new Uint8Array(buffer);
+  for(let i=0; i<bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+  return window.btoa(binary);
+}
+function base64ToBuffer(b64) {
+  const bin = window.atob(b64); const bytes = new Uint8Array(bin.length);
+  for(let i=0; i<bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+el('btnExportConfirm').onclick = async () => {
+  try {
+    el('btnExportConfirm').disabled = true;
+    const parts = [`ALLF_VERSION// ${ALLF_VERSION}\nPROJECT// ${project.name}\n\n`];
+    project.sections.forEach(s => parts.push(`C// ${s.id}::${s.title}\n${s.content||''}\nC\\\\\nSPACE//\n`));
+    parts.push(`EM//\n${JSON.stringify(project.media)}\nEM\\\\\n`);
+    
+    for(let i=0; i<project.media.length; i++) {
+      const m = project.media[i];
+      el('exportProgressText').textContent = `Processing file: ${m.title}...`;
+      const stored = await idbAction('get', m.id); if(!stored) continue;
+      parts.push(`FILE_B64// ${m.id}\n`);
+      for(let offset=0; offset<stored.blob.size; offset += 2*1024*1024) {
+        const slice = stored.blob.slice(offset, offset + 2*1024*1024);
+        parts.push(bufferToBase64(await slice.arrayBuffer()) + '\n');
+      }
+      parts.push(`FILE_B64\\\\\n`);
+    }
+    parts.push(`B//\n${BRANDING_TEXT}\nB\\\\\nEND//`);
+    const blob = new Blob(parts, { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = el('exportFilename').value;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    closeModal('exportModal'); showToast('Export Complete');
+  } catch(e) { console.error(e); alert('Export Error'); }
+  finally { el('btnExportConfirm').disabled = false; }
+};
+
+el('menuImport').onclick = () => el('importInput').click();
+el('importInput').onchange = async e => {
+  const f = e.target.files[0]; if(!f) return;
+  try {
+    const text = await f.text();
+    if(!text.includes(BRANDING_TEXT)) return alert("Invalid ALLF file.");
+    const pid = createProject("Imported Project");
+    const np = JSON.parse(localStorage.getItem(pKey(pid)));
+    np.sections = []; np.media = [];
+    const pMatch = text.match(/PROJECT\/\/\s*(.*)/); if(pMatch) np.name = pMatch[1].trim();
+    
+    const sectionRe = /C\/\/\s*(.*?)::(.*?)\n([\s\S]*?)\nC\\\\/g;
+    let sm; while((sm = sectionRe.exec(text))) np.sections.push({ type:'code', id:sm[1], title:sm[2], content:sm[3] });
+    if(!np.sections.length) np.sections.push({type:'code', id:'C1', title:'index.html', content:''});
+    np.tabs = [np.sections[0].id]; np.open = np.sections[0].id;
+    
+    const manMatch = text.match(/EM\/\/\n([\s\S]*?)\nEM\\\\/);
+    if(manMatch) try { np.media = JSON.parse(manMatch[1]); } catch(e){}
+    
+    const b64Re = /FILE_B64\/\/\s*(.*?)\n([\s\S]*?)\nFILE_B64\\\\/g;
+    let bm; while((bm = b64Re.exec(text))) {
+      const bParts = bm[2].split('\n').filter(x=>x.trim()).map(x=>base64ToBuffer(x.trim()));
+      const mRef = np.media.find(x=>x.id===bm[1]);
+      await idbAction('put', { id: bm[1], projectId: pid, blob: new Blob(bParts, { type: mRef?mRef.type:'application/octet-stream' }) });
+    }
+    localStorage.setItem(pKey(pid), JSON.stringify(np));
+    index.projects.find(x=>x.id===pid).name = np.name; saveStorage();
+    loadProject(pid); showToast('Import Successful');
+  } catch(e) { console.error(e); alert('Import Failed.'); }
+};
+
+// --- Init ---
+loadStorage();
+if(!index.projects.length) createProject();
+else loadProject(index.lastProjectId || index.projects[0].id);
 </script>
 </body>
 </html>
