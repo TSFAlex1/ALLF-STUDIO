@@ -70,7 +70,7 @@ header {
   position: absolute; top: 100%; left: 0; margin-top: 4px;
   background: rgba(22, 24, 29, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 12px 30px rgba(0,0,0,0.5);
-  min-width: 220px; padding: 6px 0; z-index: 2000;
+  min-width: 230px; padding: 6px 0; z-index: 2000;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .menu-group:hover .dropdown { visibility: visible; opacity: 1; transform: translateY(0); }
@@ -383,7 +383,8 @@ footer {
           Install App (PWA)
         </div>
         <div class="dropdown-divider"></div>
-        <div class="dropdown-item danger" id="menuFactoryReset">Restore to Default</div>
+        <div class="dropdown-item danger" id="menuResetProject">Restore to Default</div>
+        <div class="dropdown-item danger" id="menuFactoryReset" style="font-weight: 800;">Factory Reset</div>
       </div>
     </div>
 
@@ -487,7 +488,7 @@ footer {
       <span>Preview Output</span>
       <button class="icon-btn" id="btnReloadPreview" title="Reload"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button>
     </div>
-    <iframe id="previewFrame" sandbox="allow-scripts allow-forms allow-modals"></iframe>
+    <iframe id="previewFrame" sandbox="allow-scripts allow-forms allow-modals allow-same-origin"></iframe>
     
     <div class="console-panel" id="consolePanel">
       <div class="console-header">
@@ -500,7 +501,7 @@ footer {
 
 </div>
 
-<footer>2026 &copy; TSFAlex Version 1.5.1</footer>
+<footer>2026 &copy; TSFAlex Version 1.5.2</footer>
 
 <input id="mediaInput" type="file" accept="*/*" multiple style="display:none" />
 <input id="importInput" type="file" accept=".allf,text/plain" style="display:none" />
@@ -561,23 +562,28 @@ footer {
 
 <div id="whatsNewModal" class="modal-overlay">
   <div class="modal" style="width: 450px;">
-    <div class="modal-header">What's New in v1.5.1</div>
+    <div class="modal-header">What's New in v1.5.2</div>
     <div class="modal-body" style="max-height: 60vh; overflow-y: auto; gap: 16px;">
       
       <div>
-        <h4 style="margin: 0 0 4px 0; color: var(--cyan-accent); display: flex; align-items: center; gap: 6px;">
-          <svg style="width:16px; height:16px; fill:currentColor;" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
-          Format Modal UI Fix
+        <h4 style="margin: 0 0 4px 0; color: var(--success); display: flex; align-items: center; gap: 6px;">
+          Project Reset Optimization
         </h4>
-        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;">Restored the premium styling and layout for the <b>Change File Type</b> modal. It now perfectly displays categories and file formats.</p>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;">The <b>Restore to Default</b> option now safely resets ONLY your current active project and files, keeping all your other projects totally safe.</p>
       </div>
 
       <div>
-        <h4 style="margin: 0 0 4px 0; color: var(--accent); display: flex; align-items: center; gap: 6px;">
-          <svg style="width:16px; height:16px; fill:currentColor;" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg> 
-          Infinite Update History
+        <h4 style="margin: 0 0 4px 0; color: var(--danger); display: flex; align-items: center; gap: 6px;">
+          Factory Reset
         </h4>
-        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;">The <b>Update History</b> tab now natively supports scrolling through all past updates infinitely, allowing you to easily look back at ALLF STUDIO's evolution.</p>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;">Added a true <b>Factory Reset</b> option under the File menu for when you want to completely wipe all app data. This includes double-confirmation warnings to prevent accidents.</p>
+      </div>
+
+      <div>
+        <h4 style="margin: 0 0 4px 0; color: var(--cyan-accent); display: flex; align-items: center; gap: 6px;">
+          JS Console Fix
+        </h4>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;">The Developer Console is fixed! It now properly intercepts live code logs, parses complex stringified objects, and correctly forces the preview panel open so you can always see your debug data.</p>
       </div>
 
     </div>
@@ -744,7 +750,7 @@ footer {
 
 <script>
 /* =========================================================
-   ALLF STUDIO - V1.5.1 (UI Fixes & Infinite History)
+   ALLF STUDIO - V1.5.2 (Fixes & Project Resets)
    ========================================================= */
 
 const BRANDING_TEXT = '© ALLF STUDIO - TSFALEX';
@@ -1007,12 +1013,11 @@ function buildFileTree(files) {
 }
 
 function renderTreeBranch(node, container, path="", isMedia=false) {
-  // Render Folders first
   Object.keys(node.folders).forEach(folderName => {
     const fullPath = path + folderName;
     const fNode = node.folders[folderName];
     
-    if(openFolders[fullPath] === undefined) openFolders[fullPath] = true; // default open
+    if(openFolders[fullPath] === undefined) openFolders[fullPath] = true; 
     const isOpen = openFolders[fullPath];
     
     const div = document.createElement('div');
@@ -1031,7 +1036,6 @@ function renderTreeBranch(node, container, path="", isMedia=false) {
     }
   });
 
-  // Render Files
   node.files.forEach(f => {
     const div = document.createElement('div');
     const color = getExtColor(f.title);
@@ -1175,10 +1179,11 @@ function loadEditorContent(targetNum) {
 // --- Features (Console & Previews) ---
 const consoleHookScript = `
 <script>
+  const _s = x => { try{ return typeof x==='object' ? JSON.stringify(x) : String(x); }catch(e){ return String(x); } };
   const _l = console.log, _e = console.error, _w = console.warn;
-  console.log = function(...a) { _l(...a); window.parent.postMessage({type:'console', level:'log', args:a.map(String)}, '*'); };
-  console.error = function(...a) { _e(...a); window.parent.postMessage({type:'console', level:'error', args:a.map(String)}, '*'); };
-  console.warn = function(...a) { _w(...a); window.parent.postMessage({type:'console', level:'warn', args:a.map(String)}, '*'); };
+  console.log = function(...a) { _l(...a); window.parent.postMessage({type:'console', level:'log', args:a.map(_s)}, '*'); };
+  console.error = function(...a) { _e(...a); window.parent.postMessage({type:'console', level:'error', args:a.map(_s)}, '*'); };
+  console.warn = function(...a) { _w(...a); window.parent.postMessage({type:'console', level:'warn', args:a.map(_s)}, '*'); };
   window.onerror = function(m,u,l) { window.parent.postMessage({type:'console', level:'error', args:[m+' (Line '+l+')']}, '*'); };
 <\/script>
 `;
@@ -1199,7 +1204,7 @@ function togglePreview() {
   previewOpen = !previewOpen;
   el('previewPanel').classList.toggle('open', previewOpen);
   el('resizer-right').style.display = previewOpen ? 'block' : 'none';
-  if(!previewOpen) el('previewPanel').style.width = '0px'; // reset custom dragged width
+  if(!previewOpen) el('previewPanel').style.width = '0px';
   setTimeout(() => { editor1.resize(); editor2.resize(); }, 300); 
   if(previewOpen) refreshPreview();
 }
@@ -1210,6 +1215,7 @@ el('btnReloadPreview').onclick = refreshPreview;
 function toggleConsole() {
   consoleOpen = !consoleOpen;
   el('consolePanel').classList.toggle('open', consoleOpen);
+  if(consoleOpen && !previewOpen) togglePreview(); // Auto-open preview if closed to show console
 }
 el('menuToggleConsole').onclick = toggleConsole;
 
@@ -1226,7 +1232,7 @@ function toggleSplitEditor() {
   splitViewOpen = !splitViewOpen;
   el('editorPane2').style.display = splitViewOpen ? 'flex' : 'none';
   if(splitViewOpen && !project.open2) {
-    project.open2 = project.open; // clone view initially
+    project.open2 = project.open; 
   }
   setTimeout(() => { editor1.resize(); editor2.resize(); }, 100);
   renderTabs();
@@ -1306,13 +1312,31 @@ el('menuWhatsNew').onclick = () => openModal('whatsNewModal');
 el('btnViewHistory').onclick = () => { closeModal('whatsNewModal'); openModal('updateHistoryModal'); };
 el('btnBackToWhatsNew').onclick = () => { closeModal('updateHistoryModal'); openModal('whatsNewModal'); };
 
+// Safely reset current project only
+el('menuResetProject').onclick = async () => {
+  if(confirm("Are you sure you want to reset the CURRENT project to default?\nAll files and media in this project will be deleted.")) {
+    await deleteProjectDbFiles(project.id);
+    project.sections = [{type:'code', id:'C1', title:'index.html', content:'<!DOCTYPE html>\n<html>\n<body>\n  <h1>ALLF STUDIO</h1>\n</body>\n</html>'}];
+    project.tabs = ['C1'];
+    project.open = 'C1';
+    project.open2 = null;
+    project.media = [];
+    saveProject();
+    renderAll();
+    showToast("Project reset to default");
+  }
+};
+
+// Massive Double-Confirm Factory Reset
 el('menuFactoryReset').onclick = async () => {
-  if(confirm("WARNING: This will delete ALL projects, files, and settings. This cannot be undone. Are you absolutely sure?")) {
-    const db = await openDb();
-    const tx = db.transaction('files', 'readwrite');
-    tx.objectStore('files').clear();
-    Object.keys(localStorage).forEach(k => { if(k.startsWith('ALLF_')) localStorage.removeItem(k); });
-    window.location.reload();
+  if(confirm("WARNING: FACTORY RESET.\nThis will permanently delete ALL projects, files, and settings across the entire app.\n\nDo you want to proceed?")) {
+    if(confirm("FINAL WARNING!\nAre you ABSOLUTELY sure? This cannot be undone!")) {
+      const db = await openDb();
+      const tx = db.transaction('files', 'readwrite');
+      tx.objectStore('files').clear();
+      Object.keys(localStorage).forEach(k => { if(k.startsWith('ALLF_')) localStorage.removeItem(k); });
+      window.location.reload();
+    }
   }
 };
 
@@ -1389,6 +1413,7 @@ async function handleFiles(files) {
   showLoading("Saving Files to Local DB...");
   for(let i=0; i<files.length; i++) {
     const f = files[i]; const id = newId('F');
+    // Ask for folder path optionally
     let fName = f.name;
     const path = prompt(`Organize ${f.name} into a folder? (Leave blank for root, or type e.g. "images/")`, "");
     if(path && path.trim()!=="") fName = path.trim().replace(/\/$/, '') + '/' + f.name;
