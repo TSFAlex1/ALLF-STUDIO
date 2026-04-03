@@ -201,6 +201,7 @@ footer {
   background: var(--bg-surface); border: 1px solid var(--border); width: 400px; max-width: 90%;
   border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); overflow: hidden;
   transform: translateY(20px) scale(0.95); opacity: 0; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex; flex-direction: column;
 }
 .modal-overlay.show .modal { transform: translateY(0) scale(1); opacity: 1; }
 
@@ -347,6 +348,8 @@ footer {
         <div class="dropdown-item" id="menuTogglePreview">Toggle Live Preview</div>
         <div class="dropdown-divider"></div>
         <div class="dropdown-item" id="menuThemes">Editor Themes</div>
+        <div class="dropdown-divider"></div>
+        <div class="dropdown-item" id="menuWhatsNew">What's new?</div>
       </div>
     </div>
 
@@ -411,6 +414,66 @@ footer {
       <div id="loadingFill" class="progress-fill" style="width: 0%;"></div>
     </div>
     <div id="loadingText" style="font-size: 12px; color: var(--text-secondary);">0%</div>
+  </div>
+</div>
+
+<div id="whatsNewModal" class="modal-overlay">
+  <div class="modal" style="width: 450px;">
+    <div class="modal-header">What's New in v1.4.0</div>
+    <div class="modal-body" style="max-height: 60vh; overflow-y: auto; gap: 16px;">
+      
+      <div>
+        <h4 style="margin: 0 0 4px 0; color: var(--accent); display: flex; align-items: center; gap: 6px;">
+          <svg style="width:16px; height:16px; fill:currentColor;" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg> 
+          Project Manager
+        </h4>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;">Easily view, switch, and delete all your projects from a single centralized menu under <b>Project > Manage Projects</b>.</p>
+      </div>
+
+      <div>
+        <h4 style="margin: 0 0 4px 0; color: var(--danger); display: flex; align-items: center; gap: 6px;">
+          <svg style="width:16px; height:16px; fill:currentColor;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg> 
+          Factory Reset
+        </h4>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;">Added a <b>Restore to Default</b> option in the File menu to completely wipe all local data, databases, and settings to start fresh.</p>
+      </div>
+
+      <div>
+        <h4 style="margin: 0 0 4px 0; color: var(--success); display: flex; align-items: center; gap: 6px;">
+          <svg style="width:16px; height:16px; fill:currentColor;" viewBox="0 0 24 24"><path d="M13.5 2c-5.621 0-10.211 4.443-10.475 10h-3.025l4.537 5.917 4.463-5.917h-2.975c.26-3.902 3.508-7 7.475-7 4.136 0 7.5 3.364 7.5 7.5s-3.364 7.5-7.5 7.5c-2.381 0-4.502-1.119-5.876-2.854l-1.847 2.449c1.919 2.088 4.664 3.405 7.723 3.405 5.798 0 10.5-4.702 10.5-10.5s-4.702-10.5-10.5-10.5z"/></svg>
+          Ultra-Performance Engine
+        </h4>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;">Export and Import logic has been fully rewritten to intelligently stream binary data in safe chunks. You can now reliably import/export massive files (like 1GB+ videos) without memory crashing your browser.</p>
+      </div>
+
+      <div>
+        <h4 style="margin: 0 0 4px 0; color: var(--cyan-accent); display: flex; align-items: center; gap: 6px;">
+          <svg style="width:16px; height:16px; fill:currentColor;" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+          Progress Bars & Loading UI
+        </h4>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;">Added beautiful, accurate progress bars for importing, exporting, and uploading large files so you never have to guess if the app is working.</p>
+      </div>
+
+      <div>
+        <h4 style="margin: 0 0 4px 0; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+          <svg style="width:16px; height:16px; fill:currentColor;"><use href="#icon-download"></use></svg>
+          Asset Downloading
+        </h4>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;">You can now download your uploaded assets (images, videos, fonts) directly from the sidebar back to your physical computer.</p>
+      </div>
+
+      <div>
+        <h4 style="margin: 0 0 4px 0; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+          <svg style="width:16px; height:16px; fill:currentColor;" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4c-.83 0-1.5-.67-1.5-1.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+          Smooth UI Animations
+        </h4>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;">Everything from dropdown menus to hover effects now features buttery-smooth CSS transitions and glass-morphism blurs for a premium feel.</p>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-close-modal primary">Awesome!</button>
+    </div>
   </div>
 </div>
 
@@ -877,6 +940,8 @@ function refreshPreview() {
 el('projectNameInput').onchange = () => { saveProject(); updateProjectDropdown(); };
 el('menuNewProject').onclick = () => createProject("New Project");
 
+el('menuWhatsNew').onclick = () => openModal('whatsNewModal');
+
 el('menuFactoryReset').onclick = async () => {
   if(confirm("WARNING: This will delete ALL projects, files, and settings. This cannot be undone. Are you absolutely sure?")) {
     const db = await openDb();
@@ -948,7 +1013,7 @@ function renderProjectManager() {
     div.querySelector('.btn-del').onclick = async () => {
       if (confirm(`Delete project "${p.name}" forever?`)) {
         await deleteProjectById(p.id);
-        renderProjectManager(); // Re-render the list immediately
+        renderProjectManager(); 
       }
     };
     
