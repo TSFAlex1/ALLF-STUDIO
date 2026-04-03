@@ -3,8 +3,10 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="theme-color" content="#0E1015">
 <title>ALLF STUDIO</title>
 <link rel="icon" type="image/png" href="ALLF_STUDIO_IMG.png" />
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiQUxMRiBTVFVESU8iLCJzaG9ydF9uYW1lIjoiQUxMRiIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3ciOiIjMEUxMDE1IiwidGhlbWVfY29sb3ciOiIjMEUxMDE1IiwiaWNvbnMiOlt7InNyYyI6IkFMTEZfU1RVRElPX0lNRy5wbmciLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiaW1hZ2UvcG5nIn1dfQ==">
 
 <style>
 /* Modern Premium Dark Theme */
@@ -19,10 +21,12 @@
   --accent: #5E6AD2;
   --accent-hover: #737EE0;
   --danger: #E06C75;
+  --warning: #E5C07B;
   --success: #98C379;
   --cyan-accent: #0DE2C6;
   --radius: 8px;
   --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Fira Code', 'Consolas', monospace;
   --file-color: var(--border); 
 }
 
@@ -66,7 +70,7 @@ header {
   position: absolute; top: 100%; left: 0; margin-top: 4px;
   background: rgba(22, 24, 29, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 12px 30px rgba(0,0,0,0.5);
-  min-width: 190px; padding: 6px 0; z-index: 2000;
+  min-width: 220px; padding: 6px 0; z-index: 2000;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .menu-group:hover .dropdown { visibility: visible; opacity: 1; transform: translateY(0); }
@@ -78,6 +82,7 @@ header {
 .dropdown-item:hover { background: var(--accent); color: #fff; padding-left: 20px; }
 .dropdown-item.danger:hover { background: var(--danger); color: #fff; }
 .dropdown-divider { height: 1px; background: var(--border); margin: 4px 0; }
+.shortcut-hint { font-size: 11px; opacity: 0.6; font-family: var(--font-mono); }
 
 .project-name-input {
   background: transparent; border: 1px solid transparent; color: var(--text-primary);
@@ -108,13 +113,19 @@ header {
 .btn.danger:hover { background: var(--danger); color: #fff; }
 .btn svg { width: 14px; height: 14px; fill: currentColor; }
 
-/* WORKSPACE */
-.workspace { display: flex; height: calc(100vh - 45px - 26px); }
+/* WORKSPACE & RESIZERS */
+.workspace { display: flex; height: calc(100vh - 45px - 26px); width: 100vw; position: relative; }
+
+.resizer {
+  width: 4px; background: transparent; cursor: col-resize; z-index: 10;
+  transition: background 0.2s; position: relative;
+}
+.resizer:hover, .resizer.dragging { background: var(--accent); }
 
 /* SIDEBAR */
 .sidebar {
-  width: 280px; background: var(--bg-surface); border-right: 1px solid var(--border);
-  display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden;
+  width: 280px; min-width: 150px; max-width: 600px;
+  background: var(--bg-surface); display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden;
 }
 .section-header {
   padding: 16px 16px 8px 16px; font-size: 11px; text-transform: uppercase; font-weight: 700;
@@ -127,11 +138,21 @@ header {
 }
 .icon-btn:hover { background: var(--bg-overlay); color: var(--text-primary); transform: scale(1.1); }
 
+/* FOLDERS & FILES */
+.tree-folder {
+  display: flex; align-items: center; padding: 6px 16px; cursor: pointer;
+  color: var(--text-primary); font-size: 13px; font-weight: 600;
+}
+.tree-folder:hover { background: var(--bg-surface-hover); }
+.tree-folder svg { width: 14px; height: 14px; margin-right: 8px; fill: var(--accent); transition: transform 0.2s; }
+.tree-folder.open svg { transform: rotate(90deg); }
+
 .tree-item {
   display: flex; align-items: center; padding: 6px 16px; cursor: pointer;
   color: var(--text-secondary); font-size: 13px; transition: all 0.2s ease; position: relative;
   border-right: 3px solid transparent;
 }
+.tree-item.nested { padding-left: 36px; }
 .tree-item:hover { background: var(--bg-surface-hover); color: var(--text-primary); }
 .tree-item.active { background: rgba(94, 106, 210, 0.15); color: var(--text-primary); border-right: 3px solid var(--file-color); }
 .tree-item svg { width: 14px; height: 14px; margin-right: 8px; fill: currentColor; flex-shrink: 0; transition: fill 0.3s ease; }
@@ -140,13 +161,24 @@ header {
 .tree-actions { opacity: 0; gap: 4px; transition: opacity 0.2s ease; display: flex; }
 .tree-item:hover .tree-actions { opacity: 1; }
 
-/* EDITOR AREA */
-.editor-container { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; background: var(--bg-base); }
-.tabs { display: flex; background: var(--bg-surface); border-bottom: 1px solid var(--border); overflow-x: auto; align-items: center; }
+/* EDITOR AREA (SPLIT VIEW SUPPORT) */
+.editor-wrapper {
+  flex: 1; display: flex; flex-direction: column; min-width: 0; background: var(--bg-base);
+}
+.editor-split-container {
+  flex: 1; display: flex; flex-direction: row; min-height: 0;
+}
+.editor-pane {
+  flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative;
+  border-right: 1px solid var(--border);
+}
+.editor-pane:last-child { border-right: none; }
+
+.tabs { display: flex; background: var(--bg-surface); border-bottom: 1px solid var(--border); overflow-x: auto; align-items: center; min-height: 40px; }
 .tab {
   padding: 10px 20px; font-size: 13px; color: var(--text-secondary); cursor: pointer;
   border-right: 1px solid var(--border); background: var(--bg-base); display: flex; align-items: center; gap: 8px;
-  transition: all 0.2s ease; box-shadow: inset 0 0 0 transparent;
+  transition: all 0.2s ease; box-shadow: inset 0 0 0 transparent; white-space: nowrap;
 }
 .tab:hover { background: var(--bg-surface-hover); }
 .tab.active { background: transparent; color: var(--text-primary); box-shadow: inset 0 2px 0 var(--file-color); }
@@ -160,19 +192,36 @@ header {
   border-top: 2px solid var(--file-color); transition: border-color 0.4s ease;
 }
 
-#editor { flex: 1; width: 100%; font-family: 'Fira Code', monospace; }
+.ace-editor-div { flex: 1; width: 100%; font-family: var(--font-mono); }
 
-/* SLIDING PREVIEW PANEL */
+/* PREVIEW PANEL & CONSOLE */
 .preview-panel {
-  width: 0; border-left: 0 solid var(--border); background: #fff;
-  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden; display: flex; flex-direction: column;
+  width: 0; background: #fff;
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden; display: flex; flex-direction: column; position: relative;
 }
-.preview-panel.open { width: 45%; border-left: 1px solid var(--border); }
+.preview-panel.open { width: 45%; min-width: 200px; }
 .preview-header {
   height: 40px; background: var(--bg-surface); border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between; padding: 0 16px; color: var(--text-primary); font-size: 13px;
+  display: flex; align-items: center; justify-content: space-between; padding: 0 16px; color: var(--text-primary); font-size: 13px; flex-shrink: 0;
 }
 iframe { border: none; width: 100%; flex: 1; background: #fff; }
+
+/* JS CONSOLE */
+.console-panel {
+  height: 0; background: var(--bg-base); border-top: 1px solid var(--border);
+  display: flex; flex-direction: column; transition: height 0.3s ease; overflow: hidden;
+}
+.console-panel.open { height: 35%; min-height: 150px; }
+.console-header {
+  height: 30px; background: var(--bg-surface); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font-size: 11px; font-weight: 600; color: var(--text-secondary);
+}
+.console-logs {
+  flex: 1; overflow-y: auto; padding: 8px; font-family: var(--font-mono); font-size: 12px;
+}
+.log-line { padding: 4px; border-bottom: 1px solid rgba(255,255,255,0.05); word-wrap: break-word; }
+.log-line.error { color: var(--danger); background: rgba(224, 108, 117, 0.1); }
+.log-line.warn { color: var(--warning); }
 
 /* DROP ZONE */
 .drop-zone {
@@ -214,61 +263,16 @@ footer {
 }
 .input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(94, 106, 210, 0.2); }
 
+/* QUICK OPEN MODAL */
+.quick-open-item {
+  padding: 10px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.2s;
+  display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-primary);
+}
+.quick-open-item:hover, .quick-open-item.selected { background: var(--bg-surface-hover); color: var(--accent); }
+
 /* PROGRESS BARS */
 .progress-track { width: 100%; height: 8px; background: var(--bg-base); border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
 .progress-fill { width: 0%; height: 100%; background: var(--cyan-accent); transition: width 0.1s linear; }
-
-/* CHANGE FILE TYPE MODAL CSS */
-.format-modal {
-  width: 760px; max-width: 95vw; background: #111318; border: 1px solid var(--cyan-accent);
-  border-radius: 8px; box-shadow: 0 12px 40px rgba(0,0,0,0.8);
-  display: flex; flex-direction: column; 
-  transform: translateY(20px) scale(0.95); opacity: 0; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.modal-overlay.show .format-modal { transform: translateY(0) scale(1); opacity: 1; }
-
-.fm-topbar { display: flex; align-items: center; padding: 16px 20px; border-bottom: 1px solid #1E222B; }
-.fm-search-icon { color: var(--cyan-accent); margin-right: 12px; font-size: 18px; font-weight: bold; }
-.fm-search-input { flex: 1; background: transparent; border: none; color: #fff; font-size: 14px; outline: none; transition: all 0.2s ease; }
-.fm-search-input::placeholder { color: #5A6072; }
-.fm-close-btn { background: transparent; border: none; color: #5A6072; cursor: pointer; font-size: 16px; transition: color 0.2s ease; }
-.fm-close-btn:hover { color: #fff; }
-
-.fm-body { display: flex; height: 380px; }
-.fm-sidebar { width: 200px; border-right: 1px solid #1E222B; overflow-y: auto; padding: 12px 0; }
-.fm-category {
-  padding: 12px 20px; color: #8A919E; font-size: 13px; cursor: pointer;
-  display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease;
-  border-left: 3px solid transparent;
-}
-.fm-category:hover { background: #1A1D24; color: #fff; }
-.fm-category.active { color: #fff; border-left: 3px solid var(--cyan-accent); background: rgba(13,226,198,0.05); }
-
-.fm-content { flex: 1; display: flex; flex-direction: column; }
-.fm-grid {
-  flex: 1; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-  grid-auto-rows: 45px; gap: 16px; overflow-y: auto; align-content: flex-start;
-}
-.fm-btn {
-  background: #181A20; border: 1px solid #2A2E37; border-radius: 6px; color: #D1D5DB;
-  font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;
-}
-.fm-btn:hover { border-color: var(--cyan-accent); background: #1C2028; color: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(13,226,198,0.1); }
-.fm-btn:active { transform: translateY(0); }
-
-.fm-hover-info { padding: 16px 24px; border-top: 1px solid #1E222B; color: #5A6072; font-size: 12px; min-height: 50px; transition: color 0.2s ease; }
-
-.fm-bottom { padding: 16px 24px; border-top: 1px solid #1E222B; display: flex; justify-content: space-between; gap: 16px; align-items: center; }
-.fm-bottom-input {
-  flex: 1; background: #111318; border: 1px solid #2A2E37; color: #fff; padding: 10px 14px;
-  border-radius: 6px; font-size: 13px; outline: none; transition: all 0.2s ease;
-}
-.fm-bottom-input:focus { border-color: var(--cyan-accent); box-shadow: 0 0 0 2px rgba(13,226,198,0.15); }
-.fm-apply-btn {
-  background: transparent; border: 1px solid #2A2E37; color: #D1D5DB; padding: 10px 24px;
-  border-radius: 6px; font-size: 13px; cursor: pointer; transition: all 0.2s ease;
-}
-.fm-apply-btn:hover { border-color: var(--cyan-accent); color: #fff; background: rgba(13,226,198,0.05); }
 
 /* PROJECT MANAGER ITEM */
 .pm-list-item {
@@ -304,6 +308,10 @@ footer {
   <symbol id="icon-close" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></symbol>
   <symbol id="icon-download" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></symbol>
   <symbol id="icon-external" viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></symbol>
+  <symbol id="icon-folder" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></symbol>
+  <symbol id="icon-arrow-right" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></symbol>
+  <symbol id="icon-split" viewBox="0 0 24 24"><path d="M3 3h8v18H3V3zm10 0h8v18h-8V3z"/></symbol>
+  <symbol id="icon-terminal" viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .9-2 2v12c0 1.1.89 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.89-2-2-2zm0 14H4V8h16v10zm-2-1h-6v-2h6v2zM7.5 17l-1.41-1.41L8.67 13l-2.58-2.59L7.5 9l4 4-4 4z"/></symbol>
 </svg>
 
 <header>
@@ -322,6 +330,9 @@ footer {
         <div class="dropdown-item" id="menuFileConverter" style="color: var(--cyan-accent);">
           File Converter <svg class="svg-icon" style="width:12px; height:12px;"><use href="#icon-external"></use></svg>
         </div>
+        <div class="dropdown-item" id="menuInstallApp" style="color: var(--success);">
+          Install App (PWA)
+        </div>
         <div class="dropdown-divider"></div>
         <div class="dropdown-item danger" id="menuFactoryReset">Restore to Default</div>
       </div>
@@ -330,7 +341,9 @@ footer {
     <div class="menu-group">
       <div class="menu-btn">Edit</div>
       <div class="dropdown">
-        <div class="dropdown-item" id="menuAddCode">Add New File</div>
+        <div class="dropdown-item" id="menuAddCode">Add New File <span class="shortcut-hint">Alt+N</span></div>
+        <div class="dropdown-item" id="menuFormatCode">Auto-Format Code <span class="shortcut-hint">Shift+Alt+F</span></div>
+        <div class="dropdown-divider"></div>
         <div class="dropdown-item" id="menuUploadMedia">Upload Assets</div>
         <div class="dropdown-divider"></div>
         <div class="dropdown-item danger" id="menuClearTab">Clear Current Tab</div>
@@ -351,6 +364,11 @@ footer {
       <div class="menu-btn">View</div>
       <div class="dropdown">
         <div class="dropdown-item" id="menuTogglePreview">Toggle Live Preview</div>
+        <div class="dropdown-item" id="menuToggleSplit">Toggle Split Editor</div>
+        <div class="dropdown-item" id="menuToggleConsole">Toggle JS Console</div>
+        <div class="dropdown-divider"></div>
+        <div class="dropdown-item" id="menuQuickOpen">Quick Open File <span class="shortcut-hint">Ctrl+P</span></div>
+        <div class="dropdown-item" id="menuShortcuts">Keyboard Shortcuts <span class="shortcut-hint">Ctrl+/</span></div>
         <div class="dropdown-divider"></div>
         <div class="dropdown-item" id="menuThemes">Editor Themes</div>
         <div class="dropdown-divider"></div>
@@ -372,7 +390,7 @@ footer {
 
 <div class="workspace">
   
-  <div class="sidebar">
+  <div class="sidebar" id="sidebar">
     <div class="section-header">
       CODE & FILES
       <button class="icon-btn" id="btnAddCode" title="New File"><svg class="svg-icon"><use href="#icon-plus"></use></svg></button>
@@ -389,13 +407,31 @@ footer {
     <div id="mediaList"></div>
   </div>
 
-  <div class="editor-container">
-    <div class="tabs" id="tabs"></div>
-    <div class="editor-toolbar">
-      <button id="btnChangeFileType" class="btn" style="padding: 4px 8px; font-size: 11px;">Change File Type</button>
+  <div class="resizer" id="resizer-left"></div>
+
+  <div class="editor-wrapper">
+    <div class="editor-split-container">
+      
+      <div class="editor-pane" id="editorPane1">
+        <div class="tabs" id="tabs"></div>
+        <div class="editor-toolbar" id="toolbar1">
+          <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="openFormatModal(1)">Change File Type</button>
+        </div>
+        <div id="editor" class="ace-editor-div"></div>
+      </div>
+
+      <div class="editor-pane" id="editorPane2" style="display:none;">
+        <div class="tabs" id="tabs2"></div>
+        <div class="editor-toolbar" id="toolbar2">
+          <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="openFormatModal(2)">Change File Type</button>
+        </div>
+        <div id="editor2" class="ace-editor-div"></div>
+      </div>
+
     </div>
-    <div id="editor"></div>
   </div>
+
+  <div class="resizer" id="resizer-right" style="display:none;"></div>
 
   <div class="preview-panel" id="previewPanel">
     <div class="preview-header">
@@ -403,11 +439,19 @@ footer {
       <button class="icon-btn" id="btnReloadPreview" title="Reload"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button>
     </div>
     <iframe id="previewFrame" sandbox="allow-scripts allow-forms allow-modals"></iframe>
+    
+    <div class="console-panel" id="consolePanel">
+      <div class="console-header">
+        <span><svg class="svg-icon" style="margin-right:4px; vertical-align:middle; width:12px; height:12px;"><use href="#icon-terminal"></use></svg> Developer Console</span>
+        <button class="icon-btn" id="btnClearConsole" title="Clear Console">✕</button>
+      </div>
+      <div class="console-logs" id="consoleLogs"></div>
+    </div>
   </div>
 
 </div>
 
-<footer>2026 &copy; TSFAlex Version 1.4.1</footer>
+<footer>2026 &copy; TSFAlex Version 1.5.0</footer>
 
 <input id="mediaInput" type="file" accept="*/*" multiple style="display:none" />
 <input id="importInput" type="file" accept=".allf,text/plain" style="display:none" />
@@ -419,6 +463,29 @@ footer {
       <div id="loadingFill" class="progress-fill" style="width: 0%;"></div>
     </div>
     <div id="loadingText" style="font-size: 12px; color: var(--text-secondary);">0%</div>
+  </div>
+</div>
+
+<div id="quickOpenModal" class="modal-overlay">
+  <div class="modal" style="width: 500px; padding: 0;">
+    <input type="text" id="qoSearch" class="input" style="border:none; border-bottom:1px solid var(--border); border-radius:0; padding:16px; font-size:15px;" placeholder="Search files by name... (Type to filter)">
+    <div id="qoList" style="max-height: 300px; overflow-y: auto;"></div>
+  </div>
+</div>
+
+<div id="shortcutsModal" class="modal-overlay">
+  <div class="modal" style="width: 450px;">
+    <div class="modal-header">Keyboard Shortcuts</div>
+    <div class="modal-body">
+      <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="color:var(--text-secondary)">Save Project</span> <kbd style="background:var(--bg-overlay); padding:2px 6px; border-radius:4px; font-family:var(--font-mono); font-size:11px;">Ctrl + S</kbd></div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="color:var(--text-secondary)">Quick Open File</span> <kbd style="background:var(--bg-overlay); padding:2px 6px; border-radius:4px; font-family:var(--font-mono); font-size:11px;">Ctrl + P</kbd></div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="color:var(--text-secondary)">Toggle Sidebar</span> <kbd style="background:var(--bg-overlay); padding:2px 6px; border-radius:4px; font-family:var(--font-mono); font-size:11px;">Ctrl + B</kbd></div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="color:var(--text-secondary)">Toggle Live Preview</span> <kbd style="background:var(--bg-overlay); padding:2px 6px; border-radius:4px; font-family:var(--font-mono); font-size:11px;">Ctrl + Enter</kbd></div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="color:var(--text-secondary)">Auto-Format Code</span> <kbd style="background:var(--bg-overlay); padding:2px 6px; border-radius:4px; font-family:var(--font-mono); font-size:11px;">Shift + Alt + F</kbd></div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="color:var(--text-secondary)">New File</span> <kbd style="background:var(--bg-overlay); padding:2px 6px; border-radius:4px; font-family:var(--font-mono); font-size:11px;">Alt + N</kbd></div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="color:var(--text-secondary)">Show Shortcuts</span> <kbd style="background:var(--bg-overlay); padding:2px 6px; border-radius:4px; font-family:var(--font-mono); font-size:11px;">Ctrl + /</kbd></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-close-modal primary">Got it</button></div>
   </div>
 </div>
 
@@ -445,23 +512,39 @@ footer {
 
 <div id="whatsNewModal" class="modal-overlay">
   <div class="modal" style="width: 450px;">
-    <div class="modal-header">What's New in v1.4.1</div>
+    <div class="modal-header">What's New in v1.5.0</div>
     <div class="modal-body" style="max-height: 60vh; overflow-y: auto; gap: 16px;">
       
       <div>
         <h4 style="margin: 0 0 4px 0; color: var(--cyan-accent); display: flex; align-items: center; gap: 6px;">
-          <svg style="width:16px; height:16px; fill:currentColor;" viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg> 
-          File Converter Integration
+          <svg style="width:16px; height:16px; fill:currentColor;"><use href="#icon-split"></use></svg> 
+          Split-Screen Editing & Layouts
         </h4>
-        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;">Added a direct link to <b>Nexus Convert Pro</b> under the File menu to handle all your advanced file conversion needs quickly and securely.</p>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;">View and edit two files side-by-side with the new <b>Toggle Split Editor</b> option. Plus, grab the borders between panels to <b>Resize your workspace!</b></p>
       </div>
 
       <div>
         <h4 style="margin: 0 0 4px 0; color: var(--accent); display: flex; align-items: center; gap: 6px;">
-          <svg style="width:16px; height:16px; fill:currentColor;" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg> 
-          Update History
+          <svg style="width:16px; height:16px; fill:currentColor;"><use href="#icon-folder"></use></svg> 
+          Path-Based Folders
         </h4>
-        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;">You can now view past update notes directly from this window to see how ALLF STUDIO has evolved over time.</p>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;">Organize your sidebar seamlessly! Just rename a file with a slash (e.g., <code>css/style.css</code>) and ALLF Studio will automatically group it into a collapsible folder.</p>
+      </div>
+
+      <div>
+        <h4 style="margin: 0 0 4px 0; color: var(--warning); display: flex; align-items: center; gap: 6px;">
+          <svg style="width:16px; height:16px; fill:currentColor;"><use href="#icon-terminal"></use></svg> 
+          Live JS Console & Auto-Format
+        </h4>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;">Open the new built-in Developer Console to debug your Javascript in real-time. Messy code? Use the new <b>Auto-Format Code</b> tool to clean it up instantly.</p>
+      </div>
+
+      <div>
+        <h4 style="margin: 0 0 4px 0; color: var(--success); display: flex; align-items: center; gap: 6px;">
+          <svg style="width:16px; height:16px; fill:currentColor;" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+          Power Shortcuts & PWA
+        </h4>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;">Hit <b>Ctrl+P</b> to quick-search files, <b>Ctrl+B</b> to hide the sidebar, and more. You can also now install ALLF as a native desktop app!</p>
       </div>
 
     </div>
@@ -478,21 +561,21 @@ footer {
     <div class="modal-body" style="max-height: 60vh; overflow-y: auto; gap: 20px;">
       
       <div>
+        <h3 style="margin:0 0 8px 0; color: var(--text-primary); border-bottom: 1px solid var(--border); padding-bottom: 4px;">v1.4.1</h3>
+        <p style="margin: 0 0 6px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Nexus Convert Pro:</b> Added integrated file converter links.</p>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>History:</b> Added this update history viewer.</p>
+      </div>
+
+      <div>
         <h3 style="margin:0 0 8px 0; color: var(--text-primary); border-bottom: 1px solid var(--border); padding-bottom: 4px;">v1.4.0</h3>
-        <p style="margin: 0 0 6px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Project Manager:</b> Easily view, switch, and delete all your projects from a single centralized menu.</p>
+        <p style="margin: 0 0 6px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Project Manager:</b> Centralized menu to manage and delete projects.</p>
         <p style="margin: 0 0 6px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Factory Reset:</b> Added a Restore to Default option to wipe all data.</p>
-        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Asset Downloading:</b> Download uploaded assets directly back to your physical computer.</p>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Asset Downloading:</b> Download uploaded assets directly back to your computer.</p>
       </div>
 
       <div>
         <h3 style="margin:0 0 8px 0; color: var(--text-primary); border-bottom: 1px solid var(--border); padding-bottom: 4px;">v1.3.3</h3>
-        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Bulletproof Importer:</b> Re-engineered the import logic to safely handle massive 1GB+ files without crashing V8 memory limits. Fixed Base64 mathematical chunking offsets.</p>
-      </div>
-
-      <div>
-        <h3 style="margin:0 0 8px 0; color: var(--text-primary); border-bottom: 1px solid var(--border); padding-bottom: 4px;">v1.3.0</h3>
-        <p style="margin: 0 0 6px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>File Extensions:</b> Custom file extension builder with color-coded editor themes.</p>
-        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Smooth UI:</b> Added glass-morphism blurs and buttery-smooth CSS transitions to all interactive elements.</p>
+        <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"><b>Bulletproof Importer:</b> Re-engineered the import logic to safely stream 1GB+ files without crashing V8 memory limits.</p>
       </div>
 
     </div>
@@ -604,15 +687,16 @@ footer {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.14/ace.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.14/ext-language_tools.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.14/ext-beautify.min.js"></script>
 
 <script>
 /* =========================================================
-   ALLF STUDIO - V1.4.1 (Nexus Convert Pro & History)
+   ALLF STUDIO - V1.5.0 (Power User Update)
    ========================================================= */
 
 const BRANDING_TEXT = '© ALLF STUDIO - TSFALEX';
 const ALLF_VERSION = 2;
-const LS_INDEX_KEY = 'ALLF_PRO_INDEX_V7';
+const LS_INDEX_KEY = 'ALLF_PRO_INDEX_V8';
 
 // --- Utils & UI ---
 function el(id) { return document.getElementById(id); }
@@ -627,6 +711,9 @@ function showToast(msg) {
 function openModal(id) {
   const m = el(id); m.style.display = 'flex'; 
   setTimeout(() => m.classList.add('show'), 10);
+  if(id === 'quickOpenModal') {
+    setTimeout(() => el('qoSearch').focus(), 100);
+  }
 }
 function closeModal(id) {
   const m = el(id); m.classList.remove('show');
@@ -645,29 +732,19 @@ function updateLoading(percent, text) {
   el('loadingFill').style.width = percent + '%';
   el('loadingText').textContent = text || `${Math.round(percent)}%`;
 }
-function hideLoading() {
-  closeModal('loadingModal');
-}
+function hideLoading() { closeModal('loadingModal'); }
 
-// Non-blocking Yield
 const yieldThread = () => new Promise(r => setTimeout(r, 0));
 
 // --- High Performance Base64 Converters ---
 function bufferToBase64(buffer) {
-  let binary = '';
-  const bytes = new Uint8Array(buffer);
-  for (let i = 0; i < bytes.byteLength; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
+  let binary = ''; const bytes = new Uint8Array(buffer);
+  for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
   return window.btoa(binary);
 }
-
 function base64ToBuffer(b64) {
-  const bin = window.atob(b64);
-  const bytes = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) {
-    bytes[i] = bin.charCodeAt(i);
-  }
+  const bin = window.atob(b64); const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
   return bytes;
 }
 
@@ -697,16 +774,12 @@ async function idbAction(type, objOrId) {
     tx.oncomplete = () => res(true); tx.onerror = () => rej(tx.error);
   });
 }
-
 function deleteProjectDbFiles(pid) {
   return new Promise(async (resolve) => {
     const db = await openDb();
     const tx = db.transaction('files', 'readwrite');
     const cur = tx.objectStore('files').index('projectId').openCursor(IDBKeyRange.only(pid));
-    cur.onsuccess = e => { 
-      const c = e.target.result; 
-      if(c) { c.delete(); c.continue(); }
-    };
+    cur.onsuccess = e => { const c = e.target.result; if(c) { c.delete(); c.continue(); } };
     tx.oncomplete = resolve;
   });
 }
@@ -715,6 +788,10 @@ function deleteProjectDbFiles(pid) {
 let index = { projects: [], lastProjectId: null, theme: 'ace/theme/tomorrow_night_eighties' };
 let project = null;
 let previewOpen = false;
+let consoleOpen = false;
+let splitViewOpen = false;
+let activeTargetEditor = 1; // 1 or 2
+let openFolders = {}; // tracks which path folders are expanded
 
 function loadStorage() {
   try { const raw = localStorage.getItem(LS_INDEX_KEY); if(raw) index = JSON.parse(raw); } catch(e){}
@@ -736,6 +813,7 @@ function loadProject(id) {
   const raw = localStorage.getItem(pKey(id));
   if(!raw) return createProject();
   project = JSON.parse(raw);
+  project.open2 = project.open2 || null; 
   el('projectNameInput').value = project.name;
   renderAll();
 }
@@ -745,7 +823,7 @@ function createProject(name='Untitled Project') {
   project = {
     id, name, meta: { author:'', version:'1.0.0' },
     sections: [{type:'code', id:'C1', title:'index.html', content:'<!DOCTYPE html>\n<html>\n<body>\n  <h1>ALLF STUDIO</h1>\n</body>\n</html>'}],
-    tabs: ['C1'], open: 'C1', media: []
+    tabs: ['C1'], open: 'C1', open2: null, media: []
   };
   index.projects.push({id, name}); saveStorage(); saveProject();
   el('projectNameInput').value = name; renderAll(); return id;
@@ -757,22 +835,17 @@ async function deleteProjectById(pid) {
   index.projects = index.projects.filter(x => x.id !== pid);
 
   if (index.projects.length === 0) {
-    index.lastProjectId = null;
-    saveStorage();
-    window.location.reload();
+    index.lastProjectId = null; saveStorage(); window.location.reload();
   } else {
     if (pid === project.id) {
-      index.lastProjectId = index.projects[0].id;
-      saveStorage();
-      loadProject(index.lastProjectId);
+      index.lastProjectId = index.projects[0].id; saveStorage(); loadProject(index.lastProjectId);
     } else {
-      saveStorage();
-      updateProjectDropdown();
+      saveStorage(); updateProjectDropdown();
     }
   }
 }
 
-// --- Editor Colors Map ---
+// --- Editors Setup ---
 function getExtColor(filename) {
   const ext = (filename || '').split('.').pop().toLowerCase();
   const colors = {
@@ -783,25 +856,54 @@ function getExtColor(filename) {
   return colors[ext] || 'var(--border)';
 }
 
-// --- Editor Setup ---
-const editor = ace.edit("editor", { theme: index.theme, mode: 'ace/mode/html', fontSize: 14 });
+const editor1 = ace.edit("editor", { theme: index.theme, mode: 'ace/mode/html', fontSize: 14 });
+const editor2 = ace.edit("editor2", { theme: index.theme, mode: 'ace/mode/html', fontSize: 14 });
+
 let typingTimer;
-editor.session.on('change', () => {
-  clearTimeout(typingTimer);
-  typingTimer = setTimeout(() => {
-    const sec = project.sections.find(s=>s.id===project.open);
-    if(sec) sec.content = editor.getValue();
-    saveProject();
-    if(previewOpen) refreshPreview();
-  }, 600);
-});
+function setupEditorEvents(ed, targetNum) {
+  ed.session.on('change', () => {
+    clearTimeout(typingTimer);
+    typingTimer = setTimeout(() => {
+      const openId = targetNum === 1 ? project.open : project.open2;
+      const sec = project.sections.find(s=>s.id===openId);
+      if(sec) sec.content = ed.getValue();
+      saveProject();
+      if(previewOpen) refreshPreview();
+    }, 600);
+  });
+  ed.on('focus', () => activeTargetEditor = targetNum);
+}
+setupEditorEvents(editor1, 1);
+setupEditorEvents(editor2, 2);
+
+// --- UI Resizers ---
+let isResizing = false;
+let currentResizer = null;
+
+el('resizer-left').onmousedown = (e) => { isResizing = true; currentResizer = 'left'; el('resizer-left').classList.add('dragging'); };
+el('resizer-right').onmousedown = (e) => { isResizing = true; currentResizer = 'right'; el('resizer-right').classList.add('dragging'); };
+
+window.onmousemove = (e) => {
+  if (!isResizing) return;
+  if (currentResizer === 'left') {
+    let newWidth = e.clientX;
+    if(newWidth > 150 && newWidth < 600) el('sidebar').style.width = newWidth + 'px';
+  } else if (currentResizer === 'right') {
+    let newWidth = window.innerWidth - e.clientX;
+    if(newWidth > 200 && newWidth < window.innerWidth - 300) el('previewPanel').style.width = newWidth + 'px';
+  }
+  editor1.resize(); editor2.resize();
+};
+window.onmouseup = () => { 
+  isResizing = false; currentResizer = null; 
+  el('resizer-left').classList.remove('dragging'); el('resizer-right').classList.remove('dragging');
+};
 
 // --- UI Logic ---
 function updateProjectDropdown() {
   const sel = el('projectSelect'); sel.innerHTML = '';
   index.projects.forEach(p => {
-    const opt = document.createElement('option'); opt.value = p.id; opt.textContent = p.name;
-    sel.appendChild(opt);
+    const opt = document.createElement('option'); opt.value = p.id; opt.textContent = p.name; sel.appendChild(opt);
   });
   sel.value = project.id;
 }
@@ -811,7 +913,8 @@ function renderAll() {
   updateProjectDropdown();
   renderSidebar();
   renderTabs();
-  loadEditorContent();
+  loadEditorContent(1);
+  if(splitViewOpen) loadEditorContent(2);
   if(previewOpen) refreshPreview();
 }
 
@@ -829,107 +932,180 @@ function enableRename(elNode, sectionObj, callback) {
   };
 }
 
-function renderSidebar() {
-  const list = el('sectionsList'); list.innerHTML = '';
-  project.sections.forEach(s => {
-    const div = document.createElement('div');
-    const color = getExtColor(s.title);
-    div.className = 'tree-item' + (project.open===s.id?' active':'');
-    div.style.setProperty('--file-color', color);
-    div.innerHTML = `<svg style="fill:${color}"><use href="#icon-code"></use></svg><div class="name" title="Double click to rename">${escapeHtml(s.title)}</div>
-      <div class="tree-actions"><button class="icon-btn del"><svg><use href="#icon-trash"></use></svg></button></div>`;
+// Builds the visual folder tree
+function buildFileTree(files) {
+  const tree = { name: 'root', files: [], folders: {} };
+  files.forEach(f => {
+    const parts = f.title.split('/');
+    if(parts.length === 1) {
+      tree.files.push(f);
+    } else {
+      let current = tree;
+      for(let i=0; i<parts.length-1; i++) {
+        const folderName = parts[i];
+        if(!current.folders[folderName]) current.folders[folderName] = { name: folderName, files: [], folders: {} };
+        current = current.folders[folderName];
+      }
+      f._displayName = parts[parts.length-1];
+      current.files.push(f);
+    }
+  });
+  return tree;
+}
+
+function renderTreeBranch(node, container, path="", isMedia=false) {
+  // Render Folders first
+  Object.keys(node.folders).forEach(folderName => {
+    const fullPath = path + folderName;
+    const fNode = node.folders[folderName];
     
-    div.onclick = (e) => { if(!e.target.closest('button') && !e.target.closest('[contenteditable]')) { project.open=s.id; if(!project.tabs.includes(s.id)) project.tabs.push(s.id); saveProject(); renderTabs(); loadEditorContent(); renderSidebar(); }};
-    div.querySelector('.del').onclick = () => {
-      if(project.sections.length === 1) return showToast("Cannot delete last file.");
-      project.sections = project.sections.filter(x=>x.id!==s.id);
-      project.tabs = project.tabs.filter(x=>x!==s.id);
-      if(project.open===s.id) project.open = project.tabs[0] || project.sections[0].id;
-      saveProject(); renderAll();
+    if(openFolders[fullPath] === undefined) openFolders[fullPath] = true; // default open
+    const isOpen = openFolders[fullPath];
+    
+    const div = document.createElement('div');
+    div.className = 'tree-folder' + (isOpen ? ' open' : '');
+    div.innerHTML = `<svg><use href="#icon-arrow-right"></use></svg> ${escapeHtml(folderName)}`;
+    div.onclick = () => {
+      openFolders[fullPath] = !openFolders[fullPath];
+      renderSidebar();
     };
-    enableRename(div.querySelector('.name'), s, () => { renderSidebar(); renderTabs(); loadEditorContent(); });
-    list.appendChild(div);
+    container.appendChild(div);
+    
+    if(isOpen) {
+      const sub = document.createElement('div');
+      renderTreeBranch(fNode, sub, fullPath + "/", isMedia);
+      container.appendChild(sub);
+    }
   });
 
-  const mList = el('mediaList'); mList.innerHTML = '';
-  project.media.forEach(m => {
-    const div = document.createElement('div'); div.className = 'tree-item';
-    const icon = m.type.startsWith('image') ? '#icon-image' : '#icon-file';
-    div.innerHTML = `<svg><use href="${icon}"></use></svg><div class="name" title="Double click to rename">${escapeHtml(m.title)}</div>
-      <div class="tree-actions">
-        <button class="icon-btn insert" title="Insert into code"><svg><use href="#icon-plus"></use></svg></button>
-        <button class="icon-btn download" title="Download File"><svg><use href="#icon-download"></use></svg></button>
-        <button class="icon-btn del" title="Delete"><svg><use href="#icon-trash"></use></svg></button>
-      </div>`;
-      
-    div.querySelector('.insert').onclick = () => {
-      let tag = `ALLF_MEDIA:${m.id}`;
-      if(m.type.startsWith('image')) tag = `<img src="${tag}" alt="${m.title}">`;
-      else if(m.type.startsWith('video')) tag = `<video src="${tag}" controls></video>`;
-      editor.insert(tag);
-    };
+  // Render Files
+  node.files.forEach(f => {
+    const div = document.createElement('div');
+    const color = getExtColor(f.title);
+    const isActive = (project.open === f.id) || (splitViewOpen && project.open2 === f.id);
     
-    div.querySelector('.download').onclick = async () => {
-      try {
-        const stored = await idbAction('get', m.id);
-        if (!stored || !stored.blob) return showToast("File not found.");
-        const url = URL.createObjectURL(stored.blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = m.title;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        showToast(`Downloaded ${m.title}`);
-      } catch (e) {
-        console.error(e);
-        showToast("Download failed.");
+    div.className = 'tree-item' + (isActive ? ' active' : '') + (path !== "" ? ' nested' : '');
+    div.style.setProperty('--file-color', color);
+    
+    const icon = isMedia ? (f.type.startsWith('image') ? '#icon-image' : '#icon-file') : '#icon-code';
+    const dispName = f._displayName || f.title;
+    
+    let actionHTML = '';
+    if(isMedia) {
+      actionHTML = `<button class="icon-btn insert" title="Insert"><svg><use href="#icon-plus"></use></svg></button>
+                    <button class="icon-btn download" title="Download"><svg><use href="#icon-download"></use></svg></button>
+                    <button class="icon-btn del" title="Delete"><svg><use href="#icon-trash"></use></svg></button>`;
+    } else {
+      actionHTML = `<button class="icon-btn del" title="Delete"><svg><use href="#icon-trash"></use></svg></button>`;
+    }
+
+    div.innerHTML = `<svg style="fill:${color}"><use href="${icon}"></use></svg><div class="name" title="Double click to rename">${escapeHtml(dispName)}</div>
+      <div class="tree-actions">${actionHTML}</div>`;
+    
+    div.onclick = (e) => { 
+      if(!e.target.closest('button') && !e.target.closest('[contenteditable]')) { 
+        if(isMedia) return;
+        if(activeTargetEditor === 1) project.open = f.id; else project.open2 = f.id;
+        if(!project.tabs.includes(f.id)) project.tabs.push(f.id); 
+        saveProject(); renderTabs(); loadEditorContent(activeTargetEditor); renderSidebar(); 
       }
     };
+
+    if(isMedia) {
+      div.querySelector('.insert').onclick = () => {
+        let tag = `ALLF_MEDIA:${f.id}`;
+        if(f.type.startsWith('image')) tag = `<img src="${tag}" alt="${f.title}">`;
+        else if(f.type.startsWith('video')) tag = `<video src="${tag}" controls></video>`;
+        (activeTargetEditor===1 ? editor1 : editor2).insert(tag);
+      };
+      div.querySelector('.download').onclick = async () => {
+        try {
+          const stored = await idbAction('get', f.id);
+          if (!stored) return showToast("File not found.");
+          const url = URL.createObjectURL(stored.blob);
+          const a = document.createElement('a'); a.href = url; a.download = f.title;
+          document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+          showToast(`Downloaded ${f.title}`);
+        } catch (e) { showToast("Download failed."); }
+      };
+      div.querySelector('.del').onclick = async () => {
+        await idbAction('del', f.id); project.media = project.media.filter(x=>x.id!==f.id); saveProject(); renderSidebar();
+      };
+    } else {
+      div.querySelector('.del').onclick = () => {
+        if(project.sections.length === 1) return showToast("Cannot delete last file.");
+        project.sections = project.sections.filter(x=>x.id!==f.id);
+        project.tabs = project.tabs.filter(x=>x!==f.id);
+        if(project.open===f.id) project.open = project.tabs[0] || project.sections[0].id;
+        if(project.open2===f.id) project.open2 = null;
+        saveProject(); renderAll();
+      };
+    }
     
-    div.querySelector('.del').onclick = async () => {
-      await idbAction('del', m.id); project.media = project.media.filter(x=>x.id!==m.id); saveProject(); renderSidebar();
-    };
-    
-    enableRename(div.querySelector('.name'), m, renderSidebar);
-    mList.appendChild(div);
+    enableRename(div.querySelector('.name'), f, () => { renderSidebar(); renderTabs(); loadEditorContent(1); loadEditorContent(2); });
+    container.appendChild(div);
   });
+}
+
+function renderSidebar() {
+  const list = el('sectionsList'); list.innerHTML = '';
+  const mList = el('mediaList'); mList.innerHTML = '';
+  
+  const codeTree = buildFileTree(project.sections);
+  renderTreeBranch(codeTree, list, "", false);
+
+  const mediaTree = buildFileTree(project.media);
+  renderTreeBranch(mediaTree, mList, "", true);
 }
 
 function renderTabs() {
-  const t = el('tabs'); t.innerHTML = '';
-  project.tabs.forEach(id => {
-    const s = project.sections.find(x=>x.id===id); if(!s) return;
-    const color = getExtColor(s.title);
-    const div = document.createElement('div'); div.className = 'tab' + (project.open===id?' active':'');
-    div.style.setProperty('--file-color', color);
-    div.innerHTML = `<span>${escapeHtml(s.title)}</span><svg class="svg-icon tab-close"><use href="#icon-close"></use></svg>`;
-    div.onclick = (e) => {
-      if(e.target.closest('.tab-close')) {
-        project.tabs = project.tabs.filter(x=>x!==id);
-        if(project.open===id) project.open = project.tabs[0] || null;
-        saveProject(); renderTabs(); loadEditorContent(); renderSidebar();
-      } else {
-        project.open = id; saveProject(); renderTabs(); loadEditorContent(); renderSidebar();
-      }
-    };
-    t.appendChild(div);
-  });
+  const renderTabSet = (targetNum) => {
+    const t = el(targetNum === 1 ? 'tabs' : 'tabs2');
+    t.innerHTML = '';
+    const openId = targetNum === 1 ? project.open : project.open2;
+    
+    project.tabs.forEach(id => {
+      const s = project.sections.find(x=>x.id===id); if(!s) return;
+      const color = getExtColor(s.title);
+      const div = document.createElement('div'); div.className = 'tab' + (openId===id?' active':'');
+      div.style.setProperty('--file-color', color);
+      div.innerHTML = `<span>${escapeHtml(s.title)}</span><svg class="svg-icon tab-close"><use href="#icon-close"></use></svg>`;
+      div.onclick = (e) => {
+        activeTargetEditor = targetNum;
+        if(e.target.closest('.tab-close')) {
+          project.tabs = project.tabs.filter(x=>x!==id);
+          if(targetNum===1 && project.open===id) project.open = project.tabs[0] || null;
+          if(targetNum===2 && project.open2===id) project.open2 = null;
+          saveProject(); renderTabs(); loadEditorContent(targetNum); renderSidebar();
+        } else {
+          if(targetNum===1) project.open = id; else project.open2 = id;
+          saveProject(); renderTabs(); loadEditorContent(targetNum); renderSidebar();
+        }
+      };
+      t.appendChild(div);
+    });
+  };
+  
+  renderTabSet(1);
+  if(splitViewOpen) renderTabSet(2);
 }
 
-function loadEditorContent() {
-  const s = project.sections.find(x=>x.id===project.open);
+function loadEditorContent(targetNum) {
+  const ed = targetNum === 1 ? editor1 : editor2;
+  const openId = targetNum === 1 ? project.open : project.open2;
+  const tb = el(targetNum === 1 ? 'toolbar1' : 'toolbar2');
+  
+  const s = project.sections.find(x=>x.id===openId);
   if(!s) { 
-    editor.setValue('', -1); 
-    document.documentElement.style.setProperty('--file-color', 'var(--border)'); 
+    ed.setValue('', -1); 
+    tb.style.borderTopColor = 'var(--border)';
     return; 
   }
   
   const color = getExtColor(s.title);
-  document.documentElement.style.setProperty('--file-color', color);
+  tb.style.borderTopColor = color;
 
-  if(editor.getValue() !== s.content) editor.setValue(s.content||'', -1);
+  if(ed.getValue() !== s.content) ed.setValue(s.content||'', -1);
   const title = s.title.toLowerCase();
   let mode = 'ace/mode/text';
   if(title.includes('.js')||title.includes('.ts')) mode = 'ace/mode/javascript';
@@ -940,27 +1116,133 @@ function loadEditorContent() {
   else if(title.includes('.xml')) mode = 'ace/mode/xml';
   else if(title.includes('.md')) mode = 'ace/mode/markdown';
   else if(title.includes('.php')) mode = 'ace/mode/php';
-  editor.session.setMode(mode);
+  ed.session.setMode(mode);
 }
 
-// --- Preview ---
+// --- Features (Console & Previews) ---
+const consoleHookScript = `
+<script>
+  const _l = console.log, _e = console.error, _w = console.warn;
+  console.log = function(...a) { _l(...a); window.parent.postMessage({type:'console', level:'log', args:a.map(String)}, '*'); };
+  console.error = function(...a) { _e(...a); window.parent.postMessage({type:'console', level:'error', args:a.map(String)}, '*'); };
+  console.warn = function(...a) { _w(...a); window.parent.postMessage({type:'console', level:'warn', args:a.map(String)}, '*'); };
+  window.onerror = function(m,u,l) { window.parent.postMessage({type:'console', level:'error', args:[m+' (Line '+l+')']}, '*'); };
+<\/script>
+`;
+
+window.addEventListener('message', (e) => {
+  if(e.data && e.data.type === 'console') {
+    const logs = el('consoleLogs');
+    const div = document.createElement('div');
+    div.className = 'log-line ' + e.data.level;
+    div.textContent = "> " + e.data.args.join(' ');
+    logs.appendChild(div);
+    logs.scrollTop = logs.scrollHeight;
+  }
+});
+el('btnClearConsole').onclick = () => el('consoleLogs').innerHTML = '';
+
 function togglePreview() {
   previewOpen = !previewOpen;
   el('previewPanel').classList.toggle('open', previewOpen);
-  setTimeout(() => editor.resize(), 300); 
+  el('resizer-right').style.display = previewOpen ? 'block' : 'none';
+  if(!previewOpen) el('previewPanel').style.width = '0px'; // reset custom dragged width
+  setTimeout(() => { editor1.resize(); editor2.resize(); }, 300); 
   if(previewOpen) refreshPreview();
 }
 el('btnLivePreview').onclick = togglePreview;
 el('menuTogglePreview').onclick = togglePreview;
 el('btnReloadPreview').onclick = refreshPreview;
 
+function toggleConsole() {
+  consoleOpen = !consoleOpen;
+  el('consolePanel').classList.toggle('open', consoleOpen);
+}
+el('menuToggleConsole').onclick = toggleConsole;
+
 function refreshPreview() {
   const s = project.sections.find(x=>x.id===project.open);
   if(s) {
     const helper = `<script>window.ALLF_FILES=${JSON.stringify(project.media.map(m=>m.id))};<\/script>`;
-    el('previewFrame').srcdoc = s.content + helper;
+    el('previewFrame').srcdoc = consoleHookScript + s.content + helper;
   }
 }
+
+// --- Split Editor ---
+function toggleSplitEditor() {
+  splitViewOpen = !splitViewOpen;
+  el('editorPane2').style.display = splitViewOpen ? 'flex' : 'none';
+  if(splitViewOpen && !project.open2) {
+    project.open2 = project.open; // clone view initially
+  }
+  setTimeout(() => { editor1.resize(); editor2.resize(); }, 100);
+  renderTabs();
+  loadEditorContent(2);
+}
+el('menuToggleSplit').onclick = toggleSplitEditor;
+
+// --- Auto Format ---
+function autoFormat() {
+  const beautify = ace.require("ace/ext/beautify");
+  if(activeTargetEditor === 1) beautify.beautify(editor1.session);
+  else beautify.beautify(editor2.session);
+  showToast("Code Formatted");
+}
+el('menuFormatCode').onclick = autoFormat;
+
+// --- Shortcuts ---
+window.addEventListener('keydown', (e) => {
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+    e.preventDefault(); saveProject(); if(previewOpen) refreshPreview(); showToast("Saved & Refreshed");
+  }
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
+    e.preventDefault(); openQuickOpen();
+  }
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+    e.preventDefault(); 
+    const w = el('sidebar').style.width;
+    el('sidebar').style.width = (w === '0px') ? '280px' : '0px';
+    setTimeout(() => { editor1.resize(); editor2.resize(); }, 300);
+  }
+  if((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault(); togglePreview();
+  }
+  if((e.ctrlKey || e.metaKey) && e.key === '/') {
+    e.preventDefault(); openModal('shortcutsModal');
+  }
+  if(e.shiftKey && e.altKey && e.key.toLowerCase() === 'f') {
+    e.preventDefault(); autoFormat();
+  }
+  if(e.altKey && e.key.toLowerCase() === 'n') {
+    e.preventDefault(); addNewCodeFile();
+  }
+});
+el('menuShortcuts').onclick = () => openModal('shortcutsModal');
+
+function openQuickOpen() {
+  const list = el('qoList'); list.innerHTML = '';
+  el('qoSearch').value = '';
+  openModal('quickOpenModal');
+  renderQuickOpen();
+}
+function renderQuickOpen() {
+  const list = el('qoList'); list.innerHTML = '';
+  const q = el('qoSearch').value.toLowerCase();
+  
+  project.sections.forEach(s => {
+    if(q && !s.title.toLowerCase().includes(q)) return;
+    const div = document.createElement('div'); div.className = 'quick-open-item';
+    div.innerHTML = `<svg class="svg-icon"><use href="#icon-code"></use></svg> ${escapeHtml(s.title)}`;
+    div.onclick = () => {
+      if(activeTargetEditor===1) project.open = s.id; else project.open2 = s.id;
+      if(!project.tabs.includes(s.id)) project.tabs.push(s.id);
+      saveProject(); renderAll(); closeModal('quickOpenModal');
+    };
+    list.appendChild(div);
+  });
+}
+el('qoSearch').oninput = renderQuickOpen;
+el('menuQuickOpen').onclick = openQuickOpen;
 
 // --- Menu Actions ---
 el('projectNameInput').onchange = () => { saveProject(); updateProjectDropdown(); };
@@ -971,82 +1253,67 @@ el('menuWhatsNew').onclick = () => openModal('whatsNewModal');
 el('btnViewHistory').onclick = () => { closeModal('whatsNewModal'); openModal('updateHistoryModal'); };
 el('btnBackToWhatsNew').onclick = () => { closeModal('updateHistoryModal'); openModal('whatsNewModal'); };
 
-
 el('menuFactoryReset').onclick = async () => {
   if(confirm("WARNING: This will delete ALL projects, files, and settings. This cannot be undone. Are you absolutely sure?")) {
     const db = await openDb();
     const tx = db.transaction('files', 'readwrite');
     tx.objectStore('files').clear();
-
-    Object.keys(localStorage).forEach(k => {
-      if(k.startsWith('ALLF_')) localStorage.removeItem(k);
-    });
-
+    Object.keys(localStorage).forEach(k => { if(k.startsWith('ALLF_')) localStorage.removeItem(k); });
     window.location.reload();
   }
 };
 
 function addNewCodeFile() {
-  const baseName = prompt("Enter file name (without extension):", "new_file");
-  if(baseName !== null) {
-    let finalName = baseName.trim();
-    if(!finalName.includes('.')) finalName += '.txt';
-    
-    const id = newId('C'); project.sections.push({type:'code', id, title: finalName, content:''});
-    project.open = id; project.tabs.push(id); saveProject(); renderAll();
+  const baseName = prompt("Enter file name (can include folders, e.g. js/app.js):", "new_file.txt");
+  if(baseName !== null && baseName.trim() !== "") {
+    const id = newId('C'); project.sections.push({type:'code', id, title: baseName.trim(), content:''});
+    if(activeTargetEditor===1) project.open = id; else project.open2 = id;
+    project.tabs.push(id); saveProject(); renderAll();
   }
 }
 el('btnAddCode').onclick = el('menuAddCode').onclick = addNewCodeFile;
 
 el('menuClearTab').onclick = () => {
-  if(confirm('Clear current tab content?')) { editor.setValue('', -1); }
+  if(confirm('Clear current tab content?')) { (activeTargetEditor===1 ? editor1 : editor2).setValue('', -1); }
 };
 el('menuDeleteProj').onclick = async () => {
-  if(confirm('Delete current project entirely?')) {
-    await deleteProjectById(project.id);
+  if(confirm('Delete current project entirely?')) { await deleteProjectById(project.id); }
+};
+
+// PWA Install Prompt Logic
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault(); deferredPrompt = e; el('menuInstallApp').style.display = 'block';
+});
+el('menuInstallApp').onclick = async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') deferredPrompt = null;
+  } else {
+    alert("PWA installation requires the app to be hosted securely (HTTPS). If running locally, you can use Chrome's 'Install' button in the address bar if available.");
   }
 };
 
 // --- Project Manager Logic ---
-el('menuManageProjects').onclick = () => {
-  renderProjectManager();
-  openModal('projectManagerModal');
-};
+el('menuManageProjects').onclick = () => { renderProjectManager(); openModal('projectManagerModal'); };
 
 function renderProjectManager() {
-  const list = el('pmProjectList');
-  list.innerHTML = '';
-  
-  if (index.projects.length === 0) {
-    list.innerHTML = '<div style="color:var(--text-secondary); font-size:13px; text-align:center; padding:20px;">No projects found.</div>';
-    return;
-  }
-  
+  const list = el('pmProjectList'); list.innerHTML = '';
+  if (index.projects.length === 0) return;
   index.projects.forEach(p => {
     const div = document.createElement('div');
     const isActive = p.id === project.id;
     div.className = 'pm-list-item' + (isActive ? ' active' : '');
-    
-    div.innerHTML = `
-      <div class="pm-name">${escapeHtml(p.name)} ${isActive ? '<span style="font-size:10px; opacity:0.6; margin-left:5px;">(Active)</span>' : ''}</div>
+    div.innerHTML = `<div class="pm-name">${escapeHtml(p.name)}</div>
       <div style="display:flex; gap:8px;">
         <button class="btn btn-open">Open</button>
         <button class="btn danger btn-del">Delete</button>
-      </div>
-    `;
-    
-    div.querySelector('.btn-open').onclick = () => {
-      closeModal('projectManagerModal');
-      loadProject(p.id);
-    };
-    
+      </div>`;
+    div.querySelector('.btn-open').onclick = () => { closeModal('projectManagerModal'); loadProject(p.id); };
     div.querySelector('.btn-del').onclick = async () => {
-      if (confirm(`Delete project "${p.name}" forever?`)) {
-        await deleteProjectById(p.id);
-        renderProjectManager(); 
-      }
+      if (confirm(`Delete project "${p.name}" forever?`)) { await deleteProjectById(p.id); renderProjectManager(); }
     };
-    
     list.appendChild(div);
   });
 }
@@ -1056,86 +1323,56 @@ el('btnAddMedia').onclick = () => el('mediaInput').click();
 el('menuUploadMedia').onclick = () => el('mediaInput').click();
 el('dropZone').onclick = () => el('mediaInput').click();
 
-el('dropZone').ondragover = e => { 
-  e.preventDefault(); 
-  el('dropZone').classList.add('drag'); 
-};
-el('dropZone').ondragleave = e => { 
-  e.preventDefault(); 
-  el('dropZone').classList.remove('drag'); 
-};
-el('dropZone').ondrop = e => { 
-  e.preventDefault(); 
-  el('dropZone').classList.remove('drag'); 
-  handleFiles(e.dataTransfer.files); 
-};
-el('mediaInput').onchange = e => {
-  handleFiles(e.target.files);
-  e.target.value = ''; 
-};
+el('dropZone').ondragover = e => { e.preventDefault(); el('dropZone').classList.add('drag'); };
+el('dropZone').ondragleave = e => { e.preventDefault(); el('dropZone').classList.remove('drag'); };
+el('dropZone').ondrop = e => { e.preventDefault(); el('dropZone').classList.remove('drag'); handleFiles(e.dataTransfer.files); };
+el('mediaInput').onchange = e => { handleFiles(e.target.files); e.target.value = ''; };
 
 async function handleFiles(files) {
   if(!files || !files.length) return;
-  
   let totalSize = Array.from(files).reduce((a,f) => a + f.size, 0);
   let processed = 0;
   
   showLoading("Saving Files to Local DB...");
-  
   for(let i=0; i<files.length; i++) {
-    const f = files[i];
-    const id = newId('F');
+    const f = files[i]; const id = newId('F');
+    // Ask for folder path optionally
+    let fName = f.name;
+    const path = prompt(`Organize ${f.name} into a folder? (Leave blank for root, or type e.g. "images/")`, "");
+    if(path && path.trim()!=="") fName = path.trim().replace(/\/$/, '') + '/' + f.name;
+
     await idbAction('put', { id, projectId: project.id, blob: f });
-    project.media.push({ id, title: f.name, type: f.type, size: f.size });
+    project.media.push({ id, title: fName, type: f.type, size: f.size });
     
     processed += f.size;
-    updateLoading((processed/totalSize)*100, `File ${i+1}/${files.length} - ${f.name}`);
+    updateLoading((processed/totalSize)*100, `File ${i+1}/${files.length}`);
     await yieldThread();
   }
-  
-  saveProject(); 
-  renderSidebar(); 
-  hideLoading();
-  showToast(`${files.length} file(s) uploaded`);
+  saveProject(); renderSidebar(); hideLoading(); showToast(`${files.length} file(s) uploaded`);
 }
 
-// --- RESTRICTED FILE FORMAT MODAL ---
-const FORMATS = {
-  "Web & Code": [ 
-    {ext:"html", desc:"HyperText Markup"}, {ext:"css", desc:"Cascading Style Sheets"}, 
-    {ext:"js", desc:"JavaScript"}, {ext:"ts", desc:"TypeScript"},
-    {ext:"php", desc:"PHP Script"}, {ext:"py", desc:"Python Script"}, 
-    {ext:"java", desc:"Java Source"}, {ext:"cpp", desc:"C++ Source Code"}
-  ],
-  "Document": [ 
-    {ext:"txt", desc:"Plain Text File"}, {ext:"md", desc:"Markdown File"}, 
-    {ext:"csv", desc:"Comma Separated Values"} 
-  ],
-  "Data & Config": [ 
-    {ext:"json", desc:"JSON Data"}, {ext:"xml", desc:"XML Data"}, 
-    {ext:"yaml", desc:"YAML Config"}, {ext:"ini", desc:"INI Config"} 
-  ],
-  "TSFAlex": [ 
-    {ext:"cepp", desc:"Custom Engine Project File"}, {ext:"allf", desc:"ALLF Studio Configuration"} 
-  ]
-};
-
+// --- FORMAT MODAL ---
 let activeCategory = "Web & Code";
-
-function openFormatModal() {
-  if(!project.open) return showToast("Open a file first to change its type.");
+function openFormatModal(targetNum) {
+  activeTargetEditor = targetNum;
+  const openId = targetNum === 1 ? project.open : project.open2;
+  if(!openId) return showToast("Open a file first to change its type.");
   openModal('formatModal');
-  renderFormatSidebar();
-  renderFormatGrid();
+  renderFormatSidebar(); renderFormatGrid();
 }
-el('btnChangeFileType').onclick = openFormatModal;
 el('btnFormatClose').onclick = () => closeModal('formatModal');
+
+const FORMATS = {
+  "Web & Code": [ {ext:"html", desc:"HyperText Markup"}, {ext:"css", desc:"Cascading Style Sheets"}, {ext:"js", desc:"JavaScript"}, {ext:"ts", desc:"TypeScript"}, {ext:"php", desc:"PHP Script"}, {ext:"py", desc:"Python Script"}, {ext:"java", desc:"Java Source"}, {ext:"cpp", desc:"C++ Source Code"} ],
+  "Document": [ {ext:"txt", desc:"Plain Text File"}, {ext:"md", desc:"Markdown File"}, {ext:"csv", desc:"Comma Separated Values"} ],
+  "Data & Config": [ {ext:"json", desc:"JSON Data"}, {ext:"xml", desc:"XML Data"}, {ext:"yaml", desc:"YAML Config"}, {ext:"ini", desc:"INI Config"} ],
+  "TSFAlex": [ {ext:"cepp", desc:"Custom Engine Project File"}, {ext:"allf", desc:"ALLF Studio Configuration"} ]
+};
 
 function renderFormatSidebar() {
   const sb = el('fmCategories'); sb.innerHTML = '';
   Object.keys(FORMATS).forEach(cat => {
-    const div = document.createElement('div');
-    div.className = 'fm-category' + (activeCategory===cat ? ' active' : '');
+    const div = document.createElement('div'); div.className = 'fm-category' + (activeCategory===cat ? ' active' : '');
     div.innerHTML = `<span>${cat}</span> <span>›</span>`;
     div.onclick = () => { activeCategory = cat; renderFormatSidebar(); renderFormatGrid(); };
     sb.appendChild(div);
@@ -1145,91 +1382,53 @@ function renderFormatSidebar() {
 function renderFormatGrid() {
   const grid = el('fmGrid'); grid.innerHTML = '';
   const query = el('fmSearch').value.toLowerCase();
-  
   let items = FORMATS[activeCategory] || [];
   if(query) {
-    items = [];
-    Object.values(FORMATS).forEach(arr => {
-      arr.forEach(i => { if(i.ext.includes(query) || i.desc.toLowerCase().includes(query)) items.push(i); });
-    });
+    items = []; Object.values(FORMATS).forEach(arr => { arr.forEach(i => { if(i.ext.includes(query) || i.desc.toLowerCase().includes(query)) items.push(i); }); });
   }
-
   items.forEach(item => {
-    const btn = document.createElement('button');
-    btn.className = 'fm-btn';
-    btn.textContent = item.ext.toUpperCase();
+    const btn = document.createElement('button'); btn.className = 'fm-btn'; btn.textContent = item.ext.toUpperCase();
     btn.onmouseover = () => el('fmHoverInfo').textContent = `${item.ext.toUpperCase()}: ${item.desc}`;
     btn.onmouseout = () => el('fmHoverInfo').textContent = 'Hover over a format to see its details.';
     btn.onclick = () => applyExtension(item.ext);
     grid.appendChild(btn);
   });
 }
-
 el('fmSearch').oninput = renderFormatGrid;
 
 function applyExtension(newExt) {
-  const sec = project.sections.find(s=>s.id===project.open);
+  const openId = activeTargetEditor === 1 ? project.open : project.open2;
+  const sec = project.sections.find(s=>s.id===openId);
   if(sec) {
     let base = sec.title;
     if(base.includes('.')) base = base.substring(0, base.lastIndexOf('.'));
     newExt = newExt.replace('.', '');
     sec.title = `${base}.${newExt}`;
-    saveProject(); renderAll();
-    closeModal('formatModal');
-    showToast(`File type changed to .${newExt}`);
+    saveProject(); renderAll(); closeModal('formatModal'); showToast(`Changed to .${newExt}`);
   }
 }
-el('btnFormatCustomApply').onclick = () => {
-  const val = el('fmCustomInput').value.trim();
-  if(val) applyExtension(val);
-};
+el('btnFormatCustomApply').onclick = () => { const val = el('fmCustomInput').value.trim(); if(val) applyExtension(val); };
 
 // --- Modals General ---
-document.querySelectorAll('.btn-close-modal').forEach(b => {
-  b.onclick = () => {
-    const p = b.closest('.modal-overlay');
-    if(p) closeModal(p.id);
-  };
-});
-
-el('menuMeta').onclick = () => {
-  el('metaAuthor').value = project.meta.author; el('metaVersion').value = project.meta.version;
-  openModal('metaModal');
-};
-el('btnMetaSave').onclick = () => {
-  project.meta.author = el('metaAuthor').value; project.meta.version = el('metaVersion').value;
-  saveProject(); closeModal('metaModal'); showToast('Settings saved');
-};
-el('menuThemes').onclick = () => {
-  el('editorThemeSelect').value = index.theme; openModal('themesModal');
-};
-el('editorThemeSelect').onchange = (e) => {
-  index.theme = e.target.value; saveStorage(); editor.setTheme(index.theme);
-};
+document.querySelectorAll('.btn-close-modal').forEach(b => { b.onclick = () => { const p = b.closest('.modal-overlay'); if(p) closeModal(p.id); }; });
+el('menuMeta').onclick = () => { el('metaAuthor').value = project.meta.author; el('metaVersion').value = project.meta.version; openModal('metaModal'); };
+el('btnMetaSave').onclick = () => { project.meta.author = el('metaAuthor').value; project.meta.version = el('metaVersion').value; saveProject(); closeModal('metaModal'); showToast('Settings saved'); };
+el('menuThemes').onclick = () => { el('editorThemeSelect').value = index.theme; openModal('themesModal'); };
+el('editorThemeSelect').onchange = (e) => { index.theme = e.target.value; saveStorage(); editor1.setTheme(index.theme); editor2.setTheme(index.theme); };
 
 // --- EXPORT ---
 el('menuExport').onclick = () => {
   el('exportFilename').value = project.name.replace(/\s+/g,'_') + '.allf';
-  el('exportProgressContainer').style.display = 'none';
-  openModal('exportModal');
+  el('exportProgressContainer').style.display = 'none'; openModal('exportModal');
 };
 
 el('btnExportConfirm').onclick = async () => {
   try {
-    el('btnExportConfirm').disabled = true;
-    el('btnExportCancel').disabled = true;
-    
+    el('btnExportConfirm').disabled = el('btnExportCancel').disabled = true;
     el('exportProgressContainer').style.display = 'block';
-    el('exportProgressText').textContent = 'Structuring JSON...';
-    el('exportProgressPercent').textContent = '0%';
-    el('exportProgressFill').style.width = '0%';
+    el('exportProgressText').textContent = 'Structuring JSON...'; el('exportProgressPercent').textContent = '0%'; el('exportProgressFill').style.width = '0%';
     
-    const parts = [
-      `ALLF_VERSION// ${ALLF_VERSION}\n`,
-      `B//\n${BRANDING_TEXT}\nB\\\\\n`,
-      `PROJECT// ${project.name}\n\n`
-    ];
-    
+    const parts = [ `ALLF_VERSION// ${ALLF_VERSION}\n`, `B//\n${BRANDING_TEXT}\nB\\\\\n`, `PROJECT// ${project.name}\n\n` ];
     project.sections.forEach(s => parts.push(`C// ${s.id}::${s.title}\n${s.content||''}\nC\\\\\nSPACE//\n`));
     parts.push(`EM//\n${JSON.stringify(project.media)}\nEM\\\\\n`);
     
@@ -1238,126 +1437,84 @@ el('btnExportConfirm').onclick = async () => {
     
     for(let i=0; i<project.media.length; i++) {
       const m = project.media[i];
-      const stored = await idbAction('get', m.id); 
-      if(!stored) continue;
-      
+      const stored = await idbAction('get', m.id); if(!stored) continue;
       parts.push(`FILE_B64// ${m.id}\n`);
-      
       const chunkSize = 3 * 1024 * 1024; 
       
       for(let offset=0; offset<stored.blob.size; offset += chunkSize) {
         const slice = stored.blob.slice(offset, offset + chunkSize);
-        const arrayBuffer = await slice.arrayBuffer();
-        
-        parts.push(bufferToBase64(arrayBuffer) + '\n');
-        
+        parts.push(bufferToBase64(await slice.arrayBuffer()) + '\n');
         processedBytes += slice.size;
-        
         const pct = Math.min(100, (processedBytes / totalMediaBytes) * 100);
         el('exportProgressText').textContent = `Encoding: ${m.title}`;
         el('exportProgressPercent').textContent = `${Math.round(pct)}%`;
         el('exportProgressFill').style.width = `${pct}%`;
-        
         await yieldThread();
       }
       parts.push(`FILE_B64\\\\\n`);
     }
-    
     parts.push(`END//`);
-    
-    el('exportProgressText').textContent = 'Assembling final file...';
-    await yieldThread();
+    el('exportProgressText').textContent = 'Assembling final file...'; await yieldThread();
     
     const blob = new Blob(parts, { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = el('exportFilename').value;
     document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
     
-    closeModal('exportModal'); 
-    showToast('Export Complete');
-    
-  } catch(e) { 
-    console.error(e); 
-    alert('Export Error'); 
-  } finally { 
-    el('btnExportConfirm').disabled = false; 
-    el('btnExportCancel').disabled = false;
-  }
+    closeModal('exportModal'); showToast('Export Complete');
+  } catch(e) { console.error(e); alert('Export Error'); } 
+  finally { el('btnExportConfirm').disabled = el('btnExportCancel').disabled = false; }
 };
 
 // --- IMPORT ---
 el('menuImport').onclick = () => el('importInput').click();
 el('importInput').onchange = async e => {
   const f = e.target.files[0]; if(!f) return;
-  
   try {
-    showLoading('Parsing File...');
-    await yieldThread();
-
+    showLoading('Parsing File...'); await yieldThread();
     const headSize = Math.min(f.size, 5 * 1024 * 1024);
     const headText = await f.slice(0, headSize).text();
-    
     const tailSize = Math.min(f.size, 5 * 1024 * 1024);
     const tailText = await f.slice(f.size - tailSize).text();
 
-    if(!headText.includes(BRANDING_TEXT) && !tailText.includes(BRANDING_TEXT)) {
-      hideLoading();
-      return alert("Invalid ALLF file. (Missing verification branding)");
-    }
+    if(!headText.includes(BRANDING_TEXT) && !tailText.includes(BRANDING_TEXT)) { hideLoading(); return alert("Invalid ALLF file."); }
     
-    const pid = createProject("Imported Project");
-    const np = JSON.parse(localStorage.getItem(pKey(pid)));
+    const pid = createProject("Imported Project"); const np = JSON.parse(localStorage.getItem(pKey(pid)));
     np.sections = []; np.media = [];
     
-    const pMatch = headText.match(/PROJECT\/\/\s*(.*)/); 
-    if(pMatch) np.name = pMatch[1].trim();
-    
+    const pMatch = headText.match(/PROJECT\/\/\s*(.*)/); if(pMatch) np.name = pMatch[1].trim();
     const sectionRe = /C\/\/\s*(.*?)::(.*?)\n([\s\S]*?)\nC\\\\/g;
     let sm; while((sm = sectionRe.exec(headText))) np.sections.push({ type:'code', id:sm[1], title:sm[2], content:sm[3] });
     if(!np.sections.length) np.sections.push({type:'code', id:'C1', title:'index.html', content:''});
     np.tabs = [np.sections[0].id]; np.open = np.sections[0].id;
     
-    const manMatch = headText.match(/EM\/\/\n([\s\S]*?)\nEM\\\\/);
-    if(manMatch) try { np.media = JSON.parse(manMatch[1]); } catch(err){}
+    const manMatch = headText.match(/EM\/\/\n([\s\S]*?)\nEM\\\\/); if(manMatch) try { np.media = JSON.parse(manMatch[1]); } catch(err){}
     
     const CHUNK_SIZE = 10 * 1024 * 1024;
-    let offset = 0;
-    let buffer = "";
-    let currentFileId = null;
-    let currentB64Parts = [];
-    let leftoverB64 = "";
+    let offset = 0, buffer = "", currentFileId = null, currentB64Parts = [], leftoverB64 = "";
 
     while(offset < f.size) {
-        updateLoading((offset / f.size) * 100, `Extracting Media...`);
-        await yieldThread();
-
+        updateLoading((offset / f.size) * 100, `Extracting Media...`); await yieldThread();
         const slice = f.slice(offset, offset + CHUNK_SIZE);
         buffer += await slice.text();
 
         while(true) {
             if(!currentFileId) {
                 const startIdx = buffer.indexOf('FILE_B64// ');
-                if(startIdx === -1) {
-                    buffer = buffer.slice(-50); 
-                    break;
-                }
+                if(startIdx === -1) { buffer = buffer.slice(-50); break; }
                 const lineEnd = buffer.indexOf('\n', startIdx);
                 if(lineEnd === -1) break; 
-
                 currentFileId = buffer.substring(startIdx + 11, lineEnd).trim();
-                buffer = buffer.substring(lineEnd + 1);
-                leftoverB64 = "";
+                buffer = buffer.substring(lineEnd + 1); leftoverB64 = "";
             } else {
                 const endIdx = buffer.indexOf('FILE_B64\\\\');
                 if(endIdx === -1) {
                     const safeLen = buffer.length - 50;
                     if(safeLen > 0) {
                         let b64Data = leftoverB64 + buffer.substring(0, safeLen).replace(/\s/g, '');
-                        
                         let validLen = b64Data.length - (b64Data.length % 4);
                         let toProcess = b64Data.substring(0, validLen);
                         leftoverB64 = b64Data.substring(validLen);
-                        
                         if(toProcess) currentB64Parts.push(base64ToBuffer(toProcess));
                         buffer = buffer.substring(safeLen);
                     }
@@ -1365,36 +1522,22 @@ el('importInput').onchange = async e => {
                 } else {
                     let b64Data = leftoverB64 + buffer.substring(0, endIdx).replace(/\s/g, '');
                     if(b64Data) currentB64Parts.push(base64ToBuffer(b64Data));
-                    
                     const mRef = np.media.find(x => x.id === currentFileId);
                     const finalBlob = new Blob(currentB64Parts, { type: mRef ? mRef.type : 'application/octet-stream' });
                     await idbAction('put', { id: currentFileId, projectId: pid, blob: finalBlob });
-                    
-                    currentFileId = null;
-                    currentB64Parts = [];
-                    leftoverB64 = "";
-                    buffer = buffer.substring(endIdx + 10);
+                    currentFileId = null; currentB64Parts = []; leftoverB64 = ""; buffer = buffer.substring(endIdx + 10);
                 }
             }
         }
         offset += CHUNK_SIZE;
     }
     
-    updateLoading(100, 'Finalizing...');
-    await yieldThread();
-
+    updateLoading(100, 'Finalizing...'); await yieldThread();
     localStorage.setItem(pKey(pid), JSON.stringify(np));
     index.projects.find(x=>x.id===pid).name = np.name; saveStorage();
+    hideLoading(); loadProject(pid); showToast('Import Successful');
     
-    hideLoading();
-    loadProject(pid); 
-    showToast('Import Successful');
-    
-  } catch(err) { 
-    console.error(err); 
-    hideLoading();
-    alert('Import Failed: ' + err.message); 
-  }
+  } catch(err) { console.error(err); hideLoading(); alert('Import Failed: ' + err.message); }
   e.target.value = '';
 };
 
